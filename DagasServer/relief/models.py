@@ -11,9 +11,23 @@ class Donation(models.Model):
     datetime_added = models.DateTimeField('Date added')
 
 
-# TODO: Add some kind of type to Supply
+class ItemType(models.Model):
+    name = models.CharField(max_length=250)
+
+
+# TODO: Add some kind of type to Supply (e.g. Food, Water)
 class Supply(models.Model):
     name = models.CharField(max_length=250)
+    type = models.ForeignKey(ItemType, on_delete=models.CASCADE)
     quantity = models.IntegerField
     pax = models.IntegerField
-    donation = models.ForeignKey(Donation)
+    donation = models.ForeignKey(Donation, on_delete=models.CASCADE)
+
+
+# TODO: Check if good models
+class VictimRequest(models.Model):
+    pass
+
+
+class BarangayRequest(models.Model):
+    pass
