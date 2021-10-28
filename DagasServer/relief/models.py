@@ -1,13 +1,22 @@
-from django.contrib.auth.models import User
+import django.contrib.auth
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from django.contrib.auth import get_user_model
 
 # Create your models here.
 # See management/commands/create_groups.py for list of groups
 # TODO: Create models
+from DagasServer import settings
+
+
+# Use default user model
+class User(AbstractUser):
+    pass
+
 
 class Donation(models.Model):
-    donor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'groups__name': 'donors'})
+    donor = models.ForeignKey(get_user_model(),
+                              on_delete=models.CASCADE, )  # Removed: limit_choices_to={'groups__name': 'donors'})
     datetime_added = models.DateTimeField('Date added')
 
 
