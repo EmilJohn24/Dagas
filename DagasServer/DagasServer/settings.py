@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'relief.apps.ReliefConfig',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -122,3 +123,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model
 AUTH_USER_MODEL = 'relief.User'
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': [
+#             'rest_framework.permissions.IsAuthenticated',
+#              ]
+# }
