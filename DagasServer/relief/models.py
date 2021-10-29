@@ -15,6 +15,41 @@ from DagasServer import settings
 # START User Management
 # Use default user model
 
+# User roles
+# class Role(models.Model):
+#     """
+#         Defined user roles
+#     """
+#     RESIDENT = 1
+#     DONOR = 2
+#     BARANGAY = 3
+#     GOVERNMENT_ADMIN = 4
+#
+#     ROLE_CHOICES = (
+#         (RESIDENT, 'Resident'),
+#         (DONOR, 'Donor'),
+#         (BARANGAY, 'Barangay'),
+#         (GOVERNMENT_ADMIN, 'Admin')
+#     )
+#
+#     role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, primary_key=True)
+
+
+class User(AbstractUser):
+    RESIDENT = 1
+    DONOR = 2
+    BARANGAY = 3
+    GOVERNMENT_ADMIN = 4
+
+    ROLE_CHOICES = (
+        (RESIDENT, 'Resident'),
+        (DONOR, 'Donor'),
+        (BARANGAY, 'Barangay'),
+        (GOVERNMENT_ADMIN, 'Admin')
+    )
+
+    role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, default=RESIDENT)
+
 
 # User Profiles
 class ResidentProfile(models.Model):
@@ -45,42 +80,18 @@ class GovAdminProfile(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, null=True, related_name="gov_admin_profile")
 
 
-# User roles
-class Role(models.Model):
-    """
-        Defined user roles
-    """
-    RESIDENT = 1
-    DONOR = 2
-    BARANGAY = 3
-    GOVERNMENT_ADMIN = 4
-
-    ROLE_CHOICES = (
-        (RESIDENT, 'Resident'),
-        (DONOR, 'Donor'),
-        (BARANGAY, 'Barangay'),
-        (GOVERNMENT_ADMIN, 'Admin')
-    )
-
-    id = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, primary_key=True)
-
-
-class User(AbstractUser):
-    role = models.ManyToManyField(Role)
-
-
 # Called after a user is created (post-save receiver decorator)
-@receiver(post_save, sender=get_user_model())
+@receiver(post_save, sender=User)
 def generate_user_profile(sender, instance, created, **kwargs):
-    if instance.role.id == Role.RESIDENT:
+    if instance.role == User.RESIDENT:
         instance, created = ResidentProfile.objects.get_or_create(user=instance)
-    elif instance.role.id == Role.DONOR:
+    elif instance.role == User.DONOR:
         instance, created = DonorProfile.objects.get_or_create(user=instance)
-    elif instance.role.id == Role.BARANGAY:
+    elif instance.role == User.BARANGAY:
         instance, created = BarangayProfile.objects.get_or_create(user=instance)
-    elif instance.role.id == Role.GOVERNMENT_ADMIN:
+    elif instance.role == User.GOVERNMENT_ADMIN:
         instance, created = GovAdminProfile.objects.get_or_create(user=instance)
-    created.save()
+    instance.save()
 
 
 # END User Management
