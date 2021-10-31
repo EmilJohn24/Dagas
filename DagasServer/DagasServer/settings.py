@@ -14,6 +14,7 @@ from pathlib import Path
 import rest_framework
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
@@ -131,10 +132,10 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 # Custom user model
-AUTH_USER_MODEL = 'relief.User'
 
+AUTH_USER_MODEL = 'relief.User'
+LOGIN_URL = 'rest_login'
 # Third-party settings
 
 # REST_FRAMEWORK = {

@@ -1,6 +1,7 @@
-from django.conf.global_settings import LOGIN_URL
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.decorators import user_passes_test
+
+from DagasServer.settings import LOGIN_URL
 from .models import User
 
 

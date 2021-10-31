@@ -15,25 +15,6 @@ from DagasServer import settings
 # START User Management
 # Use default user model
 
-# User roles
-# class Role(models.Model):
-#     """
-#         Defined user roles
-#     """
-#     RESIDENT = 1
-#     DONOR = 2
-#     BARANGAY = 3
-#     GOVERNMENT_ADMIN = 4
-#
-#     ROLE_CHOICES = (
-#         (RESIDENT, 'Resident'),
-#         (DONOR, 'Donor'),
-#         (BARANGAY, 'Barangay'),
-#         (GOVERNMENT_ADMIN, 'Admin')
-#     )
-#
-#     role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, primary_key=True)
-
 
 class User(AbstractUser):
     RESIDENT = 1
@@ -48,7 +29,7 @@ class User(AbstractUser):
         (GOVERNMENT_ADMIN, 'Admin')
     )
 
-    role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, default=RESIDENT)
+    role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, null=True, blank=True)
 
 
 # User Profiles
@@ -57,6 +38,8 @@ class ResidentProfile(models.Model):
         User information exclusive to residents
     """
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, null=True, related_name="resident_profile")
+    # TODO: Add Pillow library to support ImageField
+    # gov_id = models.ImageField(name='government_id')
 
 
 class DonorProfile(models.Model):
@@ -68,14 +51,15 @@ class DonorProfile(models.Model):
 
 class BarangayProfile(models.Model):
     """
-        User information exclusive to donors
+        User information exclusive to barangays
     """
+    # TODO: Add geolocation and evacuation centers
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, null=True, related_name="barangay_profile")
 
 
 class GovAdminProfile(models.Model):
     """
-        User information exclusive to donors
+        User information exclusive to government admins
     """
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, null=True, related_name="gov_admin_profile")
 
@@ -91,10 +75,14 @@ def generate_user_profile(sender, instance, created, **kwargs):
         instance, created = BarangayProfile.objects.get_or_create(user=instance)
     elif instance.role == User.GOVERNMENT_ADMIN:
         instance, created = GovAdminProfile.objects.get_or_create(user=instance)
+    else:
+        return
     instance.save()
 
 
 # END User Management
+
+
 class Donation(models.Model):
     donor = models.ForeignKey(DonorProfile,
                               on_delete=models.CASCADE, )  # Removed: limit_choices_to={'groups__name': 'donors'})
