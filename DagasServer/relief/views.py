@@ -5,6 +5,7 @@ from django.shortcuts import render
 # For REST API-based views, use the list at: https://www.django-rest-framework.org/api-guide/generic-views/
 from django.utils.decorators import method_decorator
 from rest_framework import generics
+from rest_framework.parsers import FileUploadParser
 
 from relief.decorators import role_required
 from relief.models import User, ResidentProfile, GovAdminProfile

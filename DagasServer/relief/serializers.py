@@ -20,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
 class ResidentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResidentProfile
-        fields = ('id', 'user')
+        fields = ('id', 'user', 'gov_id')
 
 
 class DonorSerializer(serializers.ModelSerializer):

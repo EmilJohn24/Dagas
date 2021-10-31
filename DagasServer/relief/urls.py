@@ -8,7 +8,9 @@ from .models import ResidentProfile
 from .serializers import UserSerializer, ResidentSerializer
 
 # Settings
-USE_ROUTER = False
+from .viewsets import UserViewSet, ResidentViewSet
+
+USE_ROUTER = True
 
 app_name = 'relief'
 # TODO: Add URLs (Format: path('dir/', view, name="name")
@@ -21,12 +23,8 @@ urlpatterns = [
 
 
 # view sets and router
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
 
 router = SimpleRouter()
-router.register('users', viewset=UserViewSet, basename='users')
-if USE_ROUTER:
-    urlpatterns += router.urls
+# router.register('users', viewset=UserViewSet, basename='users')
+router.register('api/users/residents/r', ResidentViewSet, basename='residents_others')
+urlpatterns += router.urls

@@ -33,13 +33,17 @@ class User(AbstractUser):
 
 
 # User Profiles
+def resident_id_path(instance, filename):
+    return 'resident/id_{0}/{1}'.format(instance.user.id, filename)
+
+
 class ResidentProfile(models.Model):
     """
         User information exclusive to residents
     """
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, null=True, related_name="resident_profile")
     # TODO: Add Pillow library to support ImageField
-    # gov_id = models.ImageField(name='government_id')
+    gov_id = models.ImageField(null=True, upload_to=resident_id_path)
 
 
 class DonorProfile(models.Model):
