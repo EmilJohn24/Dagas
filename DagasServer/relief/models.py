@@ -87,9 +87,8 @@ def generate_user_profile(sender, instance, created, **kwargs):
 # END User Management
 class EvacuationDetails(models.Model):
     # TODO: Add datetime validation later
-    barangay = models.ForeignKey(to=BarangayProfile, on_delete=models.CASCADE, related_name="evacuating_barangay")
-    evacuation_center = models.ForeignKey(to='EvacuationCenter', on_delete=models.CASCADE,
-                                          related_name='evacuation_center')
+    barangay = models.ForeignKey(to=BarangayProfile, on_delete=models.CASCADE)
+    evacuation_center = models.ForeignKey(to='EvacuationCenter', on_delete=models.CASCADE,)
     time_evacuated = models.DateTimeField()
 
 
@@ -99,13 +98,13 @@ class EvacuationCenter(models.Model):
     """
     # TODO: Add geolocation
     name = models.CharField(max_length=200)
-    barangays = models.ManyToManyField(to=BarangayProfile, related_name='barangays_evacuation',
+    barangays = models.ManyToManyField(to=BarangayProfile, related_name='centers',
                                        through=EvacuationDetails)
 
 
 class Donation(models.Model):
     donor = models.ForeignKey(DonorProfile,
-                              on_delete=models.CASCADE, )  # Removed: limit_choices_to={'groups__name': 'donors'})
+                              on_delete=models.CASCADE, related_name='donations')  # Removed: limit_choices_to={'groups__name': 'donors'})
     datetime_added = models.DateTimeField('Date added')
 
 
@@ -119,7 +118,7 @@ class Supply(models.Model):
     type = models.ForeignKey(ItemType, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     pax = models.IntegerField()
-    donation = models.ForeignKey(Donation, on_delete=models.CASCADE)
+    donation = models.ForeignKey(Donation, on_delete=models.CASCADE, related_name='supplies')
 
 
 # TODO: Check if good models
@@ -153,4 +152,4 @@ class ItemRequest(models.Model):
 class VictimRequest(models.Model):
     # Nullable because this can be requested through the barangay
     resident = models.ForeignKey(to=ResidentProfile, on_delete=models.CASCADE,
-                                 related_name='requesting_victim', null=True, blank=True)
+                                 related_name='resident_requests', null=True, blank=True)
