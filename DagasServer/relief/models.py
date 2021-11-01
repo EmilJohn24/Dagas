@@ -117,15 +117,40 @@ class ItemType(models.Model):
 class Supply(models.Model):
     name = models.CharField(max_length=250)
     type = models.ForeignKey(ItemType, on_delete=models.CASCADE)
-    quantity = models.IntegerField
-    pax = models.IntegerField
+    quantity = models.IntegerField()
+    pax = models.IntegerField()
     donation = models.ForeignKey(Donation, on_delete=models.CASCADE)
 
 
 # TODO: Check if good models
-class VictimRequest(models.Model):
-    pass
 
 
 class BarangayRequest(models.Model):
-    pass
+    details = models.ForeignKey(to=EvacuationDetails,
+                                on_delete=models.CASCADE)  # contains both the barangay and the evac center
+
+
+class ItemRequest(models.Model):
+    """
+    Request made by or for a victim Note: Notice the use of 'for'. This is because this can be posted and tied to a
+    barangay directly since victim_request is nullable
+    """
+    barangay_request = models.ForeignKey(to=BarangayRequest, on_delete=models.CASCADE)
+    date_added = models.DateTimeField()
+    type = models.ForeignKey(ItemType, on_delete=models.CASCADE, )
+    pax = models.IntegerField()
+    victim_request = models.OneToOneField(to='VictimRequest', on_delete=models.CASCADE, related_name='item_request',
+                                          null=True, blank=True, )
+
+    def is_by_barangay(self):
+        """
+        Check if the barangay made the request directly
+        :return: True if it was made by a barangay, False if made by a victim
+        """
+        return self.victim_request is None
+
+
+class VictimRequest(models.Model):
+    # Nullable because this can be requested through the barangay
+    resident = models.ForeignKey(to=ResidentProfile, on_delete=models.CASCADE,
+                                 related_name='requesting_victim', null=True, blank=True)
