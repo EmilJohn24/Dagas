@@ -1,13 +1,36 @@
 from django.db import transaction
 from rest_framework import serializers
 from rest_auth.registration.serializers import RegisterSerializer
-from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile
+from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \
+    ItemType
+
+
+class ItemTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItemType
+        fields = ('id', 'name')
 
 
 class SupplySerializer(serializers.ModelSerializer):
     class Meta:
         model = Supply
-        fields = ('name', 'quantity', 'pax', 'donation',)
+        fields = ('name', 'type', 'quantity', 'pax', 'donation',)
+
+
+class DonationSerializer(serializers.ModelSerializer):
+    donor = serializers.HyperlinkedIdentityField(
+        view_name='relief:donor_details',
+        read_only=True,
+    )
+    supplies = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='relief:supply-detail'
+    )
+
+    class Meta:
+        model = Donation
+        fields = ['donor', 'supplies', 'datetime_added']
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,14 +47,21 @@ class ResidentSerializer(serializers.ModelSerializer):
 
 
 class DonorSerializer(serializers.ModelSerializer):
+    # donations = DonationSerializer(source='donation_set',)
+    donations = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=True,
+        view_name='relief:donations_details',
+    )
+
     class Meta:
-        model = ResidentProfile
-        fields = ('id', 'user')
+        model = DonorProfile
+        fields = ('id', 'user', 'donations')
 
 
 class BarangaySerializer(serializers.ModelSerializer):
     class Meta:
-        model = DonorProfile
+        model = BarangayProfile
         fields = ('id', 'user')
 
 

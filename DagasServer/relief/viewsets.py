@@ -3,9 +3,9 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError
 
-from relief.models import User, ResidentProfile
+from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
-from relief.serializers import UserSerializer, ResidentSerializer
+from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, ItemTypeSerializer
 
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
@@ -32,7 +32,21 @@ class ResidentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['patch', 'put'], name='Upload ID', permission_classes=[IsProfileUserOrReadOnly])
     def upload_id(self, request, pk=None):
         profile: ResidentProfile = self.get_object()
-        profile.gov_id = list(request.FILES.values())[0] # Get first file
+        profile.gov_id = list(request.FILES.values())[0]  # Get first file
         profile.save()
         return Response({'status': 'File uploaded'})
 
+
+class DonationViewSet(viewsets.ModelViewSet):
+    queryset = DonorProfile.objects.all()
+    serializer_class = DonorSerializer
+
+
+class SupplyViewSet(viewsets.ModelViewSet):
+    queryset = Supply.objects.all()
+    serializer_class = SupplySerializer
+
+
+class ItemTypeViewSet(viewsets.ModelViewSet):
+    queryset = ItemType.objects.all()
+    serializer_class = ItemTypeSerializer

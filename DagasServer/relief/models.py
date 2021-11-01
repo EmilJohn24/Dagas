@@ -52,6 +52,9 @@ class DonorProfile(models.Model):
     """
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, null=True, related_name="donor_profile")
 
+    def __str__(self):
+        return self.user.__str__()
+
 
 class BarangayProfile(models.Model):
     """
@@ -88,7 +91,7 @@ def generate_user_profile(sender, instance, created, **kwargs):
 class EvacuationDetails(models.Model):
     # TODO: Add datetime validation later
     barangay = models.ForeignKey(to=BarangayProfile, on_delete=models.CASCADE)
-    evacuation_center = models.ForeignKey(to='EvacuationCenter', on_delete=models.CASCADE,)
+    evacuation_center = models.ForeignKey(to='EvacuationCenter', on_delete=models.CASCADE, )
     time_evacuated = models.DateTimeField()
 
 
@@ -104,12 +107,19 @@ class EvacuationCenter(models.Model):
 
 class Donation(models.Model):
     donor = models.ForeignKey(DonorProfile,
-                              on_delete=models.CASCADE, related_name='donations')  # Removed: limit_choices_to={'groups__name': 'donors'})
+                              on_delete=models.CASCADE,
+                              related_name='donations')  # Removed: limit_choices_to={'groups__name': 'donors'})
     datetime_added = models.DateTimeField('Date added')
+
+    def __str__(self):
+        return self.donor.__str__() + ':' + str(self.id)
 
 
 class ItemType(models.Model):
     name = models.CharField(max_length=250)
+
+    def __str__(self):
+        return self.name
 
 
 # TODO: Add some kind of type to Supply (e.g. Food, Water)
