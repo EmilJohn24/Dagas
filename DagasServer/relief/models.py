@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 
 # Create your models here.
 # See management/commands/create_groups.py for list of groups
-# TODO: Create models
+# TODO: Finish models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -85,6 +85,22 @@ def generate_user_profile(sender, instance, created, **kwargs):
 
 
 # END User Management
+class EvacuationDetails(models.Model):
+    # TODO: Add datetime validation later
+    barangay = models.ForeignKey(to=BarangayProfile, on_delete=models.CASCADE, related_name="evacuating_barangay")
+    evacuation_center = models.ForeignKey(to='EvacuationCenter', on_delete=models.CASCADE,
+                                          related_name='evacuation_center')
+    time_evacuated = models.DateTimeField()
+
+
+class EvacuationCenter(models.Model):
+    """
+    Evacuation centers
+    """
+    # TODO: Add geolocation
+    name = models.CharField(max_length=200)
+    barangays = models.ManyToManyField(to=BarangayProfile, related_name='barangays_evacuation',
+                                       through=EvacuationDetails)
 
 
 class Donation(models.Model):
