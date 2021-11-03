@@ -18,9 +18,10 @@ class SupplySerializer(serializers.ModelSerializer):
 
 
 class DonationSerializer(serializers.ModelSerializer):
-    donor = serializers.HyperlinkedIdentityField(
+    donor = serializers.HyperlinkedRelatedField(
         view_name='relief:donor_details',
-        read_only=True,
+        read_only=False,
+        queryset=DonorProfile,
     )
     supplies = serializers.HyperlinkedRelatedField(
         many=True,
