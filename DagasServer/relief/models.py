@@ -130,6 +130,9 @@ class Supply(models.Model):
     pax = models.IntegerField()
     donation = models.ForeignKey(Donation, on_delete=models.CASCADE, related_name='supplies')
 
+    def __str__(self):
+        return self.name
+
 
 # TODO: Check if good models
 
