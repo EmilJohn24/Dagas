@@ -25,7 +25,7 @@ class DonationSerializer(serializers.ModelSerializer):
     )
     supplies = serializers.HyperlinkedRelatedField(
         many=True,
-        read_only=True,
+        read_only=False,
         queryset=Supply.objects.all(),
         view_name='relief:supply-detail'
     )
