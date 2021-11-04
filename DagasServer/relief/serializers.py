@@ -21,11 +21,12 @@ class DonationSerializer(serializers.ModelSerializer):
     donor = serializers.HyperlinkedRelatedField(
         view_name='relief:donor_details',
         read_only=False,
-        queryset=DonorProfile,
+        queryset=DonorProfile.objects.all(),
     )
     supplies = serializers.HyperlinkedRelatedField(
         many=True,
         read_only=True,
+        queryset=Supply.objects.all(),
         view_name='relief:supply-detail'
     )
 
