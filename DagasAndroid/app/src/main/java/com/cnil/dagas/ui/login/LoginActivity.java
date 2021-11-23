@@ -26,6 +26,7 @@ import com.cnil.dagas.R;
 import com.cnil.dagas.ui.login.LoginViewModel;
 import com.cnil.dagas.ui.login.LoginViewModelFactory;
 import com.cnil.dagas.databinding.ActivityLoginBinding;
+import com.google.android.material.snackbar.Snackbar;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -120,6 +121,10 @@ public class LoginActivity extends AppCompatActivity {
                 loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
+                Toast.makeText(LoginActivity.this,
+                        loginViewModel.getLoginResult().getValue().getSuccess().getDisplayName(),
+                        Toast.LENGTH_SHORT).show();
+
             }
         });
     }
