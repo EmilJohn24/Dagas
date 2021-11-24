@@ -5,6 +5,7 @@ import android.app.Activity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -23,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cnil.dagas.R;
+import com.cnil.dagas.data.ResidentRegisterActivity;
 import com.cnil.dagas.ui.login.LoginViewModel;
 import com.cnil.dagas.ui.login.LoginViewModelFactory;
 import com.cnil.dagas.databinding.ActivityLoginBinding;
@@ -47,7 +49,15 @@ public class LoginActivity extends AppCompatActivity {
         final EditText passwordEditText = binding.password;
         final Button loginButton = binding.login;
         final ProgressBar loadingProgressBar = binding.loading;
+        final Button registerRedirectButton = binding.registerRedirectButton;
 
+        registerRedirectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent registerRedirect = new Intent(LoginActivity.this, ResidentRegisterActivity.class);
+                startActivity(registerRedirect);
+            }
+        });
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
             @Override
             public void onChanged(@Nullable LoginFormState loginFormState) {
