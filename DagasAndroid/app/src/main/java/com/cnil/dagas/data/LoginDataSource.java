@@ -4,7 +4,6 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.cnil.dagas.data.model.LoggedInUser;
-import com.cnil.dagas.http.OkHttpSingleton;
 import com.cnil.dagas.ui.login.LoginActivity;
 
 import org.json.JSONArray;
@@ -29,7 +28,8 @@ public class LoginDataSource {
 
 
     class LoginThread extends Thread{
-        private static final String LOGIN_URL = "/api/rest-authlogin/";
+        private static final String BASE_URL = "http://192.168.100.115:8000";
+        private static final String LOGIN_URL = BASE_URL + "/api/rest-authlogin/";
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         private String username, password;
         private boolean loggedIn = false;
@@ -71,9 +71,10 @@ public class LoginDataSource {
             }
 
             //TODO: Turn client into singleton
-            OkHttpSingleton client = OkHttpSingleton.getInstance();
+            OkHttpClient client = new OkHttpClient();
             RequestBody body = RequestBody.create(loginJSON.toString(), JSON);
-            Request request = client.builderFromBaseUrl(LOGIN_URL)
+            Request request = new Request.Builder()
+                    .url(LOGIN_URL)
                     .post(body)
                     .build();
             Response response = client.newCall(request).execute();
