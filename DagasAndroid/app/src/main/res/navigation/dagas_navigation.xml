@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.cnil.dagas.ui.home.resident.evacuationcentervisualmap"
+        android:label="Item 1"
+        tools:layout="@layout/evacuationcentervisualmap" />
+
+    <fragment
+        android:id="@+id/nav_qr_scanner"
+        android:name="com.cnil.dagas.ui.home.resident.qrscanner"
+        android:label="Item 2"
+        tools:layout="@layout/qr_scanner" />
+
+</navigation>

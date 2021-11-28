@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.cnil.dagas.R;
 import com.cnil.dagas.data.ResidentRegisterActivity;
+import com.cnil.dagas.ui.home.HomeActivity;
 import com.cnil.dagas.ui.login.LoginViewModel;
 import com.cnil.dagas.ui.login.LoginViewModelFactory;
 import com.cnil.dagas.databinding.ActivityLoginBinding;
@@ -91,6 +92,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 //Complete and destroy login activity once successful
                 finish();
+                Intent homeRedirect = new Intent(LoginActivity.this, HomeActivity.class);
+                startActivity(homeRedirect);
             }
         });
 
@@ -140,7 +143,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void updateUiWithUser(LoggedInUserView model) {
-        String welcome = getString(R.string.welcome) + model.getDisplayName();
+        String welcome = getString(R.string.welcome) + model.getDisplayName() + " !";
         // TODO : initiate successful logged in experience
         Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
     }
