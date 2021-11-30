@@ -31,6 +31,9 @@ android {
 }
 
 dependencies {
+    //for QR scanner
+    implementation 'com.budiyev.android:code-scanner:2.1.0'
+
     implementation 'androidx.navigation:navigation-runtime:2.3.5'
     implementation 'androidx.navigation:navigation-ui:2.3.5'
     implementation 'androidx.navigation:navigation-fragment:2.3.5'

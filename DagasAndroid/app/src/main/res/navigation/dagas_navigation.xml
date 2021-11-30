@@ -14,7 +14,7 @@
     <fragment
         android:id="@+id/nav_qr_scanner"
         android:name="com.cnil.dagas.ui.home.resident.qrscanner"
-        android:label="Item 2"
+        android:label="Qr Scanner"
         tools:layout="@layout/qr_scanner" />
 
 </navigation>
