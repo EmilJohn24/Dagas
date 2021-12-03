@@ -32,17 +32,17 @@ public class qrscanner extends Fragment {
 
     private QrScannerBinding binding;
     private CodeScanner mCodeScanner;
-
+    private final String TAG = qrscanner.class.getName();
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final Activity activity = getActivity();
         binding = QrScannerBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-        if(ContextCompat.checkSelfPermission(activity.getApplicationContext(),Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_PHONE_STATE}, 1);
-        }
-        int result = ContextCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.READ_PHONE_STATE);
-            if (result == 0){
+//        if(ContextCompat.checkSelfPermission(activity.getApplicationContext(),Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_PHONE_STATE}, 1);
+//        }
+//        int result = ContextCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.READ_PHONE_STATE);
+//        if (result == 0){
         // function which uses the permission
             CodeScannerView scannerView = root.findViewById(R.id.scanner_view);
             mCodeScanner = new CodeScanner(activity, scannerView);
@@ -63,42 +63,29 @@ public class qrscanner extends Fragment {
                     mCodeScanner.startPreview();
                 }
             });
-        }
+//        }
 
         return root;
     }
 
 
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        mCodeScanner.startPreview();
-//    }
-//
-//    @Override
-//    public void onPause() {
-//        mCodeScanner.releaseResources();
-//        super.onPause();
-//    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        mCodeScanner.startPreview();
+    }
+
+    @Override
+    public void onPause() {
+        mCodeScanner.releaseResources();
+        super.onPause();
+    }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
     }
-//    private void setupPermissions(){
-//        int permission = ContextCompat.checkSelfPermission(getActivity(),
-//                android.Manifest.permission.CAMERA);
-//
-//        if(permission != PackageManager.PERMISSION_GRANTED){
-//            makerequest();
-//        }
-//    }
 
-//    private void makerequest(){
-//        ActivityCompat.requestPermissions(this,
-//                new ArrayList(android.Manifest.permission.CAMERA),
-//                CAMERA_REQUEST_CODE);
-//    }
 }

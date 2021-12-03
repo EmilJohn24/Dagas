@@ -6,6 +6,8 @@
         <entry key="..\:/Dagas/DagasAndroid/app/src/main/res/layout-w1240dp/activity_login.xml" value="0.1" />
         <entry key="..\:/Dagas/DagasAndroid/app/src/main/res/layout-w936dp/activity_login.xml" value="0.1" />
         <entry key="..\:/Dagas/DagasAndroid/app/src/main/res/layout/activity_login.xml" value="0.12545289855072464" />
+        <entry key="..\:/Dagas/DagasAndroid/app/src/main/res/layout/evacuationcentervisualmap.xml" value="0.128125" />
+        <entry key="..\:/Dagas/DagasAndroid/app/src/main/res/layout/qr_scanner.xml" value="0.264" />
         <entry key="..\:/Users/Josef Lyle H. Solis/Downloads/Thesis/Dagas/Dagas/DagasAndroid/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.2140625" />
         <entry key="..\:/Users/Josef Lyle H. Solis/Downloads/Thesis/Dagas/Dagas/DagasAndroid/app/src/main/res/drawable-v24/side_nav_bar.xml" value="0.2140625" />
         <entry key="..\:/Users/Josef Lyle H. Solis/Downloads/Thesis/Dagas/Dagas/DagasAndroid/app/src/main/res/drawable/ic_dagaslogo_background.xml" value="0.2140625" />
@@ -22,7 +24,7 @@
         <entry key="..\:/Users/Josef Lyle H. Solis/Downloads/Thesis/Dagas/Dagas/DagasAndroid/app/src/main/res/layout/content_resident.xml" value="0.19791666666666666" />
         <entry key="..\:/Users/Josef Lyle H. Solis/Downloads/Thesis/Dagas/Dagas/DagasAndroid/app/src/main/res/layout/evacuationcentervisualmap.xml" value="0.1824074074074074" />
         <entry key="..\:/Users/Josef Lyle H. Solis/Downloads/Thesis/Dagas/Dagas/DagasAndroid/app/src/main/res/layout/nav_header_home.xml" value="0.3333333333333333" />
-        <entry key="..\:/Users/Josef Lyle H. Solis/Downloads/Thesis/Dagas/Dagas/DagasAndroid/app/src/main/res/layout/qr_scanner.xml" value="0.1" />
+        <entry key="..\:/Users/Josef Lyle H. Solis/Downloads/Thesis/Dagas/Dagas/DagasAndroid/app/src/main/res/layout/qr_scanner.xml" value="0.19791666666666666" />
         <entry key="..\:/Users/Josef Lyle H. Solis/Downloads/Thesis/Dagas/Dagas/DagasAndroid/app/src/main/res/menu/activity_home_drawer.xml" value="0.5" />
         <entry key="..\:/Users/Josef Lyle H. Solis/Downloads/Thesis/Dagas/Dagas/DagasAndroid/app/src/main/res/menu/resident.xml" value="0.19791666666666666" />
         <entry key="..\:/Users/Josef Lyle H. Solis/Downloads/Thesis/Dagas/Dagas/DagasAndroid/app/src/main/res/mipmap-anydpi-v26/ic_dagaslogo.xml" value="0.2140625" />
