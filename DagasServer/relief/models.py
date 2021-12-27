@@ -125,7 +125,7 @@ class ItemType(models.Model):
 # TODO: Add some kind of type to Supply (e.g. Food, Water)
 class Supply(models.Model):
     name = models.CharField(max_length=250)
-    type = models.ForeignKey(ItemType, on_delete=models.CASCADE)
+    type = models.ForeignKey(ItemType, on_delete=models.CASCADE, related_name='type')
     quantity = models.IntegerField()
     pax = models.IntegerField()
     donation = models.ForeignKey(Donation, on_delete=models.CASCADE, related_name='supplies')
