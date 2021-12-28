@@ -2,7 +2,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_auth.registration.serializers import RegisterSerializer
 from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \
-    ItemType
+    ItemType, ItemRequest, BarangayRequest, EvacuationDetails
 
 
 class ItemTypeSerializer(serializers.ModelSerializer):
@@ -71,6 +71,41 @@ class GovAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = GovAdminProfile
         fields = ('id', 'user')
+
+
+class EvacuationDetailsSerializer(serializers.ModelSerializer):
+    # TODO : Create HyperlinkedRelatedFields for barangay and evacuation_center
+    class Meta:
+        model = EvacuationDetails
+        fields = ('barangay', 'evacuation_center', 'time_evacuated')
+
+
+class ItemRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItemRequest
+        fields = ('id', 'type', 'pax', 'date_added')
+
+
+# TODO: Include EvacuationDetails
+class BarangayRequestSerializer(serializers.ModelSerializer):
+    item_requests = serializers.HyperlinkedRelatedField(
+        many=True,
+        read_only=False,
+        queryset=ItemRequest.objects.all(),
+        view_name='relief:item_request'
+    )
+
+    class Meta:
+        model = BarangayRequest
+        fields = ('id', 'item_requests', 'expected_date')
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    donor = serializers.HyperlinkedRelatedField(
+        view_name='relief:donor_details',
+        read_only=False,
+        queryset=DonorProfile.objects.all(),
+    )
 
 
 # Based on: https://stackoverflow.com/questions/62291394/django-rest-auth-dj-rest-auth-custom-user-registration

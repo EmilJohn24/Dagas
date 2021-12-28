@@ -3,9 +3,10 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError
 
-from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType
+from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
-from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, ItemTypeSerializer
+from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
+    ItemTypeSerializer, ItemRequestSerializer
 
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
@@ -50,3 +51,8 @@ class SupplyViewSet(viewsets.ModelViewSet):
 class ItemTypeViewSet(viewsets.ModelViewSet):
     queryset = ItemType.objects.all()
     serializer_class = ItemTypeSerializer
+
+
+class ItemRequestViewSet(viewsets.ModelViewSet):
+    queryset = ItemRequest.objects.all()
+    serializer_class = ItemRequestSerializer

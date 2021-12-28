@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 # TODO: Finish models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 from DagasServer import settings
 
@@ -91,7 +92,8 @@ def generate_user_profile(sender, instance, created, **kwargs):
 class EvacuationDetails(models.Model):
     # TODO: Add datetime validation later
     barangay = models.ForeignKey(to=BarangayProfile, on_delete=models.CASCADE)
-    evacuation_center = models.ForeignKey(to='EvacuationCenter', on_delete=models.CASCADE, )
+    # TODO: Remove null=True after test
+    evacuation_center = models.ForeignKey(to='EvacuationCenter', on_delete=models.CASCADE, null=True)
     time_evacuated = models.DateTimeField()
 
 
@@ -129,17 +131,64 @@ class Supply(models.Model):
     quantity = models.IntegerField()
     pax = models.IntegerField()
     donation = models.ForeignKey(Donation, on_delete=models.CASCADE, related_name='supplies')
+    transaction = models.ForeignKey(to="Transaction", on_delete=models.CASCADE, related_name='transaction_supply',
+                                    null=True)
 
-    def __str__(self):
+    def is_ongoing(self) -> bool:
+        """
+        :return: True if the supply is included in a Transaction
+        """
+        return self.transaction is not None
+
+    def __str__(self) -> str:
         return self.name
 
 
 # TODO: Check if good models
 
+# TODO: Make views for Transaction
+class Transaction(models.Model):
+    # Status List
+    PACKAGING = 1
+    INCOMING = 2
+    RECEIVED = 3
+
+    STATUS_CHOICES = (
+        (PACKAGING, 'Packaging'),
+        (INCOMING, 'Incoming'),
+        (RECEIVED, 'Received'),
+    )
+
+    donor = models.ForeignKey(to=DonorProfile, on_delete=models.CASCADE)
+    barangay_request = models.ForeignKey(to="BarangayRequest", on_delete=models.CASCADE)
+    received = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, null=True,
+                                                blank=True)  # 1 = received, 0 = not received
+    received_date = models.DateTimeField()
+
+
+def transaction_img_path(instance, filename):
+    return 'transactions/id_{0}/{1}'.format(instance.transaction.id, filename)
+
+
+class TransactionImage(models.Model):
+    image = models.ImageField(null=True, upload_to=transaction_img_path)
+    transaction = models.ForeignKey(to=Transaction, on_delete=models.CASCADE, related_name='transaction_image')
+
 
 class BarangayRequest(models.Model):
     details = models.ForeignKey(to=EvacuationDetails,
                                 on_delete=models.CASCADE)  # contains both the barangay and the evac center
+    expected_date = models.DateTimeField()
+
+    def within_expected_date(self):
+        """
+        :return: true if the current date precedes the expected date of the request,
+                returns false otherwise
+        """
+        return timezone.now() <= self.expected_date
+        # now = timezone.now()
+        # return now - datetime.timedelta(days=1) <= self.pub_date <= now
+        # return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
 
 
 class ItemRequest(models.Model):

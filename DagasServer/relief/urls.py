@@ -8,7 +8,7 @@ from .models import ResidentProfile
 from .serializers import UserSerializer, ResidentSerializer
 
 # Settings
-from .viewsets import UserViewSet, ResidentViewSet, SupplyViewSet, ItemTypeViewSet
+from .viewsets import UserViewSet, ResidentViewSet, SupplyViewSet, ItemTypeViewSet, ItemRequestViewSet
 
 USE_ROUTER = True
 
@@ -22,8 +22,7 @@ urlpatterns = [
     path('api/users/donors/', views.DonorListView.as_view(), name='donors'),
     path('api/users/donors/<int:pk>', views.DonorDetailView.as_view(), name='donor_details'),
     path('api/donations/', views.DonationListView.as_view(), name='donations'),
-    path('api/donations/<int:pk>', views.DonationDetailView.as_view(), name='donations_details')
-
+    path('api/donations/<int:pk>', views.DonationDetailView.as_view(), name='donations_details'),
 ]
 
 
@@ -34,4 +33,5 @@ router = SimpleRouter()
 router.register('api/users/residents/r', ResidentViewSet, basename='residents_others')
 router.register('api/supplies', SupplyViewSet)
 router.register('api/item-type', ItemTypeViewSet, basename='itemtype')
+router.register('api/item-request', ItemRequestViewSet, basename='item_request')
 urlpatterns += router.urls
