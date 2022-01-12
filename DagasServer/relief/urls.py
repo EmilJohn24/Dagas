@@ -8,7 +8,8 @@ from .models import ResidentProfile
 from .serializers import UserSerializer, ResidentSerializer
 
 # Settings
-from .viewsets import UserViewSet, ResidentViewSet, SupplyViewSet, ItemTypeViewSet, ItemRequestViewSet
+from .viewsets import UserViewSet, ResidentViewSet, SupplyViewSet, ItemTypeViewSet, ItemRequestViewSet, \
+    TransactionViewSet, BarangayRequestViewSet, BarangayViewSet
 
 USE_ROUTER = True
 
@@ -34,4 +35,8 @@ router.register('api/users/residents/r', ResidentViewSet, basename='residents_ot
 router.register('api/supplies', SupplyViewSet)
 router.register('api/item-type', ItemTypeViewSet, basename='itemtype')
 router.register('api/item-request', ItemRequestViewSet, basename='item_request')
+router.register('api/requests', BarangayRequestViewSet, basename='barangay_request')
+router.register('api/transactions', TransactionViewSet, basename='transactions')
+router.register('api/users/barangays', BarangayViewSet, basename='barangays')
+
 urlpatterns += router.urls

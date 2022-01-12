@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import django.contrib.auth
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -63,6 +65,9 @@ class BarangayProfile(models.Model):
     """
     # TODO: Add geolocation and evacuation centers
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, null=True, related_name="barangay_profile")
+
+    def __str__(self):
+        return self.user.username
 
 
 class GovAdminProfile(models.Model):
@@ -163,7 +168,7 @@ class Transaction(models.Model):
     barangay_request = models.ForeignKey(to="BarangayRequest", on_delete=models.CASCADE)
     received = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, null=True,
                                                 blank=True)  # 1 = received, 0 = not received
-    received_date = models.DateTimeField()
+    received_date = models.DateTimeField(null=True)
 
 
 def transaction_img_path(instance, filename):
@@ -176,9 +181,13 @@ class TransactionImage(models.Model):
 
 
 class BarangayRequest(models.Model):
-    details = models.ForeignKey(to=EvacuationDetails,
+    barangay = models.ForeignKey(null=True, to=BarangayProfile, on_delete=models.CASCADE)
+    details = models.ForeignKey(null=True, to=EvacuationDetails,
                                 on_delete=models.CASCADE)  # contains both the barangay and the evac center
-    expected_date = models.DateTimeField()
+    expected_date = models.DateTimeField(null=True, default=datetime.now)
+
+    def __str__(self):
+        return self.barangay.user.username + " (" + str(self.id) + ")"
 
     def within_expected_date(self):
         """
@@ -196,11 +205,11 @@ class ItemRequest(models.Model):
     Request made by or for a victim Note: Notice the use of 'for'. This is because this can be posted and tied to a
     barangay directly since victim_request is nullable
     """
-    barangay_request = models.ForeignKey(to=BarangayRequest, on_delete=models.CASCADE)
+    barangay_request = models.ForeignKey(to=BarangayRequest, on_delete=models.CASCADE, related_name='item_request')
     date_added = models.DateTimeField()
     type = models.ForeignKey(ItemType, on_delete=models.CASCADE, )
     pax = models.IntegerField()
-    victim_request = models.OneToOneField(to='VictimRequest', on_delete=models.CASCADE, related_name='item_request',
+    victim_request = models.OneToOneField(to='VictimRequest', on_delete=models.CASCADE,
                                           null=True, blank=True, )
 
     def is_by_barangay(self):
