@@ -2,7 +2,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_auth.registration.serializers import RegisterSerializer
 from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \
-    ItemType, ItemRequest, BarangayRequest, EvacuationDetails
+    ItemType, ItemRequest, BarangayRequest, EvacuationDetails, Transaction, TransactionImage
 
 
 class ItemTypeSerializer(serializers.ModelSerializer):
@@ -62,6 +62,12 @@ class DonorSerializer(serializers.ModelSerializer):
 
 
 class BarangaySerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='username',
+    )
+
     class Meta:
         model = BarangayProfile
         fields = ('id', 'user')
@@ -83,29 +89,56 @@ class EvacuationDetailsSerializer(serializers.ModelSerializer):
 class ItemRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = ItemRequest
-        fields = ('id', 'type', 'pax', 'date_added')
+        fields = ('id', 'type', 'pax', 'date_added', 'barangay_request')
 
 
 # TODO: Include EvacuationDetails
 class BarangayRequestSerializer(serializers.ModelSerializer):
-    item_requests = serializers.HyperlinkedRelatedField(
+    item_request = serializers.HyperlinkedRelatedField(
         many=True,
-        read_only=False,
-        queryset=ItemRequest.objects.all(),
-        view_name='relief:item_request'
+        read_only=True,
+        # queryset=ItemRequest.objects.all(),
+        view_name='relief:item_request-detail'
     )
+
+    barangay = serializers.HyperlinkedRelatedField(
+        read_only=False,
+        queryset=BarangayProfile.objects.all(),
+        view_name='relief:barangays-detail',
+    )
+
+    # def create(self, validated_data):
+    #     barangay_request: BarangayRequest = BarangayRequest.objects.create()
+    #     barangay_request.expected_date = validated_data["expected_date"]
+    #
 
     class Meta:
         model = BarangayRequest
-        fields = ('id', 'item_requests', 'expected_date')
+        fields = ('id', 'item_request', 'expected_date', 'barangay')
 
 
+# TODO: Consider using serializers.ImageField
+class TransactionImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransactionImage
+        fields = ('id', 'image', 'transaction')
+
+
+# TODO: Make transaction image work
 class TransactionSerializer(serializers.ModelSerializer):
     donor = serializers.HyperlinkedRelatedField(
         view_name='relief:donor_details',
         read_only=False,
         queryset=DonorProfile.objects.all(),
     )
+
+    transaction_image = TransactionImageSerializer(many=True, read_only=True)
+
+    received_date = serializers.StringRelatedField(many=False)
+
+    class Meta:
+        model = Transaction
+        fields = ('donor', 'transaction_image', 'barangay_request', 'received', 'received_date')
 
 
 # Based on: https://stackoverflow.com/questions/62291394/django-rest-auth-dj-rest-auth-custom-user-registration
