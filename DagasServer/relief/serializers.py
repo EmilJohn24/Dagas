@@ -124,6 +124,7 @@ class TransactionImageSerializer(serializers.ModelSerializer):
         fields = ('id', 'image', 'transaction')
 
 
+# TODO: Make transaction image work
 class TransactionSerializer(serializers.ModelSerializer):
     donor = serializers.HyperlinkedRelatedField(
         view_name='relief:donor_details',
