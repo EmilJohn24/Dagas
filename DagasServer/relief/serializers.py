@@ -131,15 +131,19 @@ class TransactionSerializer(serializers.ModelSerializer):
         read_only=False,
         queryset=DonorProfile.objects.all(),
     )
-
+    barangay_request = serializers.HyperlinkedRelatedField(
+        view_name='relief:barangay_request-detail',
+        read_only=False,
+        queryset=BarangayRequest.objects.all(),
+    )
     transaction_image = TransactionImageSerializer(many=True, read_only=True)
 
     received_date = serializers.StringRelatedField(many=False)
 
     class Meta:
         model = Transaction
-        fields = ('donor', 'transaction_image', 'barangay_request', 'received', 'received_date')
-
+        fields = ('id', 'donor', 'transaction_image', 'qr_code', 'barangay_request', 'received', 'received_date')
+        read_only_fields = ('qr_code', 'received')
 
 # Based on: https://stackoverflow.com/questions/62291394/django-rest-auth-dj-rest-auth-custom-user-registration
 class CustomRegisterSerializer(RegisterSerializer):

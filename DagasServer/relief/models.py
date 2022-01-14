@@ -1,7 +1,12 @@
+import uuid
 from datetime import datetime
+from io import StringIO
 
 import django.contrib.auth
+import qrcode
 from django.contrib.auth.models import AbstractUser
+from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -163,12 +168,23 @@ class Transaction(models.Model):
         (INCOMING, 'Incoming'),
         (RECEIVED, 'Received'),
     )
-
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    qr_code = models.ImageField(upload_to='transaction_QRs', blank=True, null=True)
     donor = models.ForeignKey(to=DonorProfile, on_delete=models.CASCADE)
     barangay_request = models.ForeignKey(to="BarangayRequest", on_delete=models.CASCADE)
     received = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, null=True,
                                                 blank=True)  # 1 = received, 0 = not received
     received_date = models.DateTimeField(null=True)
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            filename = 'qr_%s.png' % self.id
+            qr_code_file = ContentFile(b'', name=filename)
+            img = qrcode.make(str(self.id))
+            img.save(qr_code_file)
+            self.qr_code = qr_code_file
+
+        super(Transaction, self).save(*args, **kwargs)
 
 
 def transaction_img_path(instance, filename):

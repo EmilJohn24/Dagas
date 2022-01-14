@@ -1,7 +1,9 @@
+from django.conf.urls.static import static
 from django.urls import path, include
 from rest_framework import viewsets
 from rest_framework.routers import SimpleRouter
 
+from DagasServer import settings
 from . import views
 from .forms import User
 from .models import ResidentProfile

@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-_-rs#!5yr7=4%1z2e89schctuhz4wows3xb-6j3f4xfe$074jd
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.100.2', '192.168.1.4','192.168.31.25']
+ALLOWED_HOSTS = ['192.168.100.2', '192.168.1.4', '192.168.31.25']
 
 # Application definition
 
@@ -157,3 +157,9 @@ AUTHENTICATION_BACKENDS = [
 REST_AUTH_REGISTER_SERIALIZERS = {
     'REGISTER_SERIALIZER': 'relief.serializers.CustomRegisterSerializer',
 }
+
+# QR Settings
+# SERVE_QR_CODE_IMAGE_PATH = 'transaction-qr/'
+# QR_CODE_URL_PROTECTION = {
+#     constants.ALLOWS_EXTERNAL_REQUESTS_FOR_REGISTERED_USER: lambda u: True
+# }
