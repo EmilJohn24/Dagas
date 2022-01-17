@@ -13,5 +13,10 @@
             android:icon="@drawable/ic_launcher_background"
             android:title="QR Scanner" />
 
+        <item
+            android:id="@+id/nav_barangay_request"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="Barangay Request" />
+
     </group>
 </menu>
