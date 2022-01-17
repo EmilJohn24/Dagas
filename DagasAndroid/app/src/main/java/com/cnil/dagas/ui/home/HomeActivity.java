@@ -1,7 +1,9 @@
 package com.cnil.dagas.ui.home;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -11,14 +13,18 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.cnil.dagas.R;
+import com.cnil.dagas.data.CurrentUserThread;
 import com.cnil.dagas.databinding.ActivityHomeBinding;
 import com.google.android.material.navigation.NavigationView;
+
+import org.json.JSONException;
 
 
 public class HomeActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityHomeBinding binding;
+    private final String TAG = HomeActivity.class.getName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +43,28 @@ public class HomeActivity extends AppCompatActivity {
 //        });
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
+        TextView nameTxt = (TextView) navigationView.getHeaderView(0).findViewById(R.id.nameTxt);
+        TextView emailTxt = (TextView) navigationView.getHeaderView(0).findViewById(R.id.emailTxt);
+
+        //Load current user data
+        CurrentUserThread currentUserThread = new CurrentUserThread();
+        currentUserThread.start();
+        try {
+            currentUserThread.join();
+        } catch (InterruptedException e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        try {
+            nameTxt.setText(currentUserThread.getUser().getString("username"));
+            emailTxt.setText(currentUserThread.getUser().getString("email"));
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+
+        //End load current user data
+
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(

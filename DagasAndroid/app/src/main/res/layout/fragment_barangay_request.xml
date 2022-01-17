@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.home.resident.BarangayRequestFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <EditText
+        android:id="@+id/waterNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Amount"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="@+id/foodNumber"
+        app:layout_constraintStart_toStartOf="@+id/foodNumber"
+        app:layout_constraintTop_toBottomOf="@+id/foodNumber" />
+
+    <EditText
+        android:id="@+id/clothesNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Amount"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="@+id/waterNumber"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/waterNumber"
+        app:layout_constraintTop_toBottomOf="@+id/waterNumber" />
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar4"
+        android:layout_width="409dp"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView16"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Request Items"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintBottom_toTopOf="@+id/foodNumber"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar4" />
+
+    <CheckBox
+        android:id="@+id/foodCheck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Food"
+        android:textAlignment="textStart"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/foodNumber"
+        app:layout_constraintEnd_toStartOf="@+id/foodNumber"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/foodNumber" />
+
+    <CheckBox
+        android:id="@+id/clothesCheck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Clothes"
+        android:textAlignment="textStart"
+        app:layout_constraintBottom_toBottomOf="@+id/clothesNumber"
+        app:layout_constraintEnd_toStartOf="@+id/clothesNumber"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/clothesNumber" />
+
+    <CheckBox
+        android:id="@+id/waterCheck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Water"
+        android:textAlignment="textStart"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="@+id/waterNumber"
+        app:layout_constraintEnd_toStartOf="@+id/waterNumber"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/waterNumber" />
+
+    <EditText
+        android:id="@+id/foodNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Amount"
+        android:inputType="number"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.76"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar4"
+        app:layout_constraintVertical_bias="0.241" />
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Submit Request"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/clothesNumber"
+        app:layout_constraintVertical_bias="0.050000012" />
+</androidx.constraintlayout.widget.ConstraintLayout>

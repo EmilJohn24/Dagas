@@ -1,3 +1,4 @@
+from django.utils.datetime_safe import datetime
 from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -15,6 +16,12 @@ from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializ
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    @action(detail=False, methods=['get'], name='Get Current User',
+            permission_classes=[IsProfileUserOrReadOnly])
+    def current_user(self, request, pk=None):
+        user_serializer = UserSerializer(request.user)
+        return Response(user_serializer.data)
 
 
 class ResidentViewSet(viewsets.ModelViewSet):
@@ -65,6 +72,9 @@ class BarangayRequestViewSet(viewsets.ModelViewSet):
     queryset = BarangayRequest.objects.all()
     serializer_class = BarangayRequestSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(barangay=BarangayProfile.objects.get(user=self.request.user))
+
 
 class DonationViewSet(viewsets.ModelViewSet):
     queryset = DonorProfile.objects.all()
@@ -84,3 +94,6 @@ class ItemTypeViewSet(viewsets.ModelViewSet):
 class ItemRequestViewSet(viewsets.ModelViewSet):
     queryset = ItemRequest.objects.all()
     serializer_class = ItemRequestSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(date_added=datetime.now())

@@ -63,6 +63,7 @@ public class LoginDataSource {
             // https://stackoverflow.com/questions/17810044/android-create-json-array-and-json-object
             // https://stackoverflow.com/questions/23456488/how-to-use-okhttp-to-make-a-post-request
             // https://stackoverflow.com/questions/34179922/okhttp-post-body-as-json
+            OkHttpSingleton.getInstance().setCredentials(username, password);
             try {
                 loginJSON.put("username", username);
                 loginJSON.put("password", password);
