@@ -5,14 +5,15 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
-    BarangayRequest, TransactionImage, BarangayProfile
+    BarangayRequest, TransactionImage, BarangayProfile, Donation
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
-    ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer
+    ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
+    DonationSerializer
 
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
-
+# TODO: Add permission classes
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -59,7 +60,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
 
-    @action(detail=True, methods=['patch', 'put'], name='Upload Transaction Picture', permission_classes=[IsProfileUserOrReadOnly])
+    @action(detail=True, methods=['patch', 'put'], name='Upload Transaction Picture',
+            permission_classes=[IsProfileUserOrReadOnly])
     def upload_image(self, request, pk=None):
         transaction: Transaction = self.get_object()
         new_image: TransactionImage = TransactionImage.objects.create()
@@ -77,8 +79,13 @@ class BarangayRequestViewSet(viewsets.ModelViewSet):
 
 
 class DonationViewSet(viewsets.ModelViewSet):
-    queryset = DonorProfile.objects.all()
-    serializer_class = DonorSerializer
+    queryset = Donation.objects.all()
+    serializer_class = DonationSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(datetime_added=datetime.now(),
+                        donor=DonorProfile.objects.get(user=self.request.user),
+                        )
 
 
 class SupplyViewSet(viewsets.ModelViewSet):

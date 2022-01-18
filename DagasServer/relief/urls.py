@@ -11,7 +11,7 @@ from .serializers import UserSerializer, ResidentSerializer
 
 # Settings
 from .viewsets import UserViewSet, ResidentViewSet, SupplyViewSet, ItemTypeViewSet, ItemRequestViewSet, \
-    TransactionViewSet, BarangayRequestViewSet, BarangayViewSet
+    TransactionViewSet, BarangayRequestViewSet, BarangayViewSet, DonationViewSet
 
 USE_ROUTER = True
 
@@ -24,7 +24,7 @@ urlpatterns = [
     path('api/users/admins/', views.GovAdminListView.as_view(), name='admins'),
     path('api/users/donors/', views.DonorListView.as_view(), name='donors'),
     path('api/users/donors/<int:pk>', views.DonorDetailView.as_view(), name='donor_details'),
-    path('api/donations/', views.DonationListView.as_view(), name='donations'),
+    # path('api/donations/', views.DonationListView.as_view(), name='donations'),
     path('api/donations/<int:pk>', views.DonationDetailView.as_view(), name='donations_details'),
 ]
 
@@ -40,5 +40,5 @@ router.register('api/item-request', ItemRequestViewSet, basename='item_request')
 router.register('api/requests', BarangayRequestViewSet, basename='barangay_request')
 router.register('api/transactions', TransactionViewSet, basename='transactions')
 router.register('api/users/barangays', BarangayViewSet, basename='barangays')
-
+router.register('api/donations', DonationViewSet, basename='donations')
 urlpatterns += router.urls

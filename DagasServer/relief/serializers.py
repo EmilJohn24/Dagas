@@ -19,20 +19,26 @@ class SupplySerializer(serializers.ModelSerializer):
 
 class DonationSerializer(serializers.ModelSerializer):
     donor = serializers.HyperlinkedRelatedField(
+        required=False,
         view_name='relief:donor_details',
         read_only=False,
         queryset=DonorProfile.objects.all(),
     )
     supplies = serializers.HyperlinkedRelatedField(
+        required=False,
         many=True,
         read_only=False,
         queryset=Supply.objects.all(),
         view_name='relief:supply-detail'
     )
 
+    datetime_added = serializers.DateTimeField(
+        required=False,
+    )
+
     class Meta:
         model = Donation
-        fields = ['donor', 'supplies', 'datetime_added']
+        fields = ['id', 'donor', 'supplies', 'datetime_added']
 
 
 class UserSerializer(serializers.ModelSerializer):
