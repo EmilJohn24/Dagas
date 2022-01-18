@@ -18,5 +18,12 @@
             android:icon="@drawable/ic_launcher_background"
             android:title="Barangay Request" />
 
+        <item
+            android:id="@+id/nav_donor_add_supply"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="Add Donation" />
+
+
+
     </group>
 </menu>
