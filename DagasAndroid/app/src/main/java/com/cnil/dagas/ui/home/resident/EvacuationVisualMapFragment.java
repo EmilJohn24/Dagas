@@ -1,12 +1,17 @@
 package com.cnil.dagas.ui.home.resident;
 
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -27,6 +32,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,6 +41,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -90,9 +97,57 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
 
         }
     }
+    static class AddEvacThread extends Thread {
+        private static final String EVAC_CENTER_URL = "/relief/api/evacuation-center/";
+        private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+
+       private String name;
+       private String address;
+       private String geolocation;
+
+       AddEvacThread(String name, String address, double latitude, double longtitude){
+           this.name = name;
+           this.address = address;
+           this.geolocation = latitude + ", " + longtitude;
+       }
+
+
+
+        public void run() {
+            try {
+                addEvac();
+            } catch (IOException | JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+        private void addEvac() throws IOException, JSONException {
+            JSONObject createRequestJSON = new JSONObject();
+            try {
+                createRequestJSON.put("name", name);
+                createRequestJSON.put("address", address);
+                createRequestJSON.put("geolocation", geolocation);
+            } catch (JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
+            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
+
+
+            OkHttpSingleton client = OkHttpSingleton.getInstance();
+            Request request = client.builderFromBaseUrl(EVAC_CENTER_URL)
+                    .post(body)
+                    .build();
+            //TODO: Check if request succeeded
+            Response response = client.newCall(request).execute();
+
+        }
+    }
+
     private EvacuationcentervisualmapBinding binding;
     private MapView mapView;
     private GoogleMap map;
+    private Marker newEvacMarker;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState){
 
@@ -159,6 +214,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
             double latitude = Float.parseFloat(splitCoord[0]);
             double longtitude = Float.parseFloat(splitCoord[1]);
             LatLng evacLatLng = new LatLng(latitude, longtitude);
+            //TODO: Update markers after adding new evacuation center
             map.addMarker(new MarkerOptions()
                             .position(evacLatLng)
                             .title(name));
@@ -174,7 +230,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
                     String[] splitCoord = coord.split(",");
                     double latitude = Float.parseFloat(splitCoord[0]);
                     double longtitude = Float.parseFloat(splitCoord[1]);
-                                        LatLng evacLatLng = new LatLng(latitude, longtitude);
+                    LatLng evacLatLng = new LatLng(latitude, longtitude);
                     map.animateCamera(CameraUpdateFactory.newLatLngZoom(evacLatLng, 20));
 
                 } catch (JSONException e) {
@@ -188,6 +244,57 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
             }
         });
 
+        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(@NonNull LatLng latLng) {
+                    if (newEvacMarker != null) newEvacMarker.remove();
+                    newEvacMarker = map.addMarker(new MarkerOptions()
+                            .position(latLng)
+                            .title("New Evacuation Center"));
+
+            }
+        });
+        //Create Evacuation Center
+//        map.addMarker(new MarkerOptions().)
+        EditText editTextEvacName = root.findViewById(R.id.editTextEvacName);
+        FloatingActionButton addEvacButton = root.findViewById(R.id.addEvacButton);
+        editTextEvacName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionID, KeyEvent keyEvent) {
+                if (actionID == EditorInfo.IME_ACTION_DONE){
+                    // Add Evacuation Center
+                    //TODO: Find better ways to get address
+                    Geocoder geocoder = new Geocoder(EvacuationVisualMapFragment.this.getContext());
+                    try {
+                        List<Address> addressComponents = geocoder.getFromLocation(
+                                    newEvacMarker.getPosition().latitude, newEvacMarker.getPosition().longitude, 1);
+                        if (!addressComponents.isEmpty()){
+                            String address = addressComponents.get(0).getFeatureName() + ", " +
+                                                addressComponents.get(0).getLocality() +", " +
+                                                addressComponents.get(0).getAdminArea() + ", " +
+                                                addressComponents.get(0).getCountryName();
+                            String name = editTextEvacName.getText().toString();
+                            AddEvacThread addEvacThread = new AddEvacThread(name, address,
+                                    newEvacMarker.getPosition().latitude, newEvacMarker.getPosition().longitude);
+                            addEvacThread.start();
+                            addEvacThread.join();
+                            editTextEvacName.getText().clear();
+
+                        }
+                    } catch (IOException | InterruptedException e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+        addEvacButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editTextEvacName.setVisibility(View.VISIBLE);
+            }
+        });
 
     }
 }
