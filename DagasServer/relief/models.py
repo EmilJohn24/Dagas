@@ -16,7 +16,7 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-
+from django_google_maps import fields as map_fields
 from DagasServer import settings
 
 
@@ -113,8 +113,12 @@ class EvacuationCenter(models.Model):
     """
     # TODO: Add geolocation
     name = models.CharField(max_length=200)
-    barangays = models.ManyToManyField(to=BarangayProfile, related_name='centers',
-                                       through=EvacuationDetails)
+    barangays = models.ForeignKey(null=True, to=BarangayProfile, on_delete=models.CASCADE, related_name='centers',)
+    # barangays = models.ManyToManyField(to=BarangayProfile, related_name='centers',
+    #                                    through=EvacuationDetails)
+    # Geolocation
+    address = map_fields.AddressField(max_length=200, null=True)
+    geolocation = map_fields.GeoLocationField(max_length=100, null=True)
 
 
 class Donation(models.Model):

@@ -5,11 +5,11 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
-    BarangayRequest, TransactionImage, BarangayProfile, Donation
+    BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
     ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
-    DonationSerializer
+    DonationSerializer, EvacuationCenterSerializer
 
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
@@ -86,6 +86,24 @@ class DonationViewSet(viewsets.ModelViewSet):
         serializer.save(datetime_added=datetime.now(),
                         donor=DonorProfile.objects.get(user=self.request.user),
                         )
+
+
+class EvacuationCenterViewSet(viewsets.ModelViewSet):
+    queryset = EvacuationCenter.objects.all()
+    serializer_class = EvacuationCenterSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(barangays=BarangayProfile.objects.get(
+            user=self.request.user)
+        )
+
+    @action(detail=False, methods=['get'], name='Get Current Evac',
+            permission_classes=[IsProfileUserOrReadOnly])
+    def current_evac(self, request, pk=None):
+        user_barangay = BarangayProfile.objects.get(user=request.user)
+        evac_centers = EvacuationCenter.objects.filter(barangays=user_barangay)
+        serializer = EvacuationCenterSerializer(evac_centers, many=True)
+        return Response(serializer.data)
 
 
 class SupplyViewSet(viewsets.ModelViewSet):

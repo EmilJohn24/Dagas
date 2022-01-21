@@ -2,7 +2,7 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_auth.registration.serializers import RegisterSerializer
 from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \
-    ItemType, ItemRequest, BarangayRequest, EvacuationDetails, Transaction, TransactionImage
+    ItemType, ItemRequest, BarangayRequest, EvacuationDetails, Transaction, TransactionImage, EvacuationCenter
 
 
 class ItemTypeSerializer(serializers.ModelSerializer):
@@ -83,6 +83,12 @@ class GovAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = GovAdminProfile
         fields = ('id', 'user')
+
+
+class EvacuationCenterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EvacuationCenter
+        fields = ('id', 'name', 'barangays', 'address', 'geolocation')
 
 
 class EvacuationDetailsSerializer(serializers.ModelSerializer):

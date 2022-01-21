@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'rest_auth',
     'rest_auth.registration',
+    'django_google_maps',
 ]
 
 MIDDLEWARE = [
@@ -163,3 +164,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 # QR_CODE_URL_PROTECTION = {
 #     constants.ALLOWS_EXTERNAL_REQUESTS_FOR_REGISTERED_USER: lambda u: True
 # }
+
+
+# Django Google Maps
+GOOGLE_MAPS_API_KEY = "AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM";
