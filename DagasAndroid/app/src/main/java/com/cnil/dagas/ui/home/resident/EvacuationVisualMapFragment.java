@@ -1,5 +1,6 @@
 package com.cnil.dagas.ui.home.resident;
 
+import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -18,8 +19,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
+
 
 import com.cnil.dagas.R;
 import com.cnil.dagas.databinding.EvacuationcentervisualmapBinding;
@@ -28,7 +28,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -39,7 +38,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +53,6 @@ import okhttp3.Response;
 public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyCallback {
     private final static String TAG = EvacuationVisualMapFragment.class.getName();
     static class GrabEvacsThread extends Thread {
-        private static final String EVAC_CENTER_URL = "/relief/api/evacuation-center/";
         private static final String CURR_EVAC_CENTER_URL = "/relief/api/evacuation-center/current_evac/";
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -102,19 +99,40 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
 
-       private String name;
+       private final String name;
+       private final Context context;
+       private final double latitude;
+       private final double longtitude;
+       private final String geolocation;
        private String address;
-       private String geolocation;
 
-       AddEvacThread(String name, String address, double latitude, double longtitude){
+       AddEvacThread(String name, Context context, double latitude, double longtitude){
            this.name = name;
-           this.address = address;
-           this.geolocation = latitude + ", " + longtitude;
+           this.context = context;
+           this.latitude = latitude;
+           this.longtitude = longtitude;
+           this.address = "Placeholder";
+           this.geolocation = latitude + "," + longtitude;
        }
 
 
 
         public void run() {
+            try {
+                Geocoder geocoder = new Geocoder(context);
+                List<Address> addressComponents = geocoder.getFromLocation(
+                        latitude, longtitude, 1);
+                if (!addressComponents.isEmpty()) {
+                    this.address = addressComponents.get(0).getFeatureName() + ", " +
+                            addressComponents.get(0).getLocality() + ", " +
+                            addressComponents.get(0).getAdminArea() + ", " +
+                            addressComponents.get(0).getCountryName();
+                }
+
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+                this.address = this.name;
+            }
             try {
                 addEvac();
             } catch (IOException | JSONException e) {
@@ -264,24 +282,17 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
                 if (actionID == EditorInfo.IME_ACTION_DONE){
                     // Add Evacuation Center
                     //TODO: Find better ways to get address
-                    Geocoder geocoder = new Geocoder(EvacuationVisualMapFragment.this.getContext());
                     try {
-                        List<Address> addressComponents = geocoder.getFromLocation(
-                                    newEvacMarker.getPosition().latitude, newEvacMarker.getPosition().longitude, 1);
-                        if (!addressComponents.isEmpty()){
-                            String address = addressComponents.get(0).getFeatureName() + ", " +
-                                                addressComponents.get(0).getLocality() +", " +
-                                                addressComponents.get(0).getAdminArea() + ", " +
-                                                addressComponents.get(0).getCountryName();
+
                             String name = editTextEvacName.getText().toString();
-                            AddEvacThread addEvacThread = new AddEvacThread(name, address,
+                            AddEvacThread addEvacThread = new AddEvacThread(name, EvacuationVisualMapFragment.this.getContext(),
                                     newEvacMarker.getPosition().latitude, newEvacMarker.getPosition().longitude);
                             addEvacThread.start();
                             addEvacThread.join();
                             editTextEvacName.getText().clear();
 
-                        }
-                    } catch (IOException | InterruptedException e) {
+
+                    } catch (InterruptedException e) {
                         Log.e(TAG, e.getMessage());
                     }
                     return true;
