@@ -22,4 +22,6 @@
     <string name="nav_header_desc">Navigation Header</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="createText">Create</string>
+    <string name="cancelText">Cancel</string>
 </resources>
