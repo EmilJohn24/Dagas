@@ -1,5 +1,8 @@
 plugins {
     id 'com.android.application'
+    //Google Maps
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+
 }
 
 android {

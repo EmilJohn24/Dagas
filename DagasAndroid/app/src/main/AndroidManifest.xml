@@ -13,6 +13,9 @@
         android:roundIcon="@mipmap/ic_dagaslogo_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.DagasAndroid">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="${MAPS_API_KEY}" />
         <activity
             android:name=".data.ResidentRegisterActivity"
             android:exported="true" />
