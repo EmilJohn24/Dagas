@@ -26,5 +26,9 @@
         android:name="com.cnil.dagas.DonorAddSupply"
         android:label="fragment_donor_add_supply"
         tools:layout="@layout/fragment_donor_add_supply" />
-
+    <fragment
+        android:id="@+id/nav_view_requests"
+        android:name="com.cnil.dagas.RequestsFragment"
+        android:label="fragment_requests"
+        tools:layout="@layout/fragment_requests" />
 </navigation>

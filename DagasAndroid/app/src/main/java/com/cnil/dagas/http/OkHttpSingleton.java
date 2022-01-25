@@ -25,5 +25,9 @@ public class OkHttpSingleton extends OkHttpClient {
         return new Request.Builder().url(BASE_URL + subURL).header("Authorization", credentials);
     }
 
+    public Request.Builder builderFromFullUrl(String URL){
+        return new Request.Builder().url(URL).header("Authorization", credentials);
+    }
+
 
 }

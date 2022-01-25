@@ -27,6 +27,11 @@
             android:icon="@drawable/ic_launcher_background"
             android:title="Add Donation" />
 
+        <item
+            android:id="@+id/nav_view_requests"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="View Requests" />
+
 
 
     </group>
