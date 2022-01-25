@@ -1,15 +1,16 @@
+from django.db.models import Sum
 from django.utils.datetime_safe import datetime
 from rest_framework.response import Response
-from rest_framework import viewsets
+from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
-    BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter
+    BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
     ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
-    DonationSerializer, EvacuationCenterSerializer
+    DonationSerializer, EvacuationCenterSerializer, TransactionOrderSerializer
 
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
@@ -56,6 +57,11 @@ class BarangayViewSet(viewsets.ModelViewSet):
         serializer.save(owner=self.request.user)
 
 
+class TransactionOrderViewSet(viewsets.ModelViewSet):
+    queryset = TransactionOrder.objects.all()
+    serializer_class = TransactionOrderSerializer
+
+
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
@@ -68,6 +74,28 @@ class TransactionViewSet(viewsets.ModelViewSet):
         new_image.image = list(request.FILES.values())[0]  # Get first image uploaded
         new_image.transaction = transaction
         new_image.save()
+
+    # Note: Based on total pool of donations
+    # TODO: Consider checking for oversupply
+    # def perform_create(self, serializer):
+    #     current_donor = DonorProfile.objects.get(user=self.request.user)
+    #     req : BarangayRequest = serializer.data['barangay_request']
+    #
+    #     supplies = Supply.objects.filter(donation__donor=current_donor)
+    #     for item_type in ItemType.objects.all():
+    #         type_supplies = supplies.filter(type=item_type)
+    #         if type_supplies:
+    #             type_total_pax = type_supplies.aggregate(Sum('pax'))
+    #             item_req = ItemRequest.objects.get(barangay_request=req,
+    #                                                type=item_type)
+    #             # Note: Use https://stackoverflow.com/questions/51665260/django-rest-framework-custom-error-message
+    #             if type_total_pax.get('pax__sum') < item_req.pax:
+    #                 return Response({
+    #                     "error": item_type.name + " not enough."},
+    #                     status=status.HTTP_400_BAD_REQUEST,)
+    #
+    #
+    #     serializer.save(donor=current_donor,)
 
 
 class BarangayRequestViewSet(viewsets.ModelViewSet):

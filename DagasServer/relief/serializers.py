@@ -1,8 +1,12 @@
 from django.db import transaction
+from django.db.models import Sum
 from rest_framework import serializers
 from rest_auth.registration.serializers import RegisterSerializer
+from rest_framework.reverse import reverse
+
 from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \
-    ItemType, ItemRequest, BarangayRequest, EvacuationDetails, Transaction, TransactionImage, EvacuationCenter
+    ItemType, ItemRequest, BarangayRequest, EvacuationDetails, Transaction, TransactionImage, EvacuationCenter, \
+    TransactionOrder
 
 
 class ItemTypeSerializer(serializers.ModelSerializer):
@@ -131,7 +135,7 @@ class BarangayRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BarangayRequest
-        fields = ('id', 'item_request', 'expected_date', 'barangay')
+        fields = ('id', 'item_request', 'evacuation_center', 'expected_date', 'barangay')
 
 
 # TODO: Consider using serializers.ImageField
@@ -141,20 +145,50 @@ class TransactionImageSerializer(serializers.ModelSerializer):
         fields = ('id', 'image', 'transaction')
 
 
-# TODO: Make transaction image work
+class TransactionOrderSerializer(serializers.ModelSerializer):
+    def validate(self, data):
+        request = self.context.get('request')
+        current_donor = DonorProfile.objects.get(user=request.user)
+        # transaction: BarangayRequest = serializer.data['transaction']
+        supplies = Supply.objects.filter(donation__donor=current_donor)
+        donor_transactions = Transaction.objects.filter(donor=current_donor)
+        item_type = data['type']
+        item_pax = data['pax']
+        type_supplies = supplies.filter(type=item_type)
+        all_orders = TransactionOrder.objects.filter(transaction__in=donor_transactions)
+        all_order_type_pax = all_orders.filter(type=item_type).aggregate(Sum('pax'))
+        transaction_pax = all_order_type_pax.get('pax__sum')
+        if transaction_pax is None:
+            transaction_pax = 0
+
+        if type_supplies:
+            type_supply_pax_sum = type_supplies.aggregate(Sum('pax'))
+            type_supply_pax = type_supply_pax_sum.get('pax__sum')
+
+            # Note: Use https://stackoverflow.com/questions/51665260/django-rest-framework-custom-error-message
+            if type_supply_pax - transaction_pax < item_pax:
+                raise serializers.ValidationError({
+                    "pax": item_type.name + " not enough."}, )
+        return data
+
+    class Meta:
+        model = TransactionOrder
+        fields = ('id', 'type', 'pax', 'transaction')
+
+
 class TransactionSerializer(serializers.ModelSerializer):
+    # TODO: Validate for oversupply (check if all transactions > requested amount)
     donor = serializers.HyperlinkedRelatedField(
         view_name='relief:donor_details',
         read_only=False,
         queryset=DonorProfile.objects.all(),
     )
-    barangay_request = serializers.HyperlinkedRelatedField(
-        view_name='relief:barangay_request-detail',
-        read_only=False,
-        queryset=BarangayRequest.objects.all(),
-    )
+    # barangay_request = serializers.HyperlinkedRelatedField(
+    #     view_name='relief:barangay_request-detail',
+    #     read_only=False,
+    #     queryset=BarangayRequest.objects.all(),
+    # )
     transaction_image = TransactionImageSerializer(many=True, read_only=True)
-
     received_date = serializers.StringRelatedField(many=False)
 
     class Meta:

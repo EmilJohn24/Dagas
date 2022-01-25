@@ -52,7 +52,7 @@ import okhttp3.Response;
 // https://developers.google.com/maps/documentation/android-sdk/reference/com/google/android/libraries/maps/SupportMapFragment
 public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyCallback {
     private final static String TAG = EvacuationVisualMapFragment.class.getName();
-    static class GrabEvacsThread extends Thread {
+    public static class GrabEvacsThread extends Thread {
         private static final String CURR_EVAC_CENTER_URL = "/relief/api/evacuation-center/current_evac/";
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 

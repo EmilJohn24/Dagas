@@ -8,9 +8,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import com.cnil.dagas.R;
 import com.cnil.dagas.data.model.LoggedInUser;
@@ -22,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -50,17 +53,20 @@ public class BarangayRequestFragment extends Fragment {
         private JSONObject response; // Returns JSON data if successfully added
         //TODO: Add date required
         //TODO: Fix hardcoded amounts in the future (use ItemType table in server-side)
-        private int foodAmount, waterAmount, clothesAmount;
-        private boolean foodChecked, waterChecked, clothesChecked;
+        private final int foodAmount, waterAmount, clothesAmount;
+        private final boolean foodChecked, waterChecked, clothesChecked;
+        private final int evacuationCenterId;
         AddBarangayRequestThread(int foodAmount, boolean foodChecked,
                                  int waterAmount, boolean waterChecked,
-                                 int clothesAmount, boolean clothesChecked){
+                                 int clothesAmount, boolean clothesChecked,
+                                 int evacuationCenterId){
             this.foodAmount = foodAmount;
             this.waterAmount = waterAmount;
             this.clothesAmount = clothesAmount;
             this.foodChecked = foodChecked;
             this.waterChecked = waterChecked;
             this.clothesChecked = clothesChecked;
+            this.evacuationCenterId = evacuationCenterId;
         }
 
         public void run(){
@@ -79,7 +85,7 @@ public class BarangayRequestFragment extends Fragment {
             // https://stackoverflow.com/questions/34179922/okhttp-post-body-as-json
             try {
                 //TODO: Add date required
-               createRequestJSON.put("", "");
+               createRequestJSON.put("evacuation_center", this.evacuationCenterId);
             } catch (JSONException e) {
                 Log.e(TAG, e.getMessage());
             }
@@ -131,15 +137,45 @@ public class BarangayRequestFragment extends Fragment {
         EditText foodAmountEdit = root.findViewById(R.id.foodNumber);
         CheckBox foodCheckbox = root.findViewById(R.id.foodCheck);
         Button submitButton = root.findViewById(R.id.submitButton);
+        Spinner evacSpinner = root.findViewById(R.id.evacSpinner);
+
+        EvacuationVisualMapFragment.GrabEvacsThread thread = new EvacuationVisualMapFragment.GrabEvacsThread();
+        thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        ArrayList<JSONObject> centers = thread.getCenters();
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_item);
+
+        for (JSONObject center : centers){
+            try {
+                String name = center.getString("name");
+                adapter.add(name);
+            } catch (JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+
+        evacSpinner.setAdapter(adapter);
+
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int foodAmount =Integer.parseInt(foodAmountEdit.getText().toString());
                 boolean foodChecked = foodCheckbox.isChecked();
                 //TODO: Link water and clothes amount
-                AddBarangayRequestThread thread = new AddBarangayRequestThread(foodAmount, foodChecked,
-                        0, false,
-                        0, false);
+                AddBarangayRequestThread thread = null;
+                try {
+                    thread = new AddBarangayRequestThread(foodAmount, foodChecked,
+                            0, false,
+                            0, false,
+                            centers.get(evacSpinner.getSelectedItemPosition()).getInt("id"));
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+                assert thread != null;
                 thread.start();
                 try {
                     thread.join();
@@ -149,8 +185,6 @@ public class BarangayRequestFragment extends Fragment {
 
             }
         });
-
-
         // Do shit
 
         return root;

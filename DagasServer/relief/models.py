@@ -113,7 +113,7 @@ class EvacuationCenter(models.Model):
     """
     # TODO: Add geolocation
     name = models.CharField(max_length=200)
-    barangays = models.ForeignKey(null=True, to=BarangayProfile, on_delete=models.CASCADE, related_name='centers',)
+    barangays = models.ForeignKey(null=True, to=BarangayProfile, on_delete=models.CASCADE, related_name='centers', )
     # barangays = models.ManyToManyField(to=BarangayProfile, related_name='centers',
     #                                    through=EvacuationDetails)
     # Geolocation
@@ -160,6 +160,12 @@ class Supply(models.Model):
 
 # TODO: Check if good models
 
+class TransactionOrder(models.Model):
+    type = models.ForeignKey(ItemType, on_delete=models.CASCADE)
+    pax = models.IntegerField()
+    transaction = models.ForeignKey(to="Transaction", on_delete=models.CASCADE)
+
+
 # TODO: Make views for Transaction
 class Transaction(models.Model):
     # Status List
@@ -179,6 +185,9 @@ class Transaction(models.Model):
     received = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, null=True,
                                                 blank=True)  # 1 = received, 0 = not received
     received_date = models.DateTimeField(null=True)
+
+    def __str__(self):
+        return str(self.barangay_request) + " " + str(self.id)
 
     def save(self, *args, **kwargs):
         if self._state.adding:
@@ -202,6 +211,7 @@ class TransactionImage(models.Model):
 
 class BarangayRequest(models.Model):
     barangay = models.ForeignKey(null=True, to=BarangayProfile, on_delete=models.CASCADE)
+    evacuation_center = models.ForeignKey(null=True, to=EvacuationCenter, on_delete=models.CASCADE)
     details = models.ForeignKey(null=True, to=EvacuationDetails,
                                 on_delete=models.CASCADE)  # contains both the barangay and the evac center
     expected_date = models.DateTimeField(null=True, default=datetime.now)
