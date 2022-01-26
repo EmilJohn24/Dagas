@@ -1,5 +1,6 @@
 package com.cnil.dagas;
 
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -67,6 +69,9 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
             @Override
             public void onClick(View view) {
                 // TODO: (Jan 26) move to next fragment (transaction)
+                Bundle bundle = new Bundle();
+                bundle.putString("REQUEST_URL", barangayRequest.getAcceptURL());
+                Navigation.findNavController(view).navigate(R.id.action_nav_view_requests_to_createTransactionFragment, bundle);
             }
         });
 

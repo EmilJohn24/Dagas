@@ -30,5 +30,17 @@
         android:id="@+id/nav_view_requests"
         android:name="com.cnil.dagas.RequestsFragment"
         android:label="fragment_requests"
-        tools:layout="@layout/fragment_requests" />
+        tools:layout="@layout/fragment_requests" >
+        <action
+            android:id="@+id/action_nav_view_requests_to_createTransactionFragment"
+            app:destination="@id/nav_create_transaction" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_create_transaction"
+        android:name="com.cnil.dagas.CreateTransactionFragment"
+        android:label="fragment_create_transaction"
+        tools:layout="@layout/fragment_create_transaction">
+        <argument android:name="REQUEST_URL"
+            app:argType="string" />
+    </fragment>
 </navigation>
