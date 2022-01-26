@@ -138,6 +138,23 @@ class SupplyViewSet(viewsets.ModelViewSet):
     queryset = Supply.objects.all()
     serializer_class = SupplySerializer
 
+    @action(detail=False, methods=['get'], name='Get Current Supplies',
+            permission_classes=[IsProfileUserOrReadOnly])
+    def current_supplies(self, request, pk=None):
+        user_donor = DonorProfile.objects.get(user=request.user)
+        supplies = Supply.objects.filter(donation__donor=user_donor)
+        serializer = SupplySerializer(supplies, many=True)
+        return Response(serializer.data)
+
+    @action(methods=['get'], detail=True, name='Available pax')
+    def available_pax(self, request, pk=None):
+        current_supply: Supply = self.get_object()
+        available_pax = current_supply.calculate_available_pax()
+        total_pax = current_supply.pax
+        return Response(
+            {'available': available_pax,
+             'total': total_pax, }, status=200, )
+
 
 class ItemTypeViewSet(viewsets.ModelViewSet):
     queryset = ItemType.objects.all()

@@ -13,6 +13,7 @@ from django.contrib.auth import get_user_model
 # Create your models here.
 # See management/commands/create_groups.py for list of groups
 # TODO: Finish models
+from django.db.models import Sum
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
@@ -148,6 +149,18 @@ class Supply(models.Model):
     transaction = models.ForeignKey(to="Transaction", on_delete=models.CASCADE, related_name='transaction_supply',
                                     null=True)
 
+    # Not in transaction
+    def calculate_available_pax(self):
+        supply_transactions = TransactionOrder.objects.filter(supply=self)
+        if supply_transactions is not None:
+            pax_in_transaction = supply_transactions.aggregate(Sum('pax')).get('pax__sum')
+            if pax_in_transaction is None:
+                return self.pax
+            available_supply_pax = self.pax - pax_in_transaction
+            return available_supply_pax
+        else:
+            return self.pax
+
     def is_ongoing(self) -> bool:
         """
         :return: True if the supply is included in a Transaction
@@ -161,8 +174,9 @@ class Supply(models.Model):
 # TODO: Check if good models
 
 class TransactionOrder(models.Model):
-    type = models.ForeignKey(ItemType, on_delete=models.CASCADE)
+    # type = models.ForeignKey(ItemType, on_delete=models.CASCADE)
     pax = models.IntegerField()
+    supply = models.ForeignKey(Supply, null=True, on_delete=models.CASCADE)
     transaction = models.ForeignKey(to="Transaction", on_delete=models.CASCADE)
 
 

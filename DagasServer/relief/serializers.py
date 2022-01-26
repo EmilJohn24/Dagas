@@ -152,11 +152,20 @@ class TransactionOrderSerializer(serializers.ModelSerializer):
         # transaction: BarangayRequest = serializer.data['transaction']
         supplies = Supply.objects.filter(donation__donor=current_donor)
         donor_transactions = Transaction.objects.filter(donor=current_donor)
-        item_type = data['type']
         item_pax = data['pax']
+        item_supply: Supply = data['supply']
+        item_type = item_supply.type
+
+        # Get all transactions with that supply
+        supply_transactions = TransactionOrder.objects.filter(supply=item_supply)
+        if supply_transactions is not None:
+            if item_pax > item_supply.calculate_available_pax():
+                raise serializers.ValidationError({
+                    "pax": item_supply.name + " has insufficient pax."}, )
+
         type_supplies = supplies.filter(type=item_type)
         all_orders = TransactionOrder.objects.filter(transaction__in=donor_transactions)
-        all_order_type_pax = all_orders.filter(type=item_type).aggregate(Sum('pax'))
+        all_order_type_pax = all_orders.filter(supply__type=item_type).aggregate(Sum('pax'))
         transaction_pax = all_order_type_pax.get('pax__sum')
         if transaction_pax is None:
             transaction_pax = 0
@@ -173,7 +182,7 @@ class TransactionOrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TransactionOrder
-        fields = ('id', 'type', 'pax', 'transaction')
+        fields = ('id', 'pax', 'supply', 'transaction')
 
 
 class TransactionSerializer(serializers.ModelSerializer):
