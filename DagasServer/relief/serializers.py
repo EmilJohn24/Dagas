@@ -18,7 +18,7 @@ class ItemTypeSerializer(serializers.ModelSerializer):
 class SupplySerializer(serializers.ModelSerializer):
     class Meta:
         model = Supply
-        fields = ('name', 'type', 'quantity', 'pax', 'donation',)
+        fields = ('id', 'name', 'type', 'quantity', 'pax', 'donation',)
 
 
 class DonationSerializer(serializers.ModelSerializer):
