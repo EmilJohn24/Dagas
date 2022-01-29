@@ -3,7 +3,7 @@ from django.utils.datetime_safe import datetime
 from rest_framework.response import Response
 from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
-from rest_framework.exceptions import ParseError
+from rest_framework.exceptions import ParseError, ValidationError
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
     BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder
@@ -104,6 +104,19 @@ class BarangayRequestViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(barangay=BarangayProfile.objects.get(user=self.request.user))
+
+    @action(methods=['get'], detail=True, name='Available pax')
+    def not_in_transaction(self, request, pk=None):
+        # if not request.query_params.get["type"]:
+        #     raise ValidationError(detail="Type parameter required")
+        item_type_id = int(request.query_params['type'])
+        item_type = ItemType.objects.get(id=item_type_id)
+        current_request: BarangayRequest = self.get_object()
+        untrans_pax = current_request.calculate_untransacted_pax(item_type)
+        total_pax = current_request.total_pax_of_type(item_type)
+        return Response(
+            {'not_in_transaction': untrans_pax,
+             'total': total_pax, }, status=200, )
 
 
 class DonationViewSet(viewsets.ModelViewSet):

@@ -233,6 +233,34 @@ class BarangayRequest(models.Model):
     def __str__(self):
         return self.barangay.user.username + " (" + str(self.id) + ")"
 
+    def total_pax_of_type(self, item_type: ItemType):
+        type_requests = ItemRequest.objects.filter(barangay_request=self)
+        type_requests = type_requests.filter(type=item_type)
+        pax_from_requests = 0
+        if type_requests is not None:
+            return type_requests.aggregate(Sum('pax')).get('pax__sum')
+        else:
+            return 0
+
+    def calculate_untransacted_pax(self, item_type: ItemType):
+        type_requests = ItemRequest.objects.filter(barangay_request=self)
+        type_requests = type_requests.filter(type=item_type)
+        transaction_orders = TransactionOrder.objects.filter(transaction__barangay_request=self)
+        transaction_orders = transaction_orders.filter(supply__type=item_type)
+        pax_from_requests = 0
+        if type_requests is not None:
+            pax_from_requests = type_requests.aggregate(Sum('pax')).get('pax__sum')
+        else:
+            return 0
+
+        if transaction_orders is not None:
+            pax_in_transaction = transaction_orders.aggregate(Sum('pax')).get('pax__sum')
+            if pax_in_transaction is None:
+                return pax_from_requests
+            return pax_from_requests - pax_in_transaction
+        else:
+            return pax_from_requests
+
     def within_expected_date(self):
         """
         :return: true if the current date precedes the expected date of the request,
