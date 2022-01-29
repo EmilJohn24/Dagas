@@ -10,8 +10,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
 
-import com.cnil.dagas.databinding.EvacuationcentervisualmapBinding;
 import com.cnil.dagas.databinding.FragmentCreateTransactionBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
 
@@ -20,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -39,6 +43,48 @@ public class CreateTransactionFragment extends Fragment {
 
     public CreateTransactionFragment() {
         // Required empty public constructor
+    }
+
+    public static class GetRequest extends Thread{
+        private final String requestURL;
+        private final ArrayList<Integer> itemTypeIds;
+        private final ArrayList<Integer> untransactedAmounts;
+
+        public ArrayList<Integer> getUntransactedAmounts() {
+            return untransactedAmounts;
+        }
+
+        public GetRequest(String requestURL, ArrayList<Integer> itemTypeIds) {
+            this.requestURL = requestURL;
+            this.itemTypeIds = itemTypeIds;
+            this.untransactedAmounts = new ArrayList<>();
+        }
+        public void run() {
+            try {
+                getRequest();
+            } catch (IOException | JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+        private void getRequest() throws IOException, JSONException{
+            OkHttpSingleton client = OkHttpSingleton.getInstance();
+//            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
+            Request request = client.builderFromBaseUrl(requestURL)
+                    .get()
+                    .build();
+            Response response = client.newCall(request).execute();
+            //TODO: Add success check
+            JSONObject requestJSONArray = new JSONObject(response.body().string());
+
+            for (Integer typeId : itemTypeIds){
+                Request typeRequest = client.builderFromBaseUrl(requestURL + "not_in_transaction/?type=" + typeId)
+                                    .get()
+                                    .build();
+                Response typeResponse = client.newCall(typeRequest).execute();
+                JSONObject typeResponseJson = new JSONObject(typeResponse.body().string());
+                untransactedAmounts.add(typeResponseJson.getInt("not_in_transaction"));
+            }
+        }
     }
     public static class GrabSupplies extends Thread {
         private static final String CURRENT_SUPPLIES_URL = "/relief/api/supplies/current_supplies/";
@@ -107,32 +153,7 @@ public class CreateTransactionFragment extends Fragment {
 
         }
     }
-//    /**
-//     * Use this factory method to create a new instance of
-//     * this fragment using the provided parameters.
-//     *
-//     * @param param1 Parameter 1.
-//     * @param param2 Parameter 2.
-//     * @return A new instance of fragment CreateTransactionFragment.
-//     */
-//    // TODO: Rename and change types and number of parameters
-//    public static CreateTransactionFragment newInstance(String param1, String param2) {
-//        CreateTransactionFragment fragment = new CreateTransactionFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
-//        fragment.setArguments(args);
-//        return fragment;
-//    }
-//
-//    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        if (getArguments() != null) {
-//            mParam1 = getArguments().getString(ARG_PARAM1);
-//            mParam2 = getArguments().getString(ARG_PARAM2);
-//        }
-//    }
+
     TransactionSupplyAdapter.TransactionSupplyCallback callback;
 
     FragmentCreateTransactionBinding binding;
@@ -145,6 +166,39 @@ public class CreateTransactionFragment extends Fragment {
         String requestURL = getArguments().getString("REQUEST_URL");
         View root = binding.getRoot();
         RecyclerView supplyRecycler = root.findViewById(R.id.transactionSupplyRecycler);
+
+        TableLayout transactionTable = root.findViewById(R.id.transactionTable);
+        ArrayList<TableRow> transactionRows = new ArrayList<>();
+        RetrieveItemTypesThread itemTypesThread = new RetrieveItemTypesThread();
+        GetRequest requestThread = null;
+        try {
+            itemTypesThread.start();
+            itemTypesThread.join();
+            requestThread = new GetRequest(requestURL, itemTypesThread.getTypeIds());
+            requestThread.start();
+            requestThread.join();
+        } catch (InterruptedException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        for (int i = 0; i != itemTypesThread.getTypeIds().size(); ++i){
+            String itemName = itemTypesThread.getName(i);
+            assert requestThread != null;
+            Integer untransactedAmount = requestThread.getUntransactedAmounts().get(i);
+            TableRow itemRow = new TableRow(this.getContext());
+            transactionRows.add(itemRow);
+            itemRow.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,
+                                                                TableRow.LayoutParams.WRAP_CONTENT));
+            TextView typeName = new TextView(this.getContext());
+            TextView untransactedAmountTextView = new TextView(this.getContext());
+            typeName.setText(itemName);
+            untransactedAmountTextView.setText(String.valueOf(untransactedAmount));
+            itemRow.addView(typeName);
+            itemRow.addView(untransactedAmountTextView);
+            transactionTable.addView(itemRow);
+        }
+
+
+
         callback = new TransactionSupplyAdapter.TransactionSupplyCallback() {
             @Override
             public void respond(int position, TransactionSupplyAdapter.TransactionSupply supply, int amount) {
