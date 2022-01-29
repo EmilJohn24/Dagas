@@ -10,7 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -24,9 +24,12 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 
@@ -144,7 +147,7 @@ public class CreateTransactionFragment extends Fragment {
 
                 adapter.add(new TransactionSupplyAdapter.TransactionSupply(
                                 itemName, itemTypeName,
-                                available, String.format(SUPPLY_URL, itemID))
+                                available, String.format(SUPPLY_URL, itemID), itemID)
                         );
 
             }
@@ -153,7 +156,73 @@ public class CreateTransactionFragment extends Fragment {
 
         }
     }
+    public static class CreateTransaction extends Thread{
+        private static final String TRANSACTION_ORDER_URL = "/relief/api/transaction-order/";
+        private static final String TRANSACTION_URL = "/relief/api/transactions/";
+        private Map<TransactionSupplyAdapter.TransactionSupply, TransactionSupplyAdapter.TransactionOrder> supplyOrderMap;
+        private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        private int requestID;
 
+        public CreateTransaction(int requestID, Map<TransactionSupplyAdapter.TransactionSupply, TransactionSupplyAdapter.TransactionOrder> supplyOrderMap) {
+            this.supplyOrderMap = supplyOrderMap;
+            this.requestID = requestID;
+        }
+
+        public void run() {
+            try {
+                addTransaction();
+            } catch (IOException | JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+        private void addTransaction() throws IOException, JSONException {
+            JSONObject createRequestJSON = new JSONObject();
+            try {
+//                createRequestJSON.put("name", supplyName);
+//                createRequestJSON.put("donor", "    ");
+                createRequestJSON.put("barangay_request", requestID);
+                // TODO: Check type + 1 (index)
+
+            } catch (JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
+            OkHttpSingleton client = OkHttpSingleton.getInstance();
+            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
+            Request request = client.builderFromBaseUrl(TRANSACTION_URL)
+                    .post(body)
+                    .build();
+            Response transactionResponse = client.newCall(request).execute();
+
+            JSONObject transactionJSON = new JSONObject(transactionResponse.body().string());
+            String transactionID = transactionJSON.getString("id");
+
+            for (Map.Entry<TransactionSupplyAdapter.TransactionSupply, TransactionSupplyAdapter.TransactionOrder> order :
+                    supplyOrderMap.entrySet()){
+                JSONObject addOrderRequestJSON = new JSONObject();
+                try {
+//                createRequestJSON.put("name", supplyName);
+                    addOrderRequestJSON.put("pax", order.getValue().getAmount());
+                    addOrderRequestJSON.put("supply", order.getValue().getSupply().getSupplyID());
+                    addOrderRequestJSON.put("transaction", transactionID);
+
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+
+                RequestBody addOrderRequestBody = RequestBody.create(addOrderRequestJSON.toString(), JSON);
+                Request transactionOrderRequest = client.builderFromBaseUrl(TRANSACTION_ORDER_URL)
+                        .post(addOrderRequestBody)
+                        .build();
+
+                Response transactionOrderResponse = client.newCall(transactionOrderRequest).execute();
+                JSONObject transactionOrderResponseJSON = new JSONObject(transactionOrderResponse.body().string());
+                int a = 5;
+            }
+
+
+            }
+
+    }
     TransactionSupplyAdapter.TransactionSupplyCallback callback;
 
     FragmentCreateTransactionBinding binding;
@@ -164,6 +233,7 @@ public class CreateTransactionFragment extends Fragment {
         binding = FragmentCreateTransactionBinding.inflate(inflater, container, false);
         assert getArguments() != null;
         String requestURL = getArguments().getString("REQUEST_URL");
+        int requestID = getArguments().getInt("REQUEST_ID");
         View root = binding.getRoot();
         RecyclerView supplyRecycler = root.findViewById(R.id.transactionSupplyRecycler);
 
@@ -198,13 +268,20 @@ public class CreateTransactionFragment extends Fragment {
         }
 
 
-
+        Map<TransactionSupplyAdapter.TransactionSupply, TransactionSupplyAdapter.TransactionOrder> supplyOrderMap = new HashMap<>();
         callback = new TransactionSupplyAdapter.TransactionSupplyCallback() {
             @Override
             public void respond(int position, TransactionSupplyAdapter.TransactionSupply supply, int amount) {
-                //TODO: add stuff
+                //TODO: add TransactionOrder if it does not exist yet
+                supplyOrderMap.put(supply, new TransactionSupplyAdapter.TransactionOrder(amount, supply));
+            }
+
+            @Override
+            public void removeRespond(TransactionSupplyAdapter.TransactionSupply supply) {
+                supplyOrderMap.remove(supply);
             }
         };
+
 
         TransactionSupplyAdapter adapter = new TransactionSupplyAdapter(callback);
         GrabSupplies thread = new GrabSupplies(adapter);
@@ -216,6 +293,25 @@ public class CreateTransactionFragment extends Fragment {
         }
         supplyRecycler.setAdapter(adapter);
         supplyRecycler.setLayoutManager(new LinearLayoutManager(root.getContext()));
+
+
+        Button transactionSubmit = root.findViewById(R.id.transactionSubmit);
+
+        transactionSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CreateTransaction createTransactionThread = new CreateTransaction(requestID, supplyOrderMap);
+                createTransactionThread.start();
+                try {
+                    createTransactionThread.join();
+                } catch (InterruptedException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+
+                //TODO: Bring to QR page
+
+            }
+        });
 
         return root;
     }

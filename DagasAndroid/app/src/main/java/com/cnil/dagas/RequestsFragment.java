@@ -80,7 +80,8 @@ public class RequestsFragment extends Fragment {
                 String evacCenterName = evacCenterJSON.getString("name");
 
                 this.adapter.add(new RequestsAdapter.BarangayRequest(barangayName, evacCenterName,
-                                        REQUESTS_URL + requestJSONObject.getInt("id") + "/"));
+                                        REQUESTS_URL + requestJSONObject.getInt("id") + "/",
+                                        requestJSONObject.getInt("id")));
 
             }
 

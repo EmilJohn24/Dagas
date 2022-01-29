@@ -1,7 +1,5 @@
 package com.cnil.dagas;
 
-import android.content.Context;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,18 +18,21 @@ public class TransactionSupplyAdapter extends RecyclerView.Adapter<TransactionSu
 
     public interface TransactionSupplyCallback{
         void respond(int position, TransactionSupply supply, int amount);
+        void removeRespond(TransactionSupply supply);
     }
 
     public static class TransactionSupply{
-        private String name;
-        private String type;
-        private int available;
-        private String supplyURL;
-        public TransactionSupply(String name, String type, int available, String supplyURL) {
+        private final String name;
+        private final String type;
+        private final int available;
+        private final String supplyURL;
+        private final int supplyID;
+        public TransactionSupply(String name, String type, int available, String supplyURL, int supplyID) {
             this.name = name;
             this.type = type;
             this.available = available;
             this.supplyURL = supplyURL;
+            this.supplyID = supplyID;
         }
 
         public String getName() {
@@ -45,17 +46,40 @@ public class TransactionSupplyAdapter extends RecyclerView.Adapter<TransactionSu
         public int getAvailablePax() {
             return available;
         }
+
+        public int getSupplyID() {
+            return supplyID;
+        }
+
+        public String getSupplyURL() {
+            return supplyURL;
+        }
     }
+    public static class TransactionOrder{
+        private final int amount;
+        private final TransactionSupply supply;
 
+        public TransactionOrder(int amount, TransactionSupply supply) {
+            this.amount = amount;
+            this.supply = supply;
+        }
 
-    private ArrayList<TransactionSupply> supplies;
-    private TransactionSupplyCallback callback;
+        public int getAmount() {
+            return amount;
+        }
+
+        public TransactionSupply getSupply() {
+            return supply;
+        }
+    }
+    private final ArrayList<TransactionSupply> supplies;
+    private final TransactionSupplyCallback callback;
     public TransactionSupplyAdapter(TransactionSupplyCallback callback){
         supplies = new ArrayList<>();
         this.callback = callback;
     }
 
-
+    public ArrayList<TransactionSupply> getSupplies(){ return supplies;}
 
     public void add(TransactionSupply supply){
         supplies.add(supply);
@@ -96,6 +120,8 @@ public class TransactionSupplyAdapter extends RecyclerView.Adapter<TransactionSu
                 if (checked){
                     callback.respond(currentPosition, supply,
                                 Integer.parseInt(donateAmount.getText().toString()));
+                } else{
+                    callback.removeRespond(supply);
                 }
             }
         });

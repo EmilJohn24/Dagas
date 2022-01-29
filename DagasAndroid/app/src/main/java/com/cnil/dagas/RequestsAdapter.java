@@ -16,14 +16,15 @@ import java.util.ArrayList;
 
 public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHolder>{
     public static class BarangayRequest{
-        private String barangayName;
-        private String evacuationCenterName;
-        private String acceptURL;
-
-        public BarangayRequest(String barangayName, String evacuationCenterName, String acceptURL) {
+        private final String barangayName;
+        private final String evacuationCenterName;
+        private final String acceptURL;
+        private final int id;
+        public BarangayRequest(String barangayName, String evacuationCenterName, String acceptURL, int id) {
             this.barangayName = barangayName;
             this.evacuationCenterName = evacuationCenterName;
             this.acceptURL = acceptURL;
+            this.id = id;
         }
 
         public String getEvacuationCenterName() {
@@ -36,6 +37,10 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
 
         public String getAcceptURL() {
             return acceptURL;
+        }
+
+        public int getId() {
+            return id;
         }
     }
     final private ArrayList<BarangayRequest> barangayRequests;
@@ -71,6 +76,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
                 // TODO: (Jan 26) move to next fragment (transaction)
                 Bundle bundle = new Bundle();
                 bundle.putString("REQUEST_URL", barangayRequest.getAcceptURL());
+                bundle.putInt("REQUEST_ID", barangayRequest.getId());
                 Navigation.findNavController(view).navigate(R.id.action_nav_view_requests_to_createTransactionFragment, bundle);
             }
         });
