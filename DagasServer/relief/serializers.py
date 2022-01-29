@@ -188,6 +188,7 @@ class TransactionOrderSerializer(serializers.ModelSerializer):
 class TransactionSerializer(serializers.ModelSerializer):
     # TODO: Validate for oversupply (check if all transactions > requested amount)
     donor = serializers.HyperlinkedRelatedField(
+        required=False,
         view_name='relief:donor_details',
         read_only=False,
         queryset=DonorProfile.objects.all(),
@@ -203,7 +204,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ('id', 'donor', 'transaction_image', 'qr_code', 'barangay_request', 'received', 'received_date')
-        read_only_fields = ('qr_code', 'received')
+        read_only_fields = ('qr_code', 'received', 'donor')
 
 
 # Based on: https://stackoverflow.com/questions/62291394/django-rest-auth-dj-rest-auth-custom-user-registration

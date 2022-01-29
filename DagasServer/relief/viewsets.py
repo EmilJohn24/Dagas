@@ -75,6 +75,9 @@ class TransactionViewSet(viewsets.ModelViewSet):
         new_image.transaction = transaction
         new_image.save()
 
+    def perform_create(self, serializer):
+        current_donor = DonorProfile.objects.get(user=self.request.user)
+        serializer.save(donor=current_donor)
     # Note: Based on total pool of donations
     # TODO: Consider checking for oversupply
     # def perform_create(self, serializer):
