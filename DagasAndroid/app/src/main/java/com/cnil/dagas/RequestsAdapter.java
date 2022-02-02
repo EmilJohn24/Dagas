@@ -73,7 +73,6 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: (Jan 26) move to next fragment (transaction)
                 Bundle bundle = new Bundle();
                 bundle.putString("REQUEST_URL", barangayRequest.getAcceptURL());
                 bundle.putInt("REQUEST_ID", barangayRequest.getId());

@@ -3,6 +3,7 @@ package com.cnil.dagas;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -159,15 +160,20 @@ public class CreateTransactionFragment extends Fragment {
     public static class CreateTransaction extends Thread{
         private static final String TRANSACTION_ORDER_URL = "/relief/api/transaction-order/";
         private static final String TRANSACTION_URL = "/relief/api/transactions/";
+        private static final String TRANSACTION_SPECIFIC_URL = "/relief/api/transactions/%s/";
         private Map<TransactionSupplyAdapter.TransactionSupply, TransactionSupplyAdapter.TransactionOrder> supplyOrderMap;
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         private int requestID;
+        private String transactionID;
+
 
         public CreateTransaction(int requestID, Map<TransactionSupplyAdapter.TransactionSupply, TransactionSupplyAdapter.TransactionOrder> supplyOrderMap) {
             this.supplyOrderMap = supplyOrderMap;
             this.requestID = requestID;
         }
-
+        public String getRecentTransactionURL(){
+            return String.format(TRANSACTION_SPECIFIC_URL, transactionID);
+        }
         public void run() {
             try {
                 addTransaction();
@@ -194,7 +200,7 @@ public class CreateTransactionFragment extends Fragment {
             Response transactionResponse = client.newCall(request).execute();
 
             JSONObject transactionJSON = new JSONObject(transactionResponse.body().string());
-            String transactionID = transactionJSON.getString("id");
+            transactionID = transactionJSON.getString("id");
 
             for (Map.Entry<TransactionSupplyAdapter.TransactionSupply, TransactionSupplyAdapter.TransactionOrder> order :
                     supplyOrderMap.entrySet()){
@@ -216,7 +222,6 @@ public class CreateTransactionFragment extends Fragment {
 
                 Response transactionOrderResponse = client.newCall(transactionOrderRequest).execute();
                 JSONObject transactionOrderResponseJSON = new JSONObject(transactionOrderResponse.body().string());
-                int a = 5;
             }
 
 
@@ -309,7 +314,9 @@ public class CreateTransactionFragment extends Fragment {
                 }
 
                 //TODO: Bring to QR page
-
+                Bundle bundle = new Bundle();
+                bundle.putString("TRANSACTION_URL", createTransactionThread.getRecentTransactionURL());
+                Navigation.findNavController(view).navigate(R.id.action_nav_create_transaction_to_transactionReceiptFragment2, bundle);
             }
         });
 

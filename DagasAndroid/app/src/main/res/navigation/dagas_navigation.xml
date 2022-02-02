@@ -42,5 +42,17 @@
         tools:layout="@layout/fragment_create_transaction">
         <argument android:name="REQUEST_URL"
             app:argType="string" />
+        <action
+            android:id="@+id/action_nav_create_transaction_to_transactionReceiptFragment2"
+            app:destination="@id/nav_transaction_receipt" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_transaction_receipt"
+        android:name="com.cnil.dagas.TransactionReceiptFragment"
+        android:label="fragment_transaction_receipt"
+        tools:layout="@layout/fragment_transaction_receipt">
+        <argument android:name="TRANSACTION_URL"
+            app:argType="string" />
+
     </fragment>
 </navigation>
