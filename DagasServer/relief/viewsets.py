@@ -75,6 +75,14 @@ class TransactionViewSet(viewsets.ModelViewSet):
         new_image.transaction = transaction
         new_image.save()
 
+    @action(detail=True, methods=['get'], name='Get Evacuation',
+            permission_classes=[IsProfileUserOrReadOnly])
+    def evacuation_center(self, request, pk=None):
+        current_transaction:Transaction = self.get_object()
+        barangay_request : BarangayRequest = current_transaction.barangay_request
+        serializer = EvacuationCenterSerializer(barangay_request.evacuation_center)
+        return Response(serializer.data)
+
     def perform_create(self, serializer):
         current_donor = DonorProfile.objects.get(user=self.request.user)
         serializer.save(donor=current_donor)
