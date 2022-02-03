@@ -55,4 +55,9 @@
             app:argType="string" />
 
     </fragment>
+    <fragment
+        android:id="@+id/nav_view_supplies"
+        android:name="com.cnil.dagas.ViewSuppliesFragment"
+        android:label="fragment_view_supplies"
+        tools:layout="@layout/fragment_view_supplies" />
 </navigation>
