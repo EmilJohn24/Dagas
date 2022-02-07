@@ -122,6 +122,42 @@ public class BarangayRequestFragment extends Fragment {
                     Log.e(TAG, e.getMessage());
                 }
             }
+
+            if (this.waterChecked){
+                JSONObject waterRequestJSON = new JSONObject();
+                try {
+                    //TODO: Add date created
+                    waterRequestJSON.put("type", 2);
+                    waterRequestJSON.put("pax", this.waterAmount);
+                    waterRequestJSON.put("barangay_request", barangayRequestID);
+                    RequestBody waterRequestBody = RequestBody.create(waterRequestJSON.toString(), JSON);
+                    Request waterRequest = client.builderFromBaseUrl(ADD_ITEM_URL)
+                            .post(waterRequestBody).build();
+                    Response waterResponse = client.newCall(waterRequest).execute();
+
+
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+
+            if (this.clothesChecked){
+                JSONObject clothesRequestJSON = new JSONObject();
+                try {
+                    //TODO: Add date created
+                    clothesRequestJSON.put("type", 3);
+                    clothesRequestJSON.put("pax", this.clothesAmount);
+                    clothesRequestJSON.put("barangay_request", barangayRequestID);
+                    RequestBody clothesRequestBody = RequestBody.create(clothesRequestJSON.toString(), JSON);
+                    Request clothesRequest = client.builderFromBaseUrl(ADD_ITEM_URL)
+                            .post(clothesRequestBody).build();
+                    Response clothesResponse = client.newCall(clothesRequest).execute();
+
+
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
             return responseJSON;
         }
     }
@@ -136,6 +172,11 @@ public class BarangayRequestFragment extends Fragment {
         //TODO: Modify hardcoded parts
         EditText foodAmountEdit = root.findViewById(R.id.foodNumber);
         CheckBox foodCheckbox = root.findViewById(R.id.foodCheck);
+        EditText waterAmountEdit = root.findViewById(R.id.waterNumber);
+        CheckBox waterCheckbox = root.findViewById(R.id.waterCheck);
+        EditText clothesAmountEdit = root.findViewById(R.id.clothesNumber);
+        CheckBox clothesCheckbox = root.findViewById(R.id.clothesCheck);
+
         Button submitButton = root.findViewById(R.id.submitButton);
         Spinner evacSpinner = root.findViewById(R.id.evacSpinner);
 
@@ -165,12 +206,19 @@ public class BarangayRequestFragment extends Fragment {
             public void onClick(View view) {
                 int foodAmount =Integer.parseInt(foodAmountEdit.getText().toString());
                 boolean foodChecked = foodCheckbox.isChecked();
+
+                int waterAmount = Integer.parseInt(waterAmountEdit.getText().toString());
+                boolean waterChecked = waterCheckbox.isChecked();
+
+                int clothesAmount = Integer.parseInt(clothesAmountEdit.getText().toString());
+                boolean clothesChecked = clothesCheckbox.isChecked();
+
                 //TODO: Link water and clothes amount
                 AddBarangayRequestThread thread = null;
                 try {
                     thread = new AddBarangayRequestThread(foodAmount, foodChecked,
-                            0, false,
-                            0, false,
+                            waterAmount, waterChecked,
+                            clothesAmount, clothesChecked,
                             centers.get(evacSpinner.getSelectedItemPosition()).getInt("id"));
                 } catch (JSONException e) {
                     Log.e(TAG, e.getMessage());

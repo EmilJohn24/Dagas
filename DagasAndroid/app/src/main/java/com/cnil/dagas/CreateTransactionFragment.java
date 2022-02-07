@@ -86,7 +86,7 @@ public class CreateTransactionFragment extends Fragment {
                                     .build();
                 Response typeResponse = client.newCall(typeRequest).execute();
                 JSONObject typeResponseJson = new JSONObject(typeResponse.body().string());
-                untransactedAmounts.add(typeResponseJson.getInt("not_in_transaction"));
+                untransactedAmounts.add(typeResponseJson.optInt("not_in_transaction", 0));
             }
         }
     }
@@ -289,6 +289,8 @@ public class CreateTransactionFragment extends Fragment {
 
 
         TransactionSupplyAdapter adapter = new TransactionSupplyAdapter(callback);
+        supplyRecycler.setAdapter(adapter);
+        supplyRecycler.setLayoutManager(new LinearLayoutManager(root.getContext()));
         GrabSupplies thread = new GrabSupplies(adapter);
         thread.start();
         try {
@@ -296,8 +298,8 @@ public class CreateTransactionFragment extends Fragment {
         } catch (InterruptedException e) {
             Log.e(TAG, e.getMessage());
         }
-        supplyRecycler.setAdapter(adapter);
-        supplyRecycler.setLayoutManager(new LinearLayoutManager(root.getContext()));
+
+
 
 
         Button transactionSubmit = root.findViewById(R.id.transactionSubmit);
