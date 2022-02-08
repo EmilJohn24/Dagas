@@ -1,9 +1,14 @@
 package com.cnil.dagas;
 
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -15,12 +20,15 @@ import android.widget.TextView;
 
 import com.cnil.dagas.databinding.FragmentTransactionReceiptBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
@@ -28,6 +36,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.concurrent.Executor;
 
 import okhttp3.Request;
 import okhttp3.Response;
@@ -89,6 +98,7 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
 
     private MapView evacuationCenterMapView;
     private GoogleMap map;
+    private FusedLocationProviderClient locationClient;
     FragmentTransactionReceiptBinding binding;
 
 
@@ -134,6 +144,20 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
                             .position(evacLatLng)
                             .title(name));
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(evacLatLng, 20));
+            locationClient.getLastLocation()
+                    .addOnSuccessListener(this.getActivity(), new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if (location != null) {
+                                //TODO: Do location stuff
+                                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                                map.addMarker(new MarkerOptions()
+                                        .position(userLocation)
+                                        .title("Your location"));
+                            }
+                        }
+                    });
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -154,5 +178,11 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
         // Inflate the layout for this fragment
         binding = FragmentTransactionReceiptBinding.inflate(inflater, container, false);
         return binding.getRoot();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        locationClient = LocationServices.getFusedLocationProviderClient(this.getActivity());
     }
 }

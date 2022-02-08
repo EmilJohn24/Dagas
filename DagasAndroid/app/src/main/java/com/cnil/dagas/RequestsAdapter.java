@@ -18,12 +18,14 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
     public static class BarangayRequest{
         private final String barangayName;
         private final String evacuationCenterName;
+        private final double evacuationCenterDistance;
         private final String acceptURL;
         private final int id;
-        public BarangayRequest(String barangayName, String evacuationCenterName, String acceptURL, int id) {
+        public BarangayRequest(String barangayName, String evacuationCenterName, double evacuationCenterDistance, String acceptURL, int id) {
             this.barangayName = barangayName;
             this.evacuationCenterName = evacuationCenterName;
             this.acceptURL = acceptURL;
+            this.evacuationCenterDistance = evacuationCenterDistance;
             this.id = id;
         }
 
@@ -41,6 +43,10 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
 
         public int getId() {
             return id;
+        }
+
+        public double getEvacuationCenterDistance() {
+            return evacuationCenterDistance;
         }
     }
     final private ArrayList<BarangayRequest> barangayRequests;
@@ -65,11 +71,13 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         CardView requestCard = holder.getRequestCard();
         final TextView barangayNameTextView = requestCard.findViewById(R.id.barangayNameTextView);
         final TextView evacuationCenterNameTextView = requestCard.findViewById(R.id.evacuationCenterNameTextView);
-        final TextView requestListTextView = requestCard.findViewById(R.id.requestListTextView);
+        final TextView distanceTextView = requestCard.findViewById(R.id.requestListTextView);
         final Button acceptButton = requestCard.findViewById(R.id.acceptButton);
         final BarangayRequest barangayRequest = barangayRequests.get(position);
         barangayNameTextView.setText(barangayRequest.getBarangayName());
         evacuationCenterNameTextView.setText(barangayRequest.getEvacuationCenterName());
+//        requestListTextView.setText()
+        distanceTextView.setText(String.valueOf(Math.round(barangayRequest.getEvacuationCenterDistance() / 1000)) + " km away");
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

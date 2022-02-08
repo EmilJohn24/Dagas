@@ -1,7 +1,10 @@
 package com.cnil.dagas;
 
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,6 +16,11 @@ import android.view.ViewGroup;
 
 import com.cnil.dagas.databinding.FragmentRequestsBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,11 +45,14 @@ public class RequestsFragment extends Fragment {
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
 
+
         private RequestsAdapter adapter;
+        private Location userLocation;
         private JSONObject donationAddResponse;
 
-        public GrabRequests(RequestsAdapter adapter) {
+        public GrabRequests(RequestsAdapter adapter, Location userLocation) {
             this.adapter = adapter;
+            this.userLocation = userLocation;
         }
 
 
@@ -78,9 +89,16 @@ public class RequestsFragment extends Fragment {
                 Response evacuationCenterResponse = client.newCall(evacuationCenterRequest).execute();
                 JSONObject evacCenterJSON = new JSONObject(evacuationCenterResponse.body().string());
                 String evacCenterName = evacCenterJSON.getString("name");
-
+                String coord = evacCenterJSON.getString("geolocation");
+                String[] splitCoord = coord.split(",");
+                double latitude = Float.parseFloat(splitCoord[0]);
+                double longtitude = Float.parseFloat(splitCoord[1]);
+                Location evacLocation = new Location(LocationManager.GPS_PROVIDER);
+                evacLocation.setLatitude(latitude);
+                evacLocation.setLongitude(longtitude);
+                double evacuationCenterDistance = userLocation.distanceTo(evacLocation);
                 this.adapter.add(new RequestsAdapter.BarangayRequest(barangayName, evacCenterName,
-                                        REQUESTS_URL + requestJSONObject.getInt("id") + "/",
+                                        evacuationCenterDistance, REQUESTS_URL + requestJSONObject.getInt("id") + "/",
                                         requestJSONObject.getInt("id")));
 
             }
@@ -91,6 +109,7 @@ public class RequestsFragment extends Fragment {
     }
 
     FragmentRequestsBinding binding;
+    private FusedLocationProviderClient locationClient;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -99,17 +118,34 @@ public class RequestsFragment extends Fragment {
         View root = binding.getRoot();
         RecyclerView requestRecyclerView = root.findViewById(R.id.requestRecycler);
         RequestsAdapter adapter = new RequestsAdapter();
-        GrabRequests thread = new GrabRequests(adapter);
-        thread.start();
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            Log.e(TAG, e.getMessage());
-        }
-        requestRecyclerView.setAdapter(adapter);
-        requestRecyclerView.setLayoutManager(new LinearLayoutManager(root.getContext()));
+        locationClient.getLastLocation()
+                .addOnSuccessListener(this.getActivity(), new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            //TODO: Do location stuff
+                            GrabRequests thread = new GrabRequests(adapter, location);
+                            thread.start();
+                            try {
+                                thread.join();
+                                requestRecyclerView.setAdapter(adapter);
+                                requestRecyclerView.setLayoutManager(new LinearLayoutManager(root.getContext()));
+                            } catch (InterruptedException e) {
+                                Log.e(TAG, e.getMessage());
+                            }
+                        }
+                    }
+                });
+
+
 
 
         return root;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        locationClient = LocationServices.getFusedLocationProviderClient(this.getActivity());
     }
 }
