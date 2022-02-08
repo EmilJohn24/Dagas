@@ -35,6 +35,10 @@
             android:id="@+id/nav_view_supplies"
             android:icon="@drawable/ic_launcher_background"
             android:title="View Supplies" />
+        <item
+            android:id="@+id/nav_upload_id"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="Verify Account"/>
 
 
 

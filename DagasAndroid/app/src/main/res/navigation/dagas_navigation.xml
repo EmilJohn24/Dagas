@@ -60,4 +60,9 @@
         android:name="com.cnil.dagas.ViewSuppliesFragment"
         android:label="fragment_view_supplies"
         tools:layout="@layout/fragment_view_supplies" />
+    <fragment
+        android:id="@+id/nav_upload_id"
+        android:name="com.cnil.dagas.UploadIdFragment"
+        android:label="fragment_upload_id"
+        tools:layout="@layout/fragment_upload_id" />
 </navigation>
