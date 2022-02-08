@@ -13,6 +13,10 @@ public class OkHttpSingleton extends OkHttpClient {
     public void setCredentials(String username, String password){
         this.credentials = Credentials.basic(username, password);
     }
+
+    public void logout(){
+        this.credentials = null;
+    }
     private static class LazyHolder{
         private static final OkHttpSingleton client = new OkHttpSingleton();
     }

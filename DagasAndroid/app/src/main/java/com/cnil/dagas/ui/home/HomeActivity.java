@@ -1,10 +1,14 @@
 package com.cnil.dagas.ui.home;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
@@ -14,7 +18,9 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.cnil.dagas.R;
 import com.cnil.dagas.data.CurrentUserThread;
+import com.cnil.dagas.data.ResidentRegisterActivity;
 import com.cnil.dagas.databinding.ActivityHomeBinding;
+import com.cnil.dagas.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
 
 import org.json.JSONException;
@@ -81,6 +87,22 @@ public class HomeActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.home, menu);
         return true;
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_logout:
+                Intent loginRedirect = new Intent(HomeActivity.this, LoginActivity.class);
+                startActivity(loginRedirect);
+                return true;
+            case R.id.action_settings:
+                //TODO: Navigate to settings
+                return super.onOptionsItemSelected(item);
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
