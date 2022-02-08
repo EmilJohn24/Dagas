@@ -56,6 +56,7 @@ class ResidentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResidentProfile
         fields = ('id', 'user', 'gov_id')
+        read_only_fields = ('user','owner',)
 
 
 class DonorSerializer(serializers.ModelSerializer):

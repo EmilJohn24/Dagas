@@ -31,8 +31,8 @@ class ResidentViewSet(viewsets.ModelViewSet):
     serializer_class = ResidentSerializer
 
     # Can also be applied to views
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+    # def perform_create(self, serializer):
+    #     serializer.save(owner=self.request.user)
 
     # def post(self, request, *args, **kwargs):
     #     file = request.data['file']
@@ -40,9 +40,10 @@ class ResidentViewSet(viewsets.ModelViewSet):
     #     profile.gov_id = file
     #     profile.save()
 
-    @action(detail=True, methods=['patch', 'put'], name='Upload ID', permission_classes=[IsProfileUserOrReadOnly])
+    # permission_classes=[IsProfileUserOrReadOnly]
+    @action(detail=False, methods=['put', 'patch'], name='Upload ID')
     def upload_id(self, request, pk=None):
-        profile: ResidentProfile = self.get_object()
+        profile: ResidentProfile = ResidentProfile.objects.get(user=request.user)
         profile.gov_id = list(request.FILES.values())[0]  # Get first file
         profile.save()
         return Response({'status': 'File uploaded'})
@@ -53,8 +54,8 @@ class BarangayViewSet(viewsets.ModelViewSet):
     serializer_class = BarangaySerializer
 
     # Can also be applied to views
-    def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+    # def perform_create(self, serializer):
+    #     serializer.save(owner=self.request.user)
 
 
 class TransactionOrderViewSet(viewsets.ModelViewSet):
