@@ -116,6 +116,7 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
             Picasso.with(getContext()).load(qrURL)
                     .into(qrCodeImageView);
             referenceNumberTextView.setText(thread.getTransactionJSON().getString("id"));
+            donorNameTextView.setText(thread.getTransactionJSON().getString("donor_name"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
