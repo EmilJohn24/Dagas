@@ -23,15 +23,50 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.cnil.dagas.databinding.FragmentUploadIdBinding;
+import com.cnil.dagas.http.OkHttpSingleton;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 
 public class UploadIdFragment extends Fragment {
+    private static final String UPLOAD_ID_URL = "/relief/api/users/residents/r/upload_id/";
+    static class UploadId extends Thread{
+        private File idImage;
+        public UploadId(File idImage){
+            this.idImage = idImage;
+        }
 
+        public void run(){
+            try {
+                upload();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        private void upload() throws IOException {
+            RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart("file", idImage.getName(),
+                            RequestBody.create(idImage, MediaType.parse("image/*")))
+                    .addFormDataPart("some-field", "some-value")
+                    .build();
+            OkHttpSingleton client = OkHttpSingleton.getInstance();
+            Request request = client.builderFromBaseUrl(UPLOAD_ID_URL)
+                    .put(requestBody)
+                    .build();
+            Response response = client.newCall(request).execute();
+        }
+    }
     private static final int REQUEST_IMAGE_CAPTURE = 1 ;
     FragmentUploadIdBinding binding;
 
@@ -88,6 +123,7 @@ public class UploadIdFragment extends Fragment {
        binding = FragmentUploadIdBinding.inflate(inflater, container, false);
        View root = binding.getRoot();
        Button takePictureButton = root.findViewById(R.id.takePictureButton);
+       Button uploadButton = root.findViewById(R.id.uploadButton);
        ImageView idImageView = root.findViewById(R.id.idPicture);
        File photoFile = null;
        try {
@@ -117,6 +153,14 @@ public class UploadIdFragment extends Fragment {
 
             }
        });
+
+        uploadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                UploadId thread = new UploadId(finalPhotoFile);
+                thread.start();
+            }
+        });
        return root;
     }
 }
