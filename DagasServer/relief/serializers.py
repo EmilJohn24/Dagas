@@ -180,9 +180,11 @@ class TransactionOrderSerializer(serializers.ModelSerializer):
                     "pax": item_type.name + " not enough."}, )
         return data
 
+    supply_info = SupplySerializer(source='supply', many=False, read_only=True, )
+
     class Meta:
         model = TransactionOrder
-        fields = ('id', 'pax', 'supply', 'transaction')
+        fields = ('id', 'pax', 'supply', 'supply_info', 'transaction',)
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -193,6 +195,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         read_only=False,
         queryset=DonorProfile.objects.all(),
     )
+    donor_name = serializers.StringRelatedField(source='donor', many=False, read_only=True, )
     # barangay_request = serializers.HyperlinkedRelatedField(
     #     view_name='relief:barangay_request-detail',
     #     read_only=False,
@@ -200,11 +203,15 @@ class TransactionSerializer(serializers.ModelSerializer):
     # )
     transaction_image = TransactionImageSerializer(many=True, read_only=True)
     received_date = serializers.StringRelatedField(many=False)
+    transaction_orders = TransactionOrderSerializer(source='transactionorder_set',
+                                                    read_only=True, many=True, )
 
     class Meta:
         model = Transaction
-        fields = ('id', 'donor', 'transaction_image', 'qr_code', 'barangay_request', 'received', 'received_date')
-        read_only_fields = ('qr_code', 'received', 'donor')
+        fields = ('id', 'donor', 'donor_name',
+                  'transaction_image', 'qr_code', 'transaction_orders',
+                  'barangay_request', 'received', 'received_date')
+        read_only_fields = ('qr_code', 'received', 'donor',)
 
 
 # Based on: https://stackoverflow.com/questions/62291394/django-rest-auth-dj-rest-auth-custom-user-registration
