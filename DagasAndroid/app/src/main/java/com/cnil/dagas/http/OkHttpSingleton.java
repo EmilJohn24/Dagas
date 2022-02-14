@@ -25,6 +25,9 @@ public class OkHttpSingleton extends OkHttpClient {
         return LazyHolder.client;
     }
 
+    public Request.Builder builderFromBaseUrlAnon(String subURL){
+        return new Request.Builder().url(BASE_URL + subURL);
+    }
     public Request.Builder builderFromBaseUrl(String subURL){
         return new Request.Builder().url(BASE_URL + subURL).header("Authorization", credentials);
     }

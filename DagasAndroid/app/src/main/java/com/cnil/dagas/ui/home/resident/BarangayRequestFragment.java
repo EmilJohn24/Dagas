@@ -3,6 +3,7 @@ package com.cnil.dagas.ui.home.resident;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -227,6 +228,8 @@ public class BarangayRequestFragment extends Fragment {
                 thread.start();
                 try {
                     thread.join();
+                    Navigation.findNavController(view).navigate(R.id.action_nav_barangay_request_to_nav_view_requests);
+
                 } catch (InterruptedException e) {
                     Log.e(TAG, e.getMessage());
                 }

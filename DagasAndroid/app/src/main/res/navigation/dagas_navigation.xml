@@ -20,7 +20,11 @@
         android:id="@+id/nav_barangay_request"
         android:name="com.cnil.dagas.ui.home.resident.BarangayRequestFragment"
         android:label="Barangay Request"
-        tools:layout="@layout/fragment_barangay_request" />
+        tools:layout="@layout/fragment_barangay_request" >
+        <action
+            android:id="@+id/action_nav_barangay_request_to_nav_view_requests"
+            app:destination="@id/nav_view_requests" />
+    </fragment>
     <fragment
         android:id="@+id/nav_donor_add_supply"
         android:name="com.cnil.dagas.DonorAddSupply"
