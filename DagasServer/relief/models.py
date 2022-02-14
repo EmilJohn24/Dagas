@@ -121,6 +121,9 @@ class EvacuationCenter(models.Model):
     address = map_fields.AddressField(max_length=200, null=True)
     geolocation = map_fields.GeoLocationField(max_length=100, null=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Donation(models.Model):
     donor = models.ForeignKey(DonorProfile,

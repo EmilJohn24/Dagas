@@ -206,10 +206,12 @@ class TransactionSerializer(serializers.ModelSerializer):
     received_date = serializers.StringRelatedField(many=False)
     transaction_orders = TransactionOrderSerializer(source='transactionorder_set',
                                                     read_only=True, many=True, )
-
+    barangay_name = serializers.StringRelatedField(source='barangay_request.barangay', many=False, read_only=True, )
+    evac_center_name = serializers.StringRelatedField(source='barangay_request.evacuation_center',
+                                                      many=False, read_only=True,)
     class Meta:
         model = Transaction
-        fields = ('id', 'donor', 'donor_name',
+        fields = ('id', 'donor', 'donor_name', 'barangay_name', 'evac_center_name',
                   'transaction_image', 'qr_code', 'transaction_orders',
                   'barangay_request', 'received', 'received_date')
         read_only_fields = ('qr_code', 'received', 'donor',)
