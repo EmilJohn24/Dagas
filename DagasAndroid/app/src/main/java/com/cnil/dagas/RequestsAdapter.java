@@ -69,6 +69,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull RequestsAdapter.ViewHolder holder, int position) {
         CardView requestCard = holder.getRequestCard();
+        //TODO: Move views to ViewHolder in the future
         final TextView barangayNameTextView = requestCard.findViewById(R.id.barangayNameTextView);
         final TextView evacuationCenterNameTextView = requestCard.findViewById(R.id.evacuationCenterNameTextView);
         final TextView distanceTextView = requestCard.findViewById(R.id.requestListTextView);

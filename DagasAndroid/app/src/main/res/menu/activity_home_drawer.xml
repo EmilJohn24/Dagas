@@ -39,7 +39,10 @@
             android:id="@+id/nav_upload_id"
             android:icon="@drawable/ic_launcher_background"
             android:title="Verify Account"/>
-
+        <item
+            android:id="@+id/nav_transactions"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="View Previous Transactions"/>
 
 
     </group>

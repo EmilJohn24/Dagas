@@ -65,4 +65,13 @@
         android:name="com.cnil.dagas.UploadIdFragment"
         android:label="fragment_upload_id"
         tools:layout="@layout/fragment_upload_id" />
+    <fragment
+        android:id="@+id/nav_transactions"
+        android:name="com.cnil.dagas.TransactionsFragment"
+        android:label="fragment_transaction"
+        tools:layout="@layout/fragment_transaction" >
+        <action
+            android:id="@+id/action_transactionsFragment_to_nav_transaction_receipt"
+            app:destination="@id/nav_transaction_receipt" />
+    </fragment>
 </navigation>
