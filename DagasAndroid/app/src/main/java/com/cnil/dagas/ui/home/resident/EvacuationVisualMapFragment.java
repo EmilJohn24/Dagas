@@ -28,6 +28,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -40,6 +41,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -205,6 +207,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
         View root = binding.getRoot();
         mapView = root.findViewById(R.id.mapView);
         Spinner evacCenterSpinner = root.findViewById(R.id.evacCenterSpinner);
+        EditText addressSearchBar = root.findViewById(R.id.addressSearchBar);
         GrabEvacsThread thread = new GrabEvacsThread();
         thread.start();
         try {
@@ -276,6 +279,38 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
 //        map.addMarker(new MarkerOptions().)
         EditText editTextEvacName = root.findViewById(R.id.editTextEvacName);
         FloatingActionButton addEvacButton = root.findViewById(R.id.addEvacButton);
+        addressSearchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionID, KeyEvent keyEvent) {
+                if (actionID == EditorInfo.IME_ACTION_DONE) {
+                    String address = addressSearchBar.getText().toString();
+                    // Based on: https://stackoverflow.com/questions/17160508/how-to-search-address-by-name-on-google-map-android
+                    Geocoder geoCoder = new Geocoder(EvacuationVisualMapFragment.this.getContext(), Locale.getDefault());
+                    try {
+                        List<Address> addresses = geoCoder.getFromLocationName(address, 5);
+                        if (addresses.size() > 0) {
+                            Double lat = (double) (addresses.get(0).getLatitude());
+                            Double lon = (double) (addresses.get(0).getLongitude());
+
+                            Log.d("lat-long", "" + lat + "......." + lon);
+                            final LatLng user = new LatLng(lat, lon);
+                            Marker marker = map.addMarker(new MarkerOptions()
+                                    .position(user)
+                                    .title(address));
+                            // Move the camera instantly to hamburg with a zoom of 15.
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(user, 15));
+
+                            // Zoom in, animating the camera.
+                            map.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
         editTextEvacName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int actionID, KeyEvent keyEvent) {
