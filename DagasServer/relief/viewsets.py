@@ -36,11 +36,12 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             return Response(profile_serializer.data)
         if user.role == user.DONOR:
             profile_serializer = DonorSerializer(DonorProfile.objects.get(user=user),
-                                                 context={'request': request},)
+                                                 context={'request': request}, )
             return Response(profile_serializer.data)
         else:
             raise ValidationError(detail="Invalid request")
         # TODO: Add admin
+
 
 class ResidentViewSet(viewsets.ModelViewSet):
     queryset = ResidentProfile.objects.all()
@@ -83,6 +84,28 @@ class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
 
+    @action(detail=True, methods=['patch', 'put'], name='Quick Update status',
+            permission_classes=[IsProfileUserOrReadOnly])
+    def quick_update_status(self, request, pk=None):
+        user = request.user
+        transaction: Transaction = self.get_object()
+        if user.role == User.BARANGAY:
+            if transaction.received == Transaction.INCOMING:
+                transaction.received = Transaction.RECEIVED
+            elif transaction.received == Transaction.PACKAGING:
+                raise ValidationError(detail="Order still being packaged")
+            elif transaction.received == Transaction.RECEIVED:
+                raise ValidationError(detail="Already received.")
+        elif user.role == User.DONOR:
+            if transaction.received == Transaction.INCOMING:
+                raise ValidationError(detail="Already declared incoming")
+            elif transaction.received == Transaction.PACKAGING:
+                transaction.received = Transaction.INCOMING
+            elif transaction.received == Transaction.RECEIVED:
+                raise ValidationError(detail="Already received.")
+        transaction.save()
+        return Response({"status": "Successful update"}, status=status.HTTP_200_OK)
+
     @action(detail=True, methods=['patch', 'put'], name='Upload Transaction Picture',
             permission_classes=[IsProfileUserOrReadOnly])
     def upload_image(self, request, pk=None):
@@ -102,7 +125,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         current_donor = DonorProfile.objects.get(user=self.request.user)
-        serializer.save(donor=current_donor)
+        serializer.save(donor=current_donor, received=Transaction.PACKAGING,)
     # Note: Based on total pool of donations
     # TODO: Consider checking for oversupply
     # def perform_create(self, serializer):
