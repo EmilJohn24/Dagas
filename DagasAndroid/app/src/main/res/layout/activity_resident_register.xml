@@ -93,7 +93,33 @@
         android:text="@string/register_button_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/donorCheckBox" />
+
+    <Spinner
+        android:id="@+id/barangaySpinner"
+        android:layout_width="98dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@+id/residentCheckBox"
+        app:layout_constraintStart_toStartOf="@+id/residentCheckBox"
+        app:layout_constraintTop_toBottomOf="@+id/residentCheckBox" />
+
+    <CheckBox
+        android:id="@+id/residentCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Resident"
+        app:layout_constraintEnd_toEndOf="@+id/lastNameTxt"
+        app:layout_constraintStart_toStartOf="@+id/lastNameTxt"
         app:layout_constraintTop_toBottomOf="@+id/lastNameTxt" />
+
+    <CheckBox
+        android:id="@+id/donorCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Donor"
+        app:layout_constraintEnd_toEndOf="@+id/lastNameTxt"
+        app:layout_constraintStart_toStartOf="@+id/lastNameTxt"
+        app:layout_constraintTop_toBottomOf="@+id/barangaySpinner" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

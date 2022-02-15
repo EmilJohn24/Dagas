@@ -4,9 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.cnil.dagas.R;
@@ -19,7 +23,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttp;
@@ -31,7 +38,57 @@ public class ResidentRegisterActivity extends AppCompatActivity {
     private Button registerButton;
     private ActivityResidentRegisterBinding binding;
     private Response response;
+    private static final String TAG = ResidentRegisterActivity.class.getName();
+    public static class GrabBarangays extends Thread {
+        private static final String BARANGAY_URL = "/relief/api/users/barangays/";
+        private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
+
+        private final ArrayList<String> barangayNames;
+        private final Map<String, Integer> barangayIds;
+        private JSONObject donationAddResponse;
+
+        public GrabBarangays() {
+
+            barangayNames = new ArrayList<>();
+            barangayIds = new HashMap<>();
+        }
+
+
+
+        public void run() {
+            try {
+                grabBarangays();
+            } catch (IOException | JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+        private void grabBarangays() throws IOException, JSONException {
+            OkHttpSingleton client = OkHttpSingleton.getInstance();
+//            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
+            Request request = client.builderFromBaseUrlAnon(BARANGAY_URL)
+                    .get()
+                    .build();
+            Response response = client.newCall(request).execute();
+            //TODO: Add success check
+            JSONArray barangayJSONArray = new JSONArray(response.body().string());
+            for (int i = 0; i < barangayJSONArray.length(); i++) {
+                JSONObject barangayJSONObject = barangayJSONArray.getJSONObject(i);
+                this.barangayNames.add(barangayJSONObject.getString("user"));
+                this.barangayIds.put(barangayJSONObject.getString("user"), barangayJSONObject.getInt("id"));
+            }
+
+            //TODO: Check for errors
+
+        }
+        public ArrayList<String> getBarangayNames() {
+            return barangayNames;
+        }
+
+        public Map<String, Integer> getBarangayIds() {
+            return barangayIds;
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,15 +102,33 @@ public class ResidentRegisterActivity extends AppCompatActivity {
         final EditText confirmPasswordTxt = binding.confirmPasswordTxt;
         final EditText firstNameTxt = binding.firstNameTxt;
         final EditText lastNameTxt = binding.lastNameTxt;
+        final Spinner barangaySpinner = binding.barangaySpinner;
+        final CheckBox residentCheckBox = binding.residentCheckBox;
+        final CheckBox donorCheckBox = binding.donorCheckBox;
+        GrabBarangays thread = new GrabBarangays();
+        thread.start();
+        try {
+            thread.join();
+            ArrayAdapter<String> barangayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
+                                                    thread.getBarangayNames());
+            barangaySpinner.setAdapter(barangayAdapter);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Thread registerThread = new Thread(new Runnable() {
                     private final String REGISTER_URL = "/api/rest-auth/registration";
+                    private final String CURRENT_USER_URL = "/relief/api/users/current_user_profile/";
+                    private final String USER_DETAIL_URL = "/relief/api/users/%d/";
+                    private final String RESIDENT_DETAIL_URL = "/relief/api/users/residents/r/%d/";
                     private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
                     @Override
                     public void run() {
                         JSONObject registerJSON = new JSONObject();
+                        JSONObject residentRegisterJSON = new JSONObject();
                         try {
                             registerJSON.put("username", usernameTxt.getText().toString());
                             registerJSON.put("email", emailTxt.getText().toString());
@@ -61,7 +136,10 @@ public class ResidentRegisterActivity extends AppCompatActivity {
                             registerJSON.put("password2", confirmPasswordTxt.getText().toString());
                             registerJSON.put("first_name", firstNameTxt.getText().toString());
                             registerJSON.put("last_name", lastNameTxt.getText().toString());
-                            registerJSON.put("role", 1);
+                            if (residentCheckBox.isChecked()) registerJSON.put("role", 1);
+                            else if (donorCheckBox.isChecked()) registerJSON.put("role", 2);
+                            residentRegisterJSON.put("barangay", thread.getBarangayIds().get(
+                                    barangaySpinner.getSelectedItem().toString()));
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -72,7 +150,23 @@ public class ResidentRegisterActivity extends AppCompatActivity {
                                 .build();
                         try {
                             response = client.newCall(request).execute();
-                        } catch (IOException e) {
+                            if (response.code() == 201 && residentCheckBox.isChecked()){
+                                client.setCredentials(usernameTxt.getText().toString(), passwordTxt.getText().toString());
+                                Request currentUserRequest = client.builderFromBaseUrl(CURRENT_USER_URL).get().build();
+                                JSONObject currentUserJSON = new JSONObject(client.newCall(currentUserRequest)
+                                                                            .execute()
+                                                                            .body()
+                                                                            .string());
+                                int residentId = currentUserJSON.getInt("id");
+                                String residentUrl = String.format(RESIDENT_DETAIL_URL, residentId);
+                                RequestBody barangayEditRequestBody = RequestBody.create(residentRegisterJSON.toString(),
+                                                                                        JSON);
+                                Request barangayEditRequest = client.builderFromBaseUrl(residentUrl)
+                                                                    .patch(barangayEditRequestBody).build();
+                                Response barangayEditResponse = client.newCall(barangayEditRequest).execute();
+
+                            }
+                        } catch (IOException | JSONException e) {
                             e.printStackTrace();
                         }
 
