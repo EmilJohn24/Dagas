@@ -16,9 +16,15 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class CurrentUserThread extends Thread {
-    private static final String USER_URL = "/relief/api/users/current_user";
+    static public final int RESIDENT = 1;
+    static public final int DONOR = 2;
+    static public final int BARANGAY = 3;
+    static public final int ADMIN = 4;
+
+
+    private static final String USER_URL = "/relief/api/users/current_user/";
     private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    private final static String TAG = "CurrentUserThread";
+    private final static String TAG = CurrentUserThread.class.getName();
     private JSONObject user;
 
     public JSONObject getUser() {
