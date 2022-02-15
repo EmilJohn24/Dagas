@@ -25,6 +25,22 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         user_serializer = UserSerializer(request.user)
         return Response(user_serializer.data)
 
+    @action(detail=False, methods=['get'], name='Get Current User Profile')
+    def current_user_profile(self, request, pk=None):
+        user = request.user
+        if user.role == user.BARANGAY:
+            profile_serializer = BarangaySerializer(BarangayProfile.objects.get(user=user))
+            return Response(profile_serializer.data)
+        if user.role == user.RESIDENT:
+            profile_serializer = ResidentSerializer(ResidentProfile.objects.get(user=user))
+            return Response(profile_serializer.data)
+        if user.role == user.DONOR:
+            profile_serializer = DonorSerializer(DonorProfile.objects.get(user=user),
+                                                 context={'request': request},)
+            return Response(profile_serializer.data)
+        else:
+            raise ValidationError(detail="Invalid request")
+        # TODO: Add admin
 
 class ResidentViewSet(viewsets.ModelViewSet):
     queryset = ResidentProfile.objects.all()
@@ -79,8 +95,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], name='Get Evacuation',
             permission_classes=[IsProfileUserOrReadOnly])
     def evacuation_center(self, request, pk=None):
-        current_transaction:Transaction = self.get_object()
-        barangay_request : BarangayRequest = current_transaction.barangay_request
+        current_transaction: Transaction = self.get_object()
+        barangay_request: BarangayRequest = current_transaction.barangay_request
         serializer = EvacuationCenterSerializer(barangay_request.evacuation_center)
         return Response(serializer.data)
 
@@ -153,7 +169,15 @@ class EvacuationCenterViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], name='Get Current Evac',
             permission_classes=[IsProfileUserOrReadOnly])
     def current_evac(self, request, pk=None):
-        user_barangay = BarangayProfile.objects.get(user=request.user)
+        user = request.user
+        user_barangay = None
+        if user.role == user.BARANGAY:
+            user_barangay = BarangayProfile.objects.get(user=request.user)
+        elif user.role == user.RESIDENT:
+            user_resident = ResidentProfile.objects.get(user=request.user)
+            user_barangay = user_resident.barangay
+        else:
+            raise ValidationError(detail="Barangay or Resident profiles only")
         evac_centers = EvacuationCenter.objects.filter(barangays=user_barangay)
         serializer = EvacuationCenterSerializer(evac_centers, many=True)
         return Response(serializer.data)

@@ -33,14 +33,14 @@ urlpatterns = [
 # view sets and router
 
 router = SimpleRouter()
-router.register('api/users', viewset=UserViewSet, basename='users')
-router.register('api/users/residents/r', ResidentViewSet, basename='residents_others')
 router.register('api/supplies', SupplyViewSet)
 router.register('api/item-type', ItemTypeViewSet, basename='itemtype')
 router.register('api/item-request', ItemRequestViewSet, basename='item_request')
 router.register('api/requests', BarangayRequestViewSet, basename='barangay_request')
 router.register('api/transactions', TransactionViewSet, basename='transactions')
+router.register('api/users/residents/r', ResidentViewSet, basename='residents_others')
 router.register('api/users/barangays', BarangayViewSet, basename='barangays')
+router.register('api/users', viewset=UserViewSet, basename='users')
 router.register('api/donations', DonationViewSet, basename='donations')
 router.register('api/evacuation-center', EvacuationCenterViewSet, basename='evac_center')
 router.register('api/transaction-order', TransactionOrderViewSet, basename='transaction_orders')

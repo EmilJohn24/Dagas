@@ -53,6 +53,7 @@ class ResidentProfile(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, null=True, related_name="resident_profile")
     # TODO: Add Pillow library to support ImageField
     gov_id = models.ImageField(null=True, upload_to=resident_id_path)
+    barangay = models.ForeignKey(to="BarangayProfile", on_delete=models.CASCADE, related_name="barangay", null=True,)
 
 
 class DonorProfile(models.Model):

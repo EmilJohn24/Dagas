@@ -52,11 +52,28 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 # Profile serializers
+class BarangaySerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='username',
+    )
+
+    class Meta:
+        model = BarangayProfile
+        fields = ('id', 'user')
+
+
 class ResidentSerializer(serializers.ModelSerializer):
+    barangay = serializers.PrimaryKeyRelatedField(many=False, required=False,
+                                                  queryset=BarangayProfile.objects.all(), )
+    barangay_info = BarangaySerializer(source='barangay', read_only=True,
+                                       many=False, allow_null=True, )
+
     class Meta:
         model = ResidentProfile
-        fields = ('id', 'user', 'gov_id')
-        read_only_fields = ('user','owner',)
+        fields = ('id', 'user', 'gov_id', 'barangay', 'barangay_info',)
+        read_only_fields = ('user', 'owner',)
 
 
 class DonorSerializer(serializers.ModelSerializer):
@@ -70,18 +87,6 @@ class DonorSerializer(serializers.ModelSerializer):
     class Meta:
         model = DonorProfile
         fields = ('id', 'user', 'donations')
-
-
-class BarangaySerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(
-        many=False,
-        read_only=True,
-        slug_field='username',
-    )
-
-    class Meta:
-        model = BarangayProfile
-        fields = ('id', 'user')
 
 
 class GovAdminSerializer(serializers.ModelSerializer):
@@ -208,7 +213,8 @@ class TransactionSerializer(serializers.ModelSerializer):
                                                     read_only=True, many=True, )
     barangay_name = serializers.StringRelatedField(source='barangay_request.barangay', many=False, read_only=True, )
     evac_center_name = serializers.StringRelatedField(source='barangay_request.evacuation_center',
-                                                      many=False, read_only=True,)
+                                                      many=False, read_only=True, )
+
     class Meta:
         model = Transaction
         fields = ('id', 'donor', 'donor_name', 'barangay_name', 'evac_center_name',
