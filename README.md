@@ -10,7 +10,7 @@ Naturally, in order to even begin making changes, you must first have a local co
 ```bash
 git clone https://github.com/EmilJohn24/Dagas.git
 ```
-If you want a more secure connection to the repo, you can set up SSH but I will be discussing this here.
+If you want a more secure connection to the repo, you can set up SSH but I will not be discussing this here.
 
 ### Experimenting (with branches)
 If you want to make significant changes, but are unsure whether it will work out, I would probably recommend you work on a separate branch in your local repository before pushing them here and for that, I will go over this first.
@@ -20,4 +20,18 @@ A branch, as the name implies, is a timeline of the project that deviates from t
 ```bash
 git branch <name>
 ```
-2. <b>git checkout</b>: Although
+2. <b>git checkout</b>: Can be used to create a branch, but the HEAD moves to the new branch
+```bash
+git checkout -b <name>
+```
+- <b>Note</b>: The ```bash git checkout``` is actually used to transfer to a different branch but the -b flag is used so that the branch is created if it does not exist.
+
+To get a complete list of all the branches in the project, you can use:
+```bash
+git branch
+```
+To transfer between branches, you can use
+```bash
+git checkout <name>
+```
+ 
