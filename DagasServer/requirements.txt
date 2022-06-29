@@ -6,3 +6,4 @@ django-silk~=4.2.0
 django-allauth
 django_google_maps
 Pillow
+django-cors-headers
