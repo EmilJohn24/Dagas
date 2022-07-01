@@ -7,6 +7,9 @@ import reportWebVitals from './reportWebVitals';
 // Good tutorial: https://www.digitalocean.com/community/tutorials/build-a-to-do-application-using-django-and-react#step-3-setting-up-the-frontend
 // Official website tutorial: https://reactjs.org/docs/getting-started.html
 // Another tutorial: https://blog.logrocket.com/creating-an-app-with-react-and-django/
+// Authentication tutorial: https://www.digitalocean.com/community/tutorials/how-to-add-login-authentication-to-react-applications
+//TODO: Study react-bootstrap or reactstrap for design 
+//TODO: Consider getting a template (https://reactstrap.github.io/?path=/docs/home-themes--page)
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>

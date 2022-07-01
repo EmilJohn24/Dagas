@@ -1,26 +1,21 @@
 import logo from './logo.svg';
 import './App.css';
 import { Component } from 'react';
-import axios from "axios";
-
+import EvacuationCenter from './components/EvacuationCenter';
+import Login from './components/Login';
+import { BrowserRouter, Switch, Route, Link, Routes } from "react-router-dom";
+// Bootstrap CSS
+import "bootstrap/dist/css/bootstrap.min.css";
+// Bootstrap Bundle JS
+import "bootstrap/dist/js/bootstrap.bundle.min";
+import UserTest from './test/userTest';
 // function App() {
 //   return (
-//     <div className="App">
-//       <header className="App-header">
-//         <img src={logo} className="App-logo" alt="logo" />
-//         <p>
-//           Edit <code>src/App.js</code> and save to reload.
-//         </p>
-//         <a
-//           className="App-link"
-//           href="https://reactjs.org"
-//           target="_blank"
-//           rel="noopener noreferrer"
-//         >
-//           Learn React
-//         </a>
-//       </header>
-//     </div>
+//     <Router>
+//       <div className='flex flex-col min-h-screen overflow-hidden'>
+        
+//       </div>
+//     </Router>
 //   );
 // }
 
@@ -28,35 +23,20 @@ class App extends Component{
   //retrieves the attributes of the tag and initializes the object
   constructor(props){
     super(props);
-    this.state = {
-      viewCompleted: false,
-      evacuationCenters: [],
-    }
   };
-  refreshEvacuationCenters = () => {
-    axios
-      .get("/relief/api/evacuation-center/")
-      .then((result) => this.setState({evacuationCenters: result.data}))
-      .catch((error) => console.log(error));
-  }
-  renderEvacuationCenter = () => {
-    return this.state.evacuationCenters.map((item) => (
-      <li>{item.name}</li>
-    ))
-  }
-  //runs when component works
-  componentDidMount(){
-    this.refreshEvacuationCenters();
-  }
-
+  
   //runs when class tag is called elsewhere
   render(){
     return (
-      <main className="container">
-        <h1>Evacuation Centers</h1>
-        <ul className="list-group">{this.renderEvacuationCenter()}</ul>
-      </main>
-    )
+        <div className='App flex flex-col min-h-screen overflow-hidden'>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login/>}/>
+              <Route path="/user_test" element={<UserTest/>}/>
+            </Routes>
+          </BrowserRouter>
+        </div>
+    );
   }
 
 

@@ -7,3 +7,4 @@ django-allauth
 django_google_maps
 Pillow
 django-cors-headers
+djangorestframework-simplejwt==4.5.0
