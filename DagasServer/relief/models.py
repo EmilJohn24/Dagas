@@ -20,7 +20,6 @@ from django.utils import timezone
 from django_google_maps import fields as map_fields
 from DagasServer import settings
 
-
 # START User Management
 # Use default user model
 

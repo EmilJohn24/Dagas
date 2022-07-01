@@ -80,9 +80,15 @@ public class LoginDataSource {
             Response response = client.newCall(request).execute();
             JSONObject responseJSON = new JSONObject(response.body().string());
             //TODO: Handle login failure
-            String token = responseJSON.get("key").toString();
-            Log.i(TAG, token);
-            return new LoggedInUser(token, username);
+            if (String.valueOf(response.code()).equals("403")) {
+                String token = "403";
+                return new LoggedInUser(token, username);
+            }
+            else{
+                String token = responseJSON.get("key").toString();
+                Log.i(TAG, token);
+                return new LoggedInUser(token, username);
+            }
         }
     }
     public Result<LoggedInUser> login(String username, String password) {
@@ -96,8 +102,8 @@ public class LoginDataSource {
 //                    new LoggedInUser(
 //                            java.util.UUID.randomUUID().toString(),
 //                            "Jane Doe");
-
-            return new Result.Success<>(loginThread.loggedInUser);
+            if(loginThread.loggedInUser.getToken().equals("403")) return new Result.Error(new Exception("Exception message"));
+            else return new Result.Success<>(loginThread.loggedInUser);
         } catch (Exception e) {
             return new Result.Error(new IOException("Error logging in", e));
         }

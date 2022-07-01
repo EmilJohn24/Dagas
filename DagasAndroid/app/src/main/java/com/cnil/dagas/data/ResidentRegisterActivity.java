@@ -4,11 +4,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -39,6 +42,50 @@ public class ResidentRegisterActivity extends AppCompatActivity {
     private ActivityResidentRegisterBinding binding;
     private Response response;
     private static final String TAG = ResidentRegisterActivity.class.getName();
+    //thread that gets the list of username
+    public static class GrabUsers extends Thread {
+        private static final String USER_URL = "/relief/api/users/";
+        private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+
+        private final ArrayList<String> UserNames;
+
+
+        public GrabUsers() {
+            UserNames = new ArrayList<>();
+        }
+
+
+
+        public void run() {
+            try {
+                GrabUsers();
+            } catch (IOException | JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+        private void GrabUsers() throws IOException, JSONException {
+            OkHttpSingleton client = OkHttpSingleton.getInstance();
+//            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
+            Request request = client.builderFromBaseUrlAnon(USER_URL)
+                    .get()
+                    .build();
+            Response response = client.newCall(request).execute();
+            //TODO: Add success check
+            JSONArray userJSONArray = new JSONArray(response.body().string());
+            for (int i = 0; i < userJSONArray.length(); i++) {
+                JSONObject userJSONObject = userJSONArray.getJSONObject(i);
+                this.UserNames.add(userJSONObject.getString("username"));
+            }
+
+            //TODO: Check for errors
+
+        }
+        public ArrayList<String> getUserNames() {
+            return UserNames;
+        }
+    }
+
     public static class GrabBarangays extends Thread {
         private static final String BARANGAY_URL = "/relief/api/users/barangays/";
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -106,7 +153,9 @@ public class ResidentRegisterActivity extends AppCompatActivity {
         final CheckBox residentCheckBox = binding.residentCheckBox;
         final CheckBox donorCheckBox = binding.donorCheckBox;
         GrabBarangays thread = new GrabBarangays();
+        GrabUsers userThread = new GrabUsers();
         thread.start();
+        userThread.start();
         try {
             thread.join();
             ArrayAdapter<String> barangayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
@@ -115,6 +164,84 @@ public class ResidentRegisterActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        try {
+            userThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //Added text watcher to avoid empty text field and valid password
+        TextWatcher afterTextChangedListener = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // ignore
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // ignore
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(usernameTxt == null || usernameTxt.getText().toString().trim().isEmpty()){
+                    usernameTxt.setError("Username is required!");
+                    registerButton.setEnabled(false);
+                }
+                else if(userThread.getUserNames().contains(usernameTxt.getText().toString().trim())){
+                    usernameTxt.setError("Username is already taken!");
+                    registerButton.setEnabled(false);
+                }
+                else if(emailTxt == null || emailTxt.getText().toString().trim().isEmpty()){
+                    emailTxt.setError("Email is required!");
+                    registerButton.setEnabled(false);
+                }
+                else if(firstNameTxt == null || firstNameTxt.getText().toString().trim().isEmpty()){
+                    firstNameTxt.setError("First name is required!");
+                    registerButton.setEnabled(false);
+                }
+                else if(lastNameTxt == null || lastNameTxt.getText().toString().trim().isEmpty()){
+                    lastNameTxt.setError("Last name is required!");
+                    registerButton.setEnabled(false);
+                }
+                else if(passwordTxt == null || passwordTxt.getText().toString().trim().length() < 5){
+                    passwordTxt.setError("Password length must be greater than 5!");
+                    registerButton.setEnabled(false);
+                }
+                else if(confirmPasswordTxt == null || confirmPasswordTxt.getText().toString().trim().length() < 5){
+                    confirmPasswordTxt.setError("Confirm Password length must be greater than 5!");
+                    registerButton.setEnabled(false);
+                }
+                else if(!passwordTxt.getText().toString().trim().equals(confirmPasswordTxt.getText().toString().trim())){
+                    confirmPasswordTxt.setError("Password does not match Confirm Password!");
+                    registerButton.setEnabled(false);
+                }
+                else  registerButton.setEnabled(true);
+            }
+        };
+        usernameTxt.addTextChangedListener(afterTextChangedListener);
+        passwordTxt.addTextChangedListener(afterTextChangedListener);
+        confirmPasswordTxt.addTextChangedListener(afterTextChangedListener);
+        emailTxt.addTextChangedListener(afterTextChangedListener);
+        firstNameTxt.addTextChangedListener(afterTextChangedListener);
+        lastNameTxt.addTextChangedListener(afterTextChangedListener);
+
+        //check box checker
+        residentCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(donorCheckBox.isChecked())
+                    residentCheckBox.setChecked(false);
+
+            }
+        });
+        donorCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(residentCheckBox.isChecked())
+                    donorCheckBox.setChecked(false);
+            }
+        });
+
 
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override

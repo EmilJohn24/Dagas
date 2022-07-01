@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -87,13 +88,14 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 if (loginResult.getSuccess() != null) {
                     updateUiWithUser(loginResult.getSuccess());
-                }
-                setResult(Activity.RESULT_OK);
 
-                //Complete and destroy login activity once successful
-                finish();
-                Intent homeRedirect = new Intent(LoginActivity.this, HomeActivity.class);
-                startActivity(homeRedirect);
+                    setResult(Activity.RESULT_OK);
+
+                    //Complete and destroy login activity once successful
+                    finish();
+                    Intent homeRedirect = new Intent(LoginActivity.this, HomeActivity.class);
+                    startActivity(homeRedirect);
+                }
             }
         });
 
@@ -134,9 +136,9 @@ public class LoginActivity extends AppCompatActivity {
                 loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
-                Toast.makeText(LoginActivity.this,
-                        loginViewModel.getLoginResult().getValue().getSuccess().getDisplayName(),
-                        Toast.LENGTH_SHORT).show();
+//                Toast.makeText(LoginActivity.this,
+//                        loginViewModel.getLoginResult().getValue().getSuccess().getDisplayName(),
+//                        Toast.LENGTH_SHORT).show();
 
             }
         });

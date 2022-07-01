@@ -90,25 +90,35 @@
         android:id="@+id/registerButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:text="@string/register_button_text"
+        android:enabled="false"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/donorCheckBox" />
 
     <Spinner
         android:id="@+id/barangaySpinner"
-        android:layout_width="98dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="@+id/residentCheckBox"
-        app:layout_constraintStart_toStartOf="@+id/residentCheckBox"
-        app:layout_constraintTop_toBottomOf="@+id/residentCheckBox" />
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/residentCheckBox"
+        app:layout_constraintEnd_toEndOf="@+id/lastNameTxt"
+        app:layout_constraintHorizontal_bias="0.782"
+        app:layout_constraintStart_toEndOf="@+id/residentCheckBox"
+        app:layout_constraintTop_toBottomOf="@+id/lastNameTxt" />
 
     <CheckBox
         android:id="@+id/residentCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="Resident"
         app:layout_constraintEnd_toEndOf="@+id/lastNameTxt"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/lastNameTxt"
         app:layout_constraintTop_toBottomOf="@+id/lastNameTxt" />
 
@@ -116,10 +126,12 @@
         android:id="@+id/donorCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:text="Donor"
         app:layout_constraintEnd_toEndOf="@+id/lastNameTxt"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/lastNameTxt"
-        app:layout_constraintTop_toBottomOf="@+id/barangaySpinner" />
+        app:layout_constraintTop_toBottomOf="@+id/residentCheckBox" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

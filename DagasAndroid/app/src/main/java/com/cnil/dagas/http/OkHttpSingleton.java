@@ -6,9 +6,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 public class OkHttpSingleton extends OkHttpClient {
-    private final String BASE_URL = "http://192.168.100.2:8000";
+    private final String BASE_URL = "http://192.168.31.25:8000";
     private String credentials;
     public final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+    public String getBaseUrl() {
+        return BASE_URL;
+    }
 
     public void setCredentials(String username, String password){
         this.credentials = Credentials.basic(username, password);

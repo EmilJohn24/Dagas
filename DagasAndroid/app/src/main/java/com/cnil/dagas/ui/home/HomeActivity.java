@@ -1,11 +1,15 @@
 package com.cnil.dagas.ui.home;
 
+import static androidx.camera.core.CameraX.getContext;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,8 +24,10 @@ import com.cnil.dagas.R;
 import com.cnil.dagas.data.CurrentUserThread;
 import com.cnil.dagas.data.ResidentRegisterActivity;
 import com.cnil.dagas.databinding.ActivityHomeBinding;
+import com.cnil.dagas.http.OkHttpSingleton;
 import com.cnil.dagas.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 
@@ -51,6 +57,8 @@ public class HomeActivity extends AppCompatActivity {
         NavigationView navigationView = binding.navView;
         TextView nameTxt = (TextView) navigationView.getHeaderView(0).findViewById(R.id.nameTxt);
         TextView emailTxt = (TextView) navigationView.getHeaderView(0).findViewById(R.id.emailTxt);
+        TextView roleTxt = (TextView) navigationView.getHeaderView(0).findViewById(R.id.roleTxt);
+        ImageView profilePictureImg = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.profilePictureImageView);
 
         //Load current user data
         CurrentUserThread currentUserThread = new CurrentUserThread();
@@ -62,8 +70,13 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         try {
+            String baseUrl = OkHttpSingleton.getInstance().getBaseUrl();
             nameTxt.setText(currentUserThread.getUser().getString("username"));
             emailTxt.setText(currentUserThread.getUser().getString("email"));
+            roleTxt.setText(currentUserThread.getUser().getString("role"));
+            Picasso.with(this).load(baseUrl + currentUserThread
+                    .getUser().getString("profile_picture"))
+                    .into(profilePictureImg);
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
         }

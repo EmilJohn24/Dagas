@@ -17,8 +17,9 @@
     <string name="lastNameHint">Last Name</string>
     <string name="register_button_text">Register</string>
     <string name="action_settings">Settings</string>
-    <string name="nav_header_title">dagas</string>
-    <string name="nav_header_subtitle">dagas@gmai.com</string>
+    <string name="nav_header_name">dagas</string>
+    <string name="nav_header_email">dagas@gmail.com</string>
+    <string name="nav_header_role">role</string>
     <string name="nav_header_desc">Navigation Header</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
