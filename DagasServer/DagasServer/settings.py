@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-_-rs#!5yr7=4%1z2e89schctuhz4wows3xb-6j3f4xfe$074jd
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.100.2', '192.168.1.4', '192.168.31.25']
+ALLOWED_HOSTS = ['192.168.100.2', '192.168.1.4', '192.168.31.25', '127.0.0.1']
 
 # Application definition
 
@@ -51,8 +51,6 @@ INSTALLED_APPS = [
     'django_google_maps',
     # profiling
     'silk',
-    # cors headers
-    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -64,7 +62,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'silk.middleware.SilkyMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'DagasServer.urls'
@@ -180,9 +177,3 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 
 # Django Google Maps
 GOOGLE_MAPS_API_KEY = "AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM";
-
-# Cors settings
-# Based on: https://www.digitalocean.com/community/tutorials/build-a-to-do-application-using-django-and-react
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',
-]

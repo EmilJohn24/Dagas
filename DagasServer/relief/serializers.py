@@ -48,7 +48,7 @@ class DonationSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'role',)
+        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'role','profile_picture')
 
 
 # Profile serializers
@@ -228,7 +228,7 @@ class CustomRegisterSerializer(RegisterSerializer):
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     role = serializers.ChoiceField(choices=User.ROLE_CHOICES, allow_null=True, allow_blank=True)
-
+    profile_picture = serializers.ImageField()
     def get_cleaned_data(self):
         super(CustomRegisterSerializer, self).get_cleaned_data()
         return {
@@ -239,6 +239,7 @@ class CustomRegisterSerializer(RegisterSerializer):
             'first_name': self.validated_data.get('first_name', ''),
             'last_name': self.validated_data.get('last_name', ''),
             'role': self.validated_data.get('role'),
+            'profile picture': self.validated_data.get('profile_picture'),
         }
 
     @transaction.atomic

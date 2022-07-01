@@ -22,6 +22,9 @@ from DagasServer import settings
 
 
 # START User Management
+# User profile picture path
+def user_profile_picture_path(instance, filename):
+    return 'profilePicture/id_{0}/{1}'.format(instance.id, filename)
 # Use default user model
 
 
@@ -39,6 +42,8 @@ class User(AbstractUser):
     )
 
     role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, null=True, blank=True)
+
+    profile_picture = models.ImageField(null=True, upload_to=user_profile_picture_path)
 
 
 # User Profiles
