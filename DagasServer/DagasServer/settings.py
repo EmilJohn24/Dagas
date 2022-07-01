@@ -159,11 +159,12 @@ LOGIN_URL = 'rest_login'
 #              ]
 # }
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-            'rest_framework_simplejwt.authentication.JWTAuthentication',
-             ]
-}
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#             # 'rest_framework.authentication.BasicAuthentication',
+#             'rest_framework_simplejwt.authentication.JWTAuthentication',
+#              ]
+# }
 # Auth registration settings
 SITE_ID = 1
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
