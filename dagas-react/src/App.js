@@ -3,6 +3,8 @@ import './App.css';
 import { Component } from 'react';
 import EvacuationCenter from './components/EvacuationCenter';
 import Login from './components/Login';
+import Registration from './components/Registration';
+
 import { BrowserRouter, Switch, Route, Link, Routes } from "react-router-dom";
 // Bootstrap CSS
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -32,6 +34,7 @@ class App extends Component{
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<Login/>}/>
+              <Route path="/register" element={<Registration/>}/>
               <Route path="/user_test" element={<UserTest/>}/>
             </Routes>
           </BrowserRouter>

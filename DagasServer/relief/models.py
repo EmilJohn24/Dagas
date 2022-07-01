@@ -42,7 +42,7 @@ class User(AbstractUser):
 
     role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, null=True, blank=True)
 
-    profile_picture = models.ImageField(null=True, upload_to=user_profile_picture_path)
+    profile_picture = models.ImageField(null=True, blank=True, upload_to=user_profile_picture_path)
 
 
 # User Profiles
