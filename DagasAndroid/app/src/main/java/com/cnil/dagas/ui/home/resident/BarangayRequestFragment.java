@@ -19,6 +19,7 @@ import com.cnil.dagas.R;
 import com.cnil.dagas.data.model.LoggedInUser;
 import com.cnil.dagas.databinding.FragmentBarangayRequestBinding;
 import com.cnil.dagas.databinding.QrScannerBinding;
+import com.cnil.dagas.http.DagasJSONServerThread;
 import com.cnil.dagas.http.OkHttpSingleton;
 
 import org.json.JSONException;
@@ -47,7 +48,7 @@ public class BarangayRequestFragment extends Fragment {
     public BarangayRequestFragment() {
         // Required empty public constructor
     }
-    class AddBarangayRequestThread extends Thread{
+    class AddBarangayRequestThread extends DagasJSONServerThread {
         private static final String ADD_URL = "/relief/api/requests/";
         private static final String ADD_ITEM_URL = "/relief/api/item-request/";
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -91,14 +92,8 @@ public class BarangayRequestFragment extends Fragment {
                 Log.e(TAG, e.getMessage());
             }
 
-            OkHttpSingleton client = OkHttpSingleton.getInstance();
-            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
-            Request request = client.builderFromBaseUrl(ADD_URL)
-                    .post(body)
-                    .build();
-            Response response = client.newCall(request).execute();
             //TODO: Add success check
-            JSONObject responseJSON = new JSONObject(response.body().string());
+            JSONObject responseJSON = this.postJSON(ADD_URL, createRequestJSON);
 
             //ID for Barangay request
             int barangayRequestID = responseJSON.getInt("id");
@@ -113,11 +108,7 @@ public class BarangayRequestFragment extends Fragment {
                     foodRequestJSON.put("type", 1);
                     foodRequestJSON.put("pax", this.foodAmount);
                     foodRequestJSON.put("barangay_request", barangayRequestID);
-                    RequestBody foodRequestBody = RequestBody.create(foodRequestJSON.toString(), JSON);
-                    Request foodRequest = client.builderFromBaseUrl(ADD_ITEM_URL)
-                                            .post(foodRequestBody).build();
-                    Response foodResponse = client.newCall(foodRequest).execute();
-
+                    Response foodResponse = this.post(ADD_ITEM_URL, foodRequestJSON);
 
                 } catch (JSONException e) {
                     Log.e(TAG, e.getMessage());
@@ -131,11 +122,7 @@ public class BarangayRequestFragment extends Fragment {
                     waterRequestJSON.put("type", 2);
                     waterRequestJSON.put("pax", this.waterAmount);
                     waterRequestJSON.put("barangay_request", barangayRequestID);
-                    RequestBody waterRequestBody = RequestBody.create(waterRequestJSON.toString(), JSON);
-                    Request waterRequest = client.builderFromBaseUrl(ADD_ITEM_URL)
-                            .post(waterRequestBody).build();
-                    Response waterResponse = client.newCall(waterRequest).execute();
-
+                    Response waterResponse = this.post(ADD_ITEM_URL, waterRequestJSON);
 
                 } catch (JSONException e) {
                     Log.e(TAG, e.getMessage());
@@ -149,10 +136,7 @@ public class BarangayRequestFragment extends Fragment {
                     clothesRequestJSON.put("type", 3);
                     clothesRequestJSON.put("pax", this.clothesAmount);
                     clothesRequestJSON.put("barangay_request", barangayRequestID);
-                    RequestBody clothesRequestBody = RequestBody.create(clothesRequestJSON.toString(), JSON);
-                    Request clothesRequest = client.builderFromBaseUrl(ADD_ITEM_URL)
-                            .post(clothesRequestBody).build();
-                    Response clothesResponse = client.newCall(clothesRequest).execute();
+                    Response clothesResponse = this.post(ADD_ITEM_URL, clothesRequestJSON);
 
 
                 } catch (JSONException e) {

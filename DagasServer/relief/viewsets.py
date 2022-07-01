@@ -42,6 +42,14 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             raise ValidationError(detail="Invalid request")
         # TODO: Add admin
 
+    # permission_classes=[IsProfileUserOrReadOnly]
+    @action(detail=False, methods=['put', 'patch'], name='Upload Profile Picture')
+    def upload_profile_picture(self, request, pk=None):
+        user = request.user
+        user.profile_picture = list(request.FILES.values())[0]  # Get first file
+        user.save()
+        return Response({'status': 'File uploaded'})
+
 
 class ResidentViewSet(viewsets.ModelViewSet):
     queryset = ResidentProfile.objects.all()

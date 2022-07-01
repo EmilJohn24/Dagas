@@ -23,6 +23,7 @@ import androidx.fragment.app.Fragment;
 
 import com.cnil.dagas.R;
 import com.cnil.dagas.databinding.EvacuationcentervisualmapBinding;
+import com.cnil.dagas.http.DagasJSONServerThread;
 import com.cnil.dagas.http.OkHttpSingleton;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -54,7 +55,7 @@ import okhttp3.Response;
 // https://developers.google.com/maps/documentation/android-sdk/reference/com/google/android/libraries/maps/SupportMapFragment
 public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyCallback {
     private final static String TAG = EvacuationVisualMapFragment.class.getName();
-    public static class GrabEvacsThread extends Thread {
+    public static class GrabEvacsThread extends DagasJSONServerThread {
         private static final String CURR_EVAC_CENTER_URL = "/relief/api/evacuation-center/current_evac/";
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -79,14 +80,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
             }
         }
         private void grabEvacCoords() throws IOException, JSONException {
-            OkHttpSingleton client = OkHttpSingleton.getInstance();
-//            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
-            Request request = client.builderFromBaseUrl(CURR_EVAC_CENTER_URL)
-                    .get()
-                    .build();
-            Response response = client.newCall(request).execute();
-            //TODO: Add success check
-            JSONArray evacCenterJSONArray = new JSONArray(response.body().string());
+            JSONArray evacCenterJSONArray = this.getList(CURR_EVAC_CENTER_URL);
             for (int typeIndex = 0; typeIndex < evacCenterJSONArray.length(); typeIndex++) {
                 JSONObject typeJSONObject = evacCenterJSONArray.getJSONObject(typeIndex);
                 this.centers.add(typeJSONObject);
@@ -96,7 +90,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
 
         }
     }
-    static class AddEvacThread extends Thread {
+    static class AddEvacThread extends DagasJSONServerThread {
         private static final String EVAC_CENTER_URL = "/relief/api/evacuation-center/";
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
@@ -150,16 +144,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
             } catch (JSONException e) {
                 Log.e(TAG, e.getMessage());
             }
-            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
-
-
-            OkHttpSingleton client = OkHttpSingleton.getInstance();
-            Request request = client.builderFromBaseUrl(EVAC_CENTER_URL)
-                    .post(body)
-                    .build();
-            //TODO: Check if request succeeded
-            Response response = client.newCall(request).execute();
-
+            Response response = this.post(EVAC_CENTER_URL, createRequestJSON);
         }
     }
 
