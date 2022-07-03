@@ -35,7 +35,11 @@ import com.cnil.dagas.http.OkHttpSingleton;
 import com.cnil.dagas.ui.home.HomeActivity;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -99,6 +103,14 @@ public class UploadIdFragment extends Fragment {
         return image;
     }
 
+    public static void copyStream(InputStream input, OutputStream output) throws IOException {
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = input.read(buffer)) != -1) {
+            output.write(buffer, 0, bytesRead);
+        }
+    }
+
     private File dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
@@ -141,13 +153,13 @@ public class UploadIdFragment extends Fragment {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        File finalPhotoFile = photoFile;
+        final File[] finalPhotoFile = {photoFile};
 
         ActivityResultLauncher<Uri> mGetContent = registerForActivityResult(new ActivityResultContracts.TakePicture(),
                 new ActivityResultCallback<Boolean>() {
                     @Override
                     public void onActivityResult(Boolean result) {
-                        Bitmap idBitMap = BitmapFactory.decodeFile(finalPhotoFile.getAbsolutePath());
+                        Bitmap idBitMap = BitmapFactory.decodeFile(finalPhotoFile[0].getAbsolutePath());
                         idImageView.setImageBitmap(idBitMap);
                     }
                 });
@@ -157,7 +169,7 @@ public class UploadIdFragment extends Fragment {
                // Continue only if the File was successfully created
                Uri photoURI = getUriForFile(UploadIdFragment.this.getContext(),
                        "com.example.android.fileprovider",
-                       finalPhotoFile);
+                       finalPhotoFile[0]);
                 mGetContent.launch(photoURI);
 
 
@@ -174,14 +186,22 @@ public class UploadIdFragment extends Fragment {
 //                    }
 //                });
         //Based on: https://stackoverflow.com/questions/67156608/how-get-image-from-gallery-in-fragmentjetpack-navigation-component
-        ActivityResultLauncher startForResultFromGallery = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+        ActivityResultLauncher<Intent> startForResultFromGallery = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
             @Override
             public void onActivityResult(ActivityResult result) {
                 if (result.getResultCode() == Activity.RESULT_OK){
                     if (result.getData() != null){
                         Uri selectedImageUri = result.getData().getData();
-//                        finalPhotoFile = (selectedImageUri.getPath());
+//                        File galleryPhotoFile = new File(selectedImageUri.getPath());
+                        try {
+                            InputStream inputStream = getActivity().getContentResolver().openInputStream(selectedImageUri);
+                            FileOutputStream fileOutputStream = new FileOutputStream(finalPhotoFile[0]);
+                            copyStream(inputStream,  fileOutputStream);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+//                        finalPhotoFile[0] = new File(selectedImageUri.getPath());
                         idImageView.setImageURI(selectedImageUri);
                     }
                 }
@@ -204,7 +224,7 @@ public class UploadIdFragment extends Fragment {
         uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                UploadId thread = new UploadId(finalPhotoFile);
+                UploadId thread = new UploadId(finalPhotoFile[0]);
                 thread.start();
             }
         });
