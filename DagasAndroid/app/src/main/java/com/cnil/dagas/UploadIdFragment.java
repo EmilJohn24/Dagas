@@ -1,16 +1,24 @@
 package com.cnil.dagas;
 
+import static android.app.Activity.RESULT_OK;
+
+import static androidx.core.content.FileProvider.getUriForFile;
+
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.ActivityResultRegistry;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
@@ -24,6 +32,7 @@ import android.widget.ImageView;
 
 import com.cnil.dagas.databinding.FragmentUploadIdBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
+import com.cnil.dagas.ui.home.HomeActivity;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,7 +113,7 @@ public class UploadIdFragment extends Fragment {
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this.getContext(),
+                Uri photoURI = getUriForFile(this.getContext(),
                         "com.example.android.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
@@ -124,6 +133,7 @@ public class UploadIdFragment extends Fragment {
        View root = binding.getRoot();
        Button takePictureButton = root.findViewById(R.id.takePictureButton);
        Button uploadButton = root.findViewById(R.id.uploadButton);
+       Button albumButton = root.findViewById(R.id.albumButton);
        ImageView idImageView = root.findViewById(R.id.idPicture);
        File photoFile = null;
        try {
@@ -145,7 +155,7 @@ public class UploadIdFragment extends Fragment {
            @Override
            public void onClick(View view) {
                // Continue only if the File was successfully created
-               Uri photoURI = FileProvider.getUriForFile(UploadIdFragment.this.getContext(),
+               Uri photoURI = getUriForFile(UploadIdFragment.this.getContext(),
                        "com.example.android.fileprovider",
                        finalPhotoFile);
                 mGetContent.launch(photoURI);
@@ -153,6 +163,43 @@ public class UploadIdFragment extends Fragment {
 
             }
        });
+
+//        // GetContent creates an ActivityResultLauncher<String> to allow you to pass
+//        // in the mime type you'd like to allow the user to select
+//        ActivityResultLauncher<String> gGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
+//                new ActivityResultCallback<Uri>() {
+//                    @Override
+//                    public void onActivityResult(Uri uri) {
+//                        idImageView.setImageURI(uri);
+//                    }
+//                });
+        //Based on: https://stackoverflow.com/questions/67156608/how-get-image-from-gallery-in-fragmentjetpack-navigation-component
+        ActivityResultLauncher startForResultFromGallery = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == Activity.RESULT_OK){
+                    if (result.getData() != null){
+                        Uri selectedImageUri = result.getData().getData();
+//                        finalPhotoFile = (selectedImageUri.getPath());
+                        idImageView.setImageURI(selectedImageUri);
+                    }
+                }
+            }
+        });
+        albumButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+//                gGetContent.launch("images/*");
+//                  Uri photoURI =FileProvider.getUriForFile(UploadIdFragment.this.getContext(),
+//                        "com.example.android.fileprovider",
+//                        finalPhotoFile);
+                  Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//                  intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                  startForResultFromGallery.launch(intent);
+            }
+        });
+
 
         uploadButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -43,7 +43,10 @@
             android:id="@+id/nav_transactions"
             android:icon="@drawable/ic_launcher_background"
             android:title="View Previous Transactions"/>
-
+        <item
+            android:id="@+id/nav_user_profile"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="User Profile"/>
 
     </group>
 </menu>

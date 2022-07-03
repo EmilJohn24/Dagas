@@ -78,4 +78,9 @@
             android:id="@+id/action_transactionsFragment_to_nav_transaction_receipt"
             app:destination="@id/nav_transaction_receipt" />
     </fragment>
+    <fragment
+        android:id="@+id/nav_user_profile"
+        android:name="com.cnil.dagas.UserProfileFragment"
+        android:label="fragment_user_profile"
+        tools:layout="@layout/user_profile" />
 </navigation>
