@@ -43,16 +43,7 @@ function InternalEvacuationCenter() {
  }
 //   };
   useEffect(() => {
-    // setEvacuationCenters(refreshEvacuationCenters());
     refreshEvacuationCenters();
-    // wait(5000);
-    // console.log(evacuationCenters);
-    // RecenterMap(evacuationCenters.at(0).geolocation.split(",")[0], evacuationCenters.at(0).geolocation.split(",")[1]);
-      // if (evacuationCenters.length > 0){
-      //     center.lat = evacuationCenters.at(0).geolocation.split(",")[0];
-      //     center.lng = evacuationCenters.at(0).geolocation.split(",")[1];
-      //     map.panTo(center);
-      // }
   
   }, [])    
     
@@ -62,30 +53,13 @@ function InternalEvacuationCenter() {
       // RecenterMap();
     }
   }, [evacuationCenters])
-  // useEffect(() => {
-  //   console.log(evacuationCenters);
-  //   console.log(map);
-  //   if (evacuationCenters.length > 0 && map){
-  //     center.lat = evacuationCenters.at(0).geolocation.split(",")[0];
-  //     center.lng = evacuationCenters.at(0).geolocation.split(",")[1];
-  //     map.setCenter(center);
-  // }
-  // }, [evacuationCenters, map])
+
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: "AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM" // ,
     // ...otherOptions
   })
 
   const renderEvacuationCenter = () => {
-    // if (evacuationCenters.length != 0){
-    //   const center = {};
-    //   center.lat = evacuationCenters.at(0).geolocation.split(",")[0];
-    //   center.lng = evacuationCenters.at(0).geolocation.split(",")[1];
-    //   // useGoogleMap().panTo(center);
-    //   // this.map({center: center});
-    // }
-    // console.log(this.googleMap);
-    // console.log(evacuationCenters);
     return  evacuationCenters.map((item) => {
       // console.log( item.geolocation);
       return(<Marker
