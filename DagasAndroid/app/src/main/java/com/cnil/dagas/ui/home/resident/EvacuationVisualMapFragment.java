@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,6 +23,7 @@ import androidx.fragment.app.Fragment;
 
 
 import com.cnil.dagas.R;
+import com.cnil.dagas.data.ResidentRegisterActivity;
 import com.cnil.dagas.databinding.EvacuationcentervisualmapBinding;
 import com.cnil.dagas.http.DagasJSONServerThread;
 import com.cnil.dagas.http.OkHttpSingleton;
@@ -151,7 +153,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
     private EvacuationcentervisualmapBinding binding;
     private MapView mapView;
     private GoogleMap map;
-    private Marker newEvacMarker;
+    private Marker newEvacMarker = null;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState){
@@ -250,20 +252,11 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
             }
         });
 
-        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(@NonNull LatLng latLng) {
-                    if (newEvacMarker != null) newEvacMarker.remove();
-                    newEvacMarker = map.addMarker(new MarkerOptions()
-                            .position(latLng)
-                            .title("New Evacuation Center"));
-
-            }
-        });
         //Create Evacuation Center
 //        map.addMarker(new MarkerOptions().)
         EditText editTextEvacName = root.findViewById(R.id.editTextEvacName);
         FloatingActionButton addEvacButton = root.findViewById(R.id.addEvacButton);
+        final Marker[] marker = {null};
         addressSearchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int actionID, KeyEvent keyEvent) {
@@ -279,14 +272,15 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
 
                             Log.d("lat-long", "" + lat + "......." + lon);
                             final LatLng user = new LatLng(lat, lon);
-                            Marker marker = map.addMarker(new MarkerOptions()
+                            if(marker[0] != null) marker[0].remove();
+                            marker[0] = map.addMarker(new MarkerOptions()
                                     .position(user)
                                     .title(address));
                             // Move the camera instantly to hamburg with a zoom of 15.
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(user, 25));
 
                             // Zoom in, animating the camera.
-                            map.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
+                            map.animateCamera(CameraUpdateFactory.zoomTo(20), 2000, null);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -296,6 +290,18 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
                 return false;
             }
         });
+
+        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(@NonNull LatLng latLng) {
+                if(marker[0] != null) marker[0].remove();
+                if (newEvacMarker != null) newEvacMarker.remove();
+                newEvacMarker = map.addMarker(new MarkerOptions()
+                        .position(latLng)
+                        .title("New Evacuation Center"));
+
+            }
+        });
         editTextEvacName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int actionID, KeyEvent keyEvent) {
@@ -303,16 +309,44 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
                     // Add Evacuation Center
                     //TODO: Find better ways to get address
                     try {
-
+                            if(marker[0] != null) marker[0].remove(); //remove marker from search bar
                             String name = editTextEvacName.getText().toString();
                             AddEvacThread addEvacThread = new AddEvacThread(name, EvacuationVisualMapFragment.this.getContext(),
                                     newEvacMarker.getPosition().latitude, newEvacMarker.getPosition().longitude);
                             addEvacThread.start();
                             addEvacThread.join();
+                            LatLng newEvacLatLng = new LatLng(newEvacMarker.getPosition().latitude, newEvacMarker.getPosition().longitude);
+                            map.addMarker(new MarkerOptions()
+                                    .position(newEvacLatLng)
+                                    .title(name));
+                            newEvacMarker.remove();
                             editTextEvacName.getText().clear();
+                            editTextEvacName.setVisibility(View.GONE);
+                            String address = null;
+                            try {
+                                Geocoder geocoder = new Geocoder(EvacuationVisualMapFragment.this.getContext());
+                                List<Address> addressComponents = geocoder.getFromLocation(
+                                        newEvacMarker.getPosition().latitude,  newEvacMarker.getPosition().longitude, 1);
+                                if (!addressComponents.isEmpty()) {
+                                    address = addressComponents.get(0).getFeatureName() + ", " +
+                                            addressComponents.get(0).getLocality() + ", " +
+                                            addressComponents.get(0).getAdminArea() + ", " +
+                                            addressComponents.get(0).getCountryName();
+                                }
 
-
-                    } catch (InterruptedException e) {
+                            } catch (IOException e) {
+                                Log.e(TAG, e.getMessage());
+                                address = name;
+                            }
+                            JSONObject createRequestJSON = new JSONObject();
+                            createRequestJSON.put("name", name);
+                            createRequestJSON.put("address", address);
+                            createRequestJSON.put("geolocation", newEvacMarker.getPosition().latitude + "," + newEvacMarker.getPosition().longitude);
+                            adapter.add(name);
+                            adapter.notifyDataSetChanged();
+                            centers.add(createRequestJSON);
+                            Toast.makeText(EvacuationVisualMapFragment.this.getContext(), "Registration complete", Toast.LENGTH_SHORT).show();
+                    } catch (InterruptedException | JSONException e) {
                         Log.e(TAG, e.getMessage());
                     }
                     return true;
