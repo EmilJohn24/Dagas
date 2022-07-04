@@ -11,6 +11,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 // Bootstrap Bundle JS
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import UserTest from './test/userTest';
+import InternalEvacuationCenter from './components/EvacuationCenterRender';
 // function App() {
 //   return (
 //     <Router>
@@ -36,7 +37,7 @@ class App extends Component{
               <Route path="/login" element={<Login/>}/>
               <Route path="/register" element={<Registration/>}/>
               <Route path="/user_test" element={<UserTest/>}/>
-              <Route path="/evacuation_centers" element={<EvacuationCenter/>} />
+              <Route path="/evacuation_centers" element={<InternalEvacuationCenter/>} />
             </Routes>
           </BrowserRouter>
         </div>
