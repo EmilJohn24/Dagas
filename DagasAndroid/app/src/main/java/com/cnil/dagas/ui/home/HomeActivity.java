@@ -31,6 +31,9 @@ import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 
+import java.util.HashSet;
+import java.util.Set;
+
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -68,12 +71,70 @@ public class HomeActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             Log.e(TAG, e.getMessage());
         }
-
+        //nav drawer filter [role]
+        Set<Integer> topLevelDestinations = new HashSet<>();
+        String roleVerbose = null;
+        try {
+            roleVerbose = currentUserThread.getUser().getString("role");
+            if(roleVerbose.equals("1")){
+                roleVerbose = "Resident";
+                topLevelDestinations.add(R.id.nav_home);
+                topLevelDestinations.add(R.id.nav_qr_scanner);
+                topLevelDestinations.add(R.id.nav_barangay_request);
+                topLevelDestinations.add(R.id.nav_view_requests);
+                topLevelDestinations.add(R.id.nav_view_supplies);
+                topLevelDestinations.add(R.id.nav_transactions);
+                topLevelDestinations.add(R.id.nav_upload_id);
+                topLevelDestinations.add(R.id.nav_user_profile);
+                navigationView.getMenu().findItem(R.id.nav_donor_add_supply).setVisible(false);
+            }
+            else if(roleVerbose.equals("2")){
+                roleVerbose = "Donor";
+                topLevelDestinations.add(R.id.nav_home);
+                topLevelDestinations.add(R.id.nav_qr_scanner);
+                topLevelDestinations.add(R.id.nav_user_profile);
+                topLevelDestinations.add(R.id.nav_view_requests);
+                topLevelDestinations.add(R.id.nav_view_supplies);
+                topLevelDestinations.add(R.id.nav_transactions);
+                topLevelDestinations.add(R.id.nav_donor_add_supply);
+                navigationView.getMenu().findItem(R.id.nav_barangay_request).setVisible(false);
+                navigationView.getMenu().findItem(R.id.nav_upload_id).setVisible(false);
+            }
+            else if(roleVerbose.equals("3")){
+                roleVerbose = "Barangay";
+                topLevelDestinations.add(R.id.nav_home);
+                topLevelDestinations.add(R.id.nav_qr_scanner);
+                topLevelDestinations.add(R.id.nav_user_profile);
+                topLevelDestinations.add(R.id.nav_view_requests);
+                topLevelDestinations.add(R.id.nav_view_supplies);
+                topLevelDestinations.add(R.id.nav_transactions);
+                topLevelDestinations.add(R.id.nav_donor_add_supply);
+                topLevelDestinations.add(R.id.nav_barangay_request);
+                navigationView.getMenu().findItem(R.id.nav_upload_id).setVisible(false);
+            }
+            else if(roleVerbose.equals("4")){
+                roleVerbose = "Admin";
+            }
+            else{
+                roleVerbose = "Resident";
+                topLevelDestinations.add(R.id.nav_home);
+                topLevelDestinations.add(R.id.nav_qr_scanner);
+                topLevelDestinations.add(R.id.nav_barangay_request);
+                topLevelDestinations.add(R.id.nav_view_requests);
+                topLevelDestinations.add(R.id.nav_view_supplies);
+                topLevelDestinations.add(R.id.nav_transactions);
+                topLevelDestinations.add(R.id.nav_upload_id);
+                topLevelDestinations.add(R.id.nav_user_profile);
+                navigationView.getMenu().findItem(R.id.nav_donor_add_supply).setVisible(false);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         try {
             String baseUrl = OkHttpSingleton.getInstance().getBaseUrl();
             nameTxt.setText(currentUserThread.getUser().getString("username"));
             emailTxt.setText(currentUserThread.getUser().getString("email"));
-            roleTxt.setText(currentUserThread.getUser().getString("role"));
+            roleTxt.setText("Role: " + roleVerbose);
             Picasso.with(this).load(baseUrl + currentUserThread
                     .getUser().getString("profile_picture"))
                     .into(profilePictureImg);
@@ -87,7 +148,8 @@ public class HomeActivity extends AppCompatActivity {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_qr_scanner)
+//                R.id.nav_home, R.id.nav_qr_scanner)
+                topLevelDestinations)
                 .setOpenableLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_home);
