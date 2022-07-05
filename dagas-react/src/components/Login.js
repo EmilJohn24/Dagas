@@ -18,6 +18,9 @@ import {
     Col
   } from "reactstrap";
 
+  import packageJson from '../../package.json';
+
+
 
 // Formik Tutorial: https://formik.org/docs/tutorial
 // TODO: Consider using class-based handling using <Formik> (https://stackblitz.com/edit/react-formik-form-validation-gge2u7?file=App%2FRegister.jsx)
@@ -31,7 +34,7 @@ function Login(props){
         },
         onSubmit: async values => {
             console.log(values);
-            const data = await fetch('/api/rest-authlogin/', {
+            const data = await fetch(packageJson.proxy + '/api/rest-authlogin/', {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json'

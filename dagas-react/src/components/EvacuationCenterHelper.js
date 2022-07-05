@@ -32,6 +32,13 @@ export function getCenterX(){
 export function getCenterY(){
     return y;
 }
+
+// export function useNewMarkerLatLng(lat, lng){
+//     const [newMarkerLat, changeMarkerLat] = useState(lat);
+//     const [newMarkerLng, changeMarkerLng] = useState(lng);
+//     return {lat: newMarkerLat, lng: newMarkerLng};
+// }
+
 export function RecenterMap() {
     const map = useGoogleMap();
     useEffect(() => {

@@ -12,6 +12,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import UserTest from './test/userTest';
 import InternalEvacuationCenter from './components/EvacuationCenterRender';
+import axios from "axios";
+
 // function App() {
 //   return (
 //     <Router>
@@ -21,6 +23,7 @@ import InternalEvacuationCenter from './components/EvacuationCenterRender';
 //     </Router>
 //   );
 // }
+// axios.defaults.withCredentials = true
 
 class App extends Component{
   //retrieves the attributes of the tag and initializes the object
