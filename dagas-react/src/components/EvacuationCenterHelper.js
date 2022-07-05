@@ -24,9 +24,18 @@ export function setCoords(newX, newY){
     x = newX;
     y = newY;
 }
+
+export function getCenterX(){
+    return x;
+}
+
+export function getCenterY(){
+    return y;
+}
 export function RecenterMap() {
     const map = useGoogleMap();
-    React.useEffect(() => {
+    useEffect(() => {
+        console.log("Recentering map...");
         if (map){
                 map.panTo({lat: x, lng: y});
         }

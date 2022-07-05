@@ -4,7 +4,8 @@ import React from 'react';
 import axios from "axios";
 import { GoogleMap, LoadScript, Marker, useGoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import { wait } from '@testing-library/user-event/dist/utils';
-import { RecenterMap, recenterMap, refreshEvacuationCenters, setCoords } from './EvacuationCenterHelper';
+import Select from 'react-select'
+import { getCenterX, getCenterY, RecenterMap, recenterMap, refreshEvacuationCenters, setCoords } from './EvacuationCenterHelper';
 //Based on: https://react-google-maps-api-docs.netlify.app
 //Properties
 
@@ -30,7 +31,14 @@ function InternalEvacuationCenter() {
 
   var updateCount = 0;
   const [evacuationCenters, setEvacuationCenters] = useState([]);
-  const [isLoading, setLoading] = useState(true);
+  const [isEvacuationCenterLoading, setLoading] = useState(true);
+  const [evacuationSelectInput, changeEvacuationSelectInput] = useState(null);
+  const { isLoaded, loadError } = useJsApiLoader({
+    googleMapsApiKey: "AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM" // ,
+    // ...otherOptions
+  })
+
+  
  const refreshEvacuationCenters = () => {
     console.log("Requesting for evacuation centers...");
     axios
@@ -40,24 +48,32 @@ function InternalEvacuationCenter() {
         setLoading(false);
       })
       .catch((error) => console.log(error));
- }
+  }
+  
 //   };
   useEffect(() => {
     refreshEvacuationCenters();
   
   }, [])    
-    
+  //Use Default value
   useEffect(() => {
     if (evacuationCenters && evacuationCenters.length > 0){
       setCoords(parseFloat(evacuationCenters.at(0).geolocation.split(",")[0]), parseFloat(evacuationCenters.at(0).geolocation.split(",")[1]));
       // RecenterMap();
     }
   }, [evacuationCenters])
+  
+  //Respond to changes in drop down
+  // useEffect(() => {
+  //   console.log(evacuationSelectInput);
+  //   if (evacuationSelectInput)
+  //     setCoords(parseFloat(evacuationSelectInput.value.split(",")[0]), parseFloat(evacuationSelectInput.value.split(",")[1]));
+  //   console.log("New X: " + getCenterX());
+  //   console.log("New Y: " + getCenterY());
+  // }, [evacuationSelectInput]);
 
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM" // ,
-    // ...otherOptions
-  })
+
+
 
   const renderEvacuationCenter = () => {
     return  evacuationCenters.map((item) => {
@@ -88,21 +104,51 @@ function InternalEvacuationCenter() {
         
       }
     )
-    if (isLoading && loadError) return <div className="map">Loading...</div>
+    const retrieveOptions = () => {
+      console.log("Loading selector items...");
+      console.log(evacuationCenters);
+      var optionArray = Array.from(evacuationCenters, (evacuationCenter) => {
+        return {'value': evacuationCenter.geolocation, 'label': evacuationCenter.name};
+      });
+      console.log(optionArray);
+      return optionArray;
+    }
+
+    const handleSelectorChange = (selectedOption) => {
+      changeEvacuationSelectInput(selectedOption);
+      if (selectedOption)
+        setCoords(parseFloat(selectedOption.value.split(",")[0]), parseFloat(selectedOption.value.split(",")[1]));
+      console.log("New X: " + getCenterX());
+      console.log("New Y: " + getCenterY());
+      console.log("New Selected Name: " + selectedOption.label);
+      console.log("Selected: " + selectedOption.toString());
+    }
+    
+    if (isEvacuationCenterLoading && !isLoaded) return <div className="map">Loading...</div>
+    // Documentation for react-select: https://react-select.com/home
     else return (
     // <LoadScript googleMapsApiKey="AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM">
+    <div className="map_container">
       <GoogleMap
-       mapContainerStyle={containerStyle}
-       zoom={20}
-       center={center}
-      options={options}
-      onLoad={onLoad}>
-      {
-        // ...Your map components
-         renderEvacuationCenter()
-      }
-      <RecenterMap/>
+        mapContainerStyle={containerStyle}
+        zoom={20}
+        center={center}
+        options={options}
+        onLoad={onLoad}>
+        {
+          // ...Your map components
+          renderEvacuationCenter()
+        }
+        <RecenterMap/>
+        <Select 
+          options={retrieveOptions()} 
+          onChange={handleSelectorChange}
+        />
+
       </GoogleMap>
+
+      </div>
+
     // </LoadScript>
     )
   // }
