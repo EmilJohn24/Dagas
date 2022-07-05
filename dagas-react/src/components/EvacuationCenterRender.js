@@ -213,9 +213,10 @@ function InternalEvacuationCenter(props) {
                   async values => {
                     console.log(values);
                     axios
-                      .post(packageJson.proxy + '/relief/api/evacuation-center/', JSON.stringify(values), {
+                      .post('/relief/api/evacuation-center/', JSON.stringify(values), {
                           "headers": {'Content-Type': 'application/json'},
-                          "credentials": "include"
+                          "credentials": "include",
+                          "withCredentials": true
                       })
                       .catch((error) => console.log(error));
                     // const data = await fetch(packageJson.proxy + '/relief/api/evacuation-center/', {

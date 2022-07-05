@@ -47,12 +47,14 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'rest_auth',
+    # 'rest_auth',
     'rest_auth.registration',
     'django_google_maps',
     # profiling
     'silk',
     'corsheaders',
+    # Authentication: https://www.django-rest-framework.org/api-guide/authentication/
+    'dj_rest_auth',
 ]
 
 MIDDLEWARE = [
@@ -164,12 +166,28 @@ LOGIN_URL = 'rest_login'
 #             'rest_framework_simplejwt.authentication.JWTAuthentication',
 #              ]
 # }
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # https://dj-rest-auth.readthedocs.io/en/latest/installation.html#json-web-token-jwt-support-optional
+        # Required Fix: Had to downgrade PyJWT to 1.7.1
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
+REST_USE_JWT = True
+JWT_AUTH_COOKIE = 'jwt-auth'
+JWT_AUTH_REFRESH_COOKIE = 'jwt-refresh-token'
+
+# REST_USE_JWT = True
+# JWT_AUTH_COOKIE = 'my-app-auth'
+# JWT_AUTH_REFRESH_COOKIE = 'my-refresh-token'
 # Auth registration settings
 SITE_ID = 1
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 AUTHENTICATION_BACKENDS = [
     # allauth specific authentication methods, such as login by e-mail
-    'allauth.account.auth_backends.AuthenticationBackend',
+    # 'allauth.account.auth_backends.AuthenticationBackend',
     # Needed to login by username in Django admin, regardless of allauth
     'django.contrib.auth.backends.ModelBackend',
 ]
@@ -189,10 +207,18 @@ GOOGLE_MAPS_API_KEY = "AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM";
 
 # Cors settings
 # Based on: https://www.digitalocean.com/community/tutorials/build-a-to-do-application-using-django-and-react
-# CORS_ORIGIN_WHITELIST = [
-#     'http://localhost:3000',
-# ]
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://192.168.100.2:3000',
+    'http://localhost:3000',
+]
+CSRF_TRUSTED_ORIGINS = [
+    'http://192.168.100.2:3000',
+    'http://localhost:3000',
+]
+
+
+CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),

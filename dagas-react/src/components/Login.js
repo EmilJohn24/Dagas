@@ -34,7 +34,7 @@ function Login(props){
         },
         onSubmit: async values => {
             console.log(values);
-            const data = await fetch(packageJson.proxy + '/api/rest-authlogin/', {
+            const data = await fetch('/api/rest-authlogin/', {
               method: 'POST',
               headers: {
                   'Content-Type': 'application/json'

@@ -23,7 +23,7 @@ import axios from "axios";
 //     </Router>
 //   );
 // }
-// axios.defaults.withCredentials = true
+axios.defaults.withCredentials = true
 
 class App extends Component{
   //retrieves the attributes of the tag and initializes the object
