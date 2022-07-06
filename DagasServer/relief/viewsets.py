@@ -50,6 +50,14 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         user.save()
         return Response({'status': 'File uploaded'})
 
+    @action(detail=True, methods=['get'], name='Get Most Recent Location')
+    def get_most_recent_location(self, request, pk=None):
+        requested_user = self.get_object()
+        user_locations = UserLocation.objects.filter(user=requested_user)
+        most_recent_location = user_locations.last()
+        most_recent_location_serialized = UserLocationSerializer(most_recent_location)
+        return Response(most_recent_location_serialized.data)
+
 
 class UserLocationViewSet(viewsets.ModelViewSet):
     queryset = UserLocation.objects.all()

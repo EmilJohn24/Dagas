@@ -23,6 +23,8 @@ import {
   Col
 } from "reactstrap";
 import packageJson from '../../package.json';
+import { geocodeByPlaceId, geocodeByLatLng  } from 'react-google-places-autocomplete';
+
 
 //Based on: https://react-google-maps-api-docs.netlify.app
 //Properties
@@ -154,10 +156,29 @@ function InternalEvacuationCenter(props) {
 
     const handleMapClick = async (e) => {
       const latLng = e.latLng;
+      console.log(e);
+      if (e.placeId){
+        geocodeByPlaceId(e.placeId)
+            .then(results => {
+              console.log(results);
+              if (setFieldValueRef)
+                setFieldValueRef('address', results[0].formatted_address);
+            })
+            .catch(error => console.log(error));
+            
+      } else {
+        geocodeByLatLng(latLng)
+              .then(results => {
+                if (setFieldValueRef)
+                  setFieldValueRef('address', results[0].formatted_address);
+              })
+              .catch(error => console.log(error));
+      }
       changeMarkerLat(latLng.lat());
       changeMarkerLng(latLng.lng());
-      if (setFieldValueRef)
+      if (setFieldValueRef){
         setFieldValueRef('geolocation', latLng.lat() + ',' + latLng.lng());
+      }
       console.log("Moving new marker");
     }
 
@@ -175,6 +196,10 @@ function InternalEvacuationCenter(props) {
       <Container>
         <Row>
           <Col>
+            <Select 
+                  options={retrieveOptions()} 
+                  onChange={handleSelectorChange}
+                />
             <GoogleMap
               mapContainerStyle={containerStyle}
               zoom={20}
@@ -187,10 +212,7 @@ function InternalEvacuationCenter(props) {
                   renderEvacuationCenter()
                 }
                 <RecenterMap/>
-                <Select 
-                  options={retrieveOptions()} 
-                  onChange={handleSelectorChange}
-                />
+              
                 <Marker
                 icon={{
                   path: window.google.maps.SymbolPath.CIRCLE,
