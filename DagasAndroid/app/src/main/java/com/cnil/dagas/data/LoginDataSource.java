@@ -85,7 +85,8 @@ public class LoginDataSource {
                 return new LoggedInUser(token, username);
             }
             else{
-                String token = responseJSON.get("key").toString();
+//                String token = responseJSON.get("key").toString();
+                String token = username;
                 Log.i(TAG, token);
                 return new LoggedInUser(token, username);
             }
@@ -102,6 +103,7 @@ public class LoginDataSource {
 //                    new LoggedInUser(
 //                            java.util.UUID.randomUUID().toString(),
 //                            "Jane Doe");
+//            return new Result.Success<>(loginThread.loggedInUser);
             if(loginThread.loggedInUser.getToken().equals("403")) return new Result.Error(new Exception("Exception message"));
             else return new Result.Success<>(loginThread.loggedInUser);
         } catch (Exception e) {

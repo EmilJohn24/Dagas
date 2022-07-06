@@ -5,6 +5,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
+// TODO: Consider changing to Retrofit (https://square.github.io/retrofit/)
 public class OkHttpSingleton extends OkHttpClient {
     private final String BASE_URL = "http://192.168.100.2:8000";
     private String credentials;

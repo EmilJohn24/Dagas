@@ -25,6 +25,7 @@ import com.cnil.dagas.data.CurrentUserThread;
 import com.cnil.dagas.data.ResidentRegisterActivity;
 import com.cnil.dagas.databinding.ActivityHomeBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
+import com.cnil.dagas.services.location.LocationService;
 import com.cnil.dagas.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
 import com.squareup.picasso.Picasso;
@@ -44,7 +45,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        // TODO: Check permissions here
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -56,6 +57,7 @@ public class HomeActivity extends AppCompatActivity {
 //                        .setAction("Action", null).show();
 //            }
 //        });
+        startService(new Intent(this, LocationService.class));
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         TextView nameTxt = (TextView) navigationView.getHeaderView(0).findViewById(R.id.nameTxt);

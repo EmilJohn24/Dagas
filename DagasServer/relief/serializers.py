@@ -6,7 +6,7 @@ from rest_framework.reverse import reverse
 
 from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \
     ItemType, ItemRequest, BarangayRequest, EvacuationDetails, Transaction, TransactionImage, EvacuationCenter, \
-    TransactionOrder
+    TransactionOrder, UserLocation
 
 
 class ItemTypeSerializer(serializers.ModelSerializer):
@@ -50,6 +50,13 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email', 'role', 'profile_picture')
         read_only_fields = ('profile_picture',)
+
+
+class UserLocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserLocation
+        fields = ('id', 'user', 'geolocation', 'time')
+        read_only_fields = ('user', 'time',)
 
 
 # Profile serializers
@@ -229,6 +236,7 @@ class CustomRegisterSerializer(RegisterSerializer):
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     role = serializers.ChoiceField(choices=User.ROLE_CHOICES, allow_null=True, allow_blank=True)
+
     # profile_picture = serializers.ImageField()
     def get_cleaned_data(self):
         super(CustomRegisterSerializer, self).get_cleaned_data()

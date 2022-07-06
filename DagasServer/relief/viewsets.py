@@ -6,11 +6,11 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError, ValidationError
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
-    BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder
+    BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder, UserLocation
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
     ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
-    DonationSerializer, EvacuationCenterSerializer, TransactionOrderSerializer
+    DonationSerializer, EvacuationCenterSerializer, TransactionOrderSerializer, UserLocationSerializer
 
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
@@ -49,6 +49,14 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         user.profile_picture = list(request.FILES.values())[0]  # Get first file
         user.save()
         return Response({'status': 'File uploaded'})
+
+
+class UserLocationViewSet(viewsets.ModelViewSet):
+    queryset = UserLocation.objects.all()
+    serializer_class = UserLocationSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(time=datetime.now(), user=self.request.user)
 
 
 class ResidentViewSet(viewsets.ModelViewSet):
@@ -133,7 +141,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         current_donor = DonorProfile.objects.get(user=self.request.user)
-        serializer.save(donor=current_donor, received=Transaction.PACKAGING,)
+        serializer.save(donor=current_donor, received=Transaction.PACKAGING, )
     # Note: Based on total pool of donations
     # TODO: Consider checking for oversupply
     # def perform_create(self, serializer):

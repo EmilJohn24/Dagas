@@ -172,6 +172,7 @@ REST_FRAMEWORK = {
         # Required Fix: Had to downgrade PyJWT to 1.7.1
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ]
 }
@@ -187,7 +188,7 @@ SITE_ID = 1
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 AUTHENTICATION_BACKENDS = [
     # allauth specific authentication methods, such as login by e-mail
-    # 'allauth.account.auth_backends.AuthenticationBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
     # Needed to login by username in Django admin, regardless of allauth
     'django.contrib.auth.backends.ModelBackend',
 ]

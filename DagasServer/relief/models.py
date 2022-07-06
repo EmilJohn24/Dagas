@@ -20,10 +20,13 @@ from django.utils import timezone
 from django_google_maps import fields as map_fields
 from DagasServer import settings
 
+
 # START User Management
 # User profile picture path
 def user_profile_picture_path(instance, filename):
     return 'profilePicture/id_{0}/{1}'.format(instance.id, filename)
+
+
 # Use default user model
 
 
@@ -50,6 +53,12 @@ def resident_id_path(instance, filename):
     return 'resident/id_{0}/{1}'.format(instance.user.id, filename)
 
 
+class UserLocation(models.Model):
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, null=True, related_name="user_location")
+    geolocation = map_fields.GeoLocationField(max_length=100, null=True)
+    time = models.DateTimeField('Date and time')
+
+
 class ResidentProfile(models.Model):
     """
         User information exclusive to residents
@@ -57,7 +66,7 @@ class ResidentProfile(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, null=True, related_name="resident_profile")
     # TODO: Add Pillow library to support ImageField
     gov_id = models.ImageField(null=True, upload_to=resident_id_path)
-    barangay = models.ForeignKey(to="BarangayProfile", on_delete=models.CASCADE, related_name="barangay", null=True,)
+    barangay = models.ForeignKey(to="BarangayProfile", on_delete=models.CASCADE, related_name="barangay", null=True, )
 
 
 class DonorProfile(models.Model):
