@@ -2,7 +2,7 @@ import '../App.css';
 import { Component, useState, useEffect } from 'react';
 import React from 'react';
 import axios from "axios";
-import { GoogleMap, LoadScript, Marker, useGoogleMap, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, StandaloneSearchBox, Marker, useGoogleMap, useJsApiLoader, Autocomplete } from '@react-google-maps/api';
 import Select from 'react-select'
 import { Form, Formik, Field } from 'formik';
 
@@ -46,6 +46,7 @@ const center = {
   lat: -3.745,
   lng: -38.523
 };
+const libs = ["places"]
 
 function InternalEvacuationCenter(props) {
 
@@ -57,8 +58,10 @@ function InternalEvacuationCenter(props) {
   const [newMarkerLng, changeMarkerLng] = useState(0);
   const [newMarker, changeMarker] = useState(null);
   var setFieldValueRef = null;
+  var searchBoxRef = null;
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM" // ,
+    googleMapsApiKey: "AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM", // ,
+    libraries: libs,
     // ...otherOptions
   })
 
@@ -181,9 +184,21 @@ function InternalEvacuationCenter(props) {
       }
       console.log("Moving new marker");
     }
+    const handleQueryFieldLoad = (autocomplete) => {
+      console.log(autocomplete);
+      searchBoxRef = autocomplete;
+    }
+    const handleMapQuery = () => {
+      console.log(searchBoxRef);
+      if (searchBoxRef){
+        var top_place = searchBoxRef.getPlace();
+        console.log(top_place);
+        setCoords(parseFloat(top_place.geometry.location.lat()), parseFloat(top_place.geometry.location.lng()));
+        // console.log(top_place_location.lat());
+        // setCoords(top_place_location.lat(), top_place_location.lng());
+      }
+    }
 
-    
-  
     
     if (isEvacuationCenterLoading && !isLoaded) return <div className="map">Loading...</div>
     // Documentation for react-select: https://react-select.com/home
@@ -200,6 +215,11 @@ function InternalEvacuationCenter(props) {
                   options={retrieveOptions()} 
                   onChange={handleSelectorChange}
                 />
+            <Autocomplete
+                onLoad={handleQueryFieldLoad}
+                onPlaceChanged={handleMapQuery}>
+                <Input id="query" name="query" type="text"/>
+            </Autocomplete>
             <GoogleMap
               mapContainerStyle={containerStyle}
               zoom={20}
@@ -221,6 +241,9 @@ function InternalEvacuationCenter(props) {
                 draggable={true}
                 position={newMarker}
                 onDragEnd={handleMapClick}/>
+              
+        
+
             </GoogleMap>
           </Col>
           <Col>
