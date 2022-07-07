@@ -12,3 +12,5 @@ PyJWT==v1.7.1
 djangorestframework-oauth
 django-oauth-toolkit
 dj-rest-auth
+celery
+redis

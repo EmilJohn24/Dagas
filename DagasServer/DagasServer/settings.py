@@ -55,6 +55,9 @@ INSTALLED_APPS = [
     'corsheaders',
     # Authentication: https://www.django-rest-framework.org/api-guide/authentication/
     'dj_rest_auth',
+    # Background tasks for algorithm: https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html/
+    # Extra tutorial: https://realpython.com/asynchronous-tasks-with-django-and-celery/#step-1-add-celerypy
+    'celery',
 ]
 
 MIDDLEWARE = [
@@ -253,3 +256,12 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
+# Celery
+CELERY_BROKER_URL = 'redis://localhost:6379'
+# CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = "Australia/Tasmania"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
