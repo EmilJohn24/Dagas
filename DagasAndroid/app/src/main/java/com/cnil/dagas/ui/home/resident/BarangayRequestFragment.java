@@ -189,14 +189,18 @@ public class BarangayRequestFragment extends Fragment {
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int foodAmount =Integer.parseInt(foodAmountEdit.getText().toString());
+                int foodAmount = 0;
                 boolean foodChecked = foodCheckbox.isChecked();
+                if (foodChecked) foodAmount =Integer.parseInt(foodAmountEdit.getText().toString());
 
-                int waterAmount = Integer.parseInt(waterAmountEdit.getText().toString());
+
+                int waterAmount = 0;
                 boolean waterChecked = waterCheckbox.isChecked();
+                if (waterChecked) waterAmount = Integer.parseInt(waterAmountEdit.getText().toString());
 
-                int clothesAmount = Integer.parseInt(clothesAmountEdit.getText().toString());
+                int clothesAmount = 0;
                 boolean clothesChecked = clothesCheckbox.isChecked();
+                if (clothesChecked) clothesAmount = Integer.parseInt(clothesAmountEdit.getText().toString());
 
                 //TODO: Link water and clothes amount
                 AddBarangayRequestThread thread = null;
