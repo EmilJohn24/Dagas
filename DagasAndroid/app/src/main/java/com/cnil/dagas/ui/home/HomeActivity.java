@@ -82,12 +82,12 @@ public class HomeActivity extends AppCompatActivity {
                 roleVerbose = "Resident";
                 topLevelDestinations.add(R.id.nav_home);
                 topLevelDestinations.add(R.id.nav_qr_scanner);
-                topLevelDestinations.add(R.id.nav_barangay_request);
-                topLevelDestinations.add(R.id.nav_view_requests);
-                topLevelDestinations.add(R.id.nav_view_supplies);
                 topLevelDestinations.add(R.id.nav_transactions);
                 topLevelDestinations.add(R.id.nav_upload_id);
                 topLevelDestinations.add(R.id.nav_user_profile);
+                navigationView.getMenu().findItem(R.id.nav_barangay_request).setVisible(false);
+                navigationView.getMenu().findItem(R.id.nav_view_requests).setVisible(false);
+                navigationView.getMenu().findItem(R.id.nav_view_supplies).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_donor_add_supply).setVisible(false);
             }
             else if(roleVerbose.equals("2")){
