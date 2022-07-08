@@ -47,6 +47,10 @@ class User(AbstractUser):
 
     profile_picture = models.ImageField(null=True, blank=True, upload_to=user_profile_picture_path)
 
+    def get_most_recent_location(self):
+        user_locations = UserLocation.objects.filter(user=self)
+        return user_locations.last()
+
 
 # User Profiles
 def resident_id_path(instance, filename):
@@ -137,6 +141,9 @@ class EvacuationCenter(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_geolocation(self):
+        return self.geolocation
 
 
 class Donation(models.Model):
