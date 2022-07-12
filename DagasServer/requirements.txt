@@ -17,3 +17,4 @@ redis
 numpy
 sklearn
 pandas
+haversine
