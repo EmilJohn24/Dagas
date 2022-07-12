@@ -6,7 +6,7 @@ from celery import Celery
 # https://www.rabbitmq.com/install-windows.html#chocolatey
 # Run: rabbitmq-server -detached
 # Run: celery -A DagasServer worker --loglevel=INFO
-
+# To stop: rabbitmqctl stop
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DagasServer.settings')
 
