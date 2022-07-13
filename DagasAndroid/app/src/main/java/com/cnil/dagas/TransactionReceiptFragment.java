@@ -1,15 +1,16 @@
 package com.cnil.dagas;
 
-import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
@@ -36,12 +37,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.concurrent.Executor;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -51,8 +50,21 @@ import okhttp3.Response;
 
 public class TransactionReceiptFragment extends Fragment  implements OnMapReadyCallback {
     static private final String TAG = TransactionReceiptFragment.class.getName();
+    double userLat = 0;
+    double userLong = 0;
 
-
+    // Based on: https://stackoverflow.com/questions/18125241/how-to-get-data-from-service-to-activity
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            String message = intent.getStringExtra("Status");
+            Bundle b = intent.getBundleExtra("Location");
+            userLat = b.getDouble("latitude");
+            userLong = b.getDouble("longitude");
+            // Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        }
+    };
 
     public static class RetrieveTransactionInfo extends Thread{
         private String transactionURL;
@@ -150,6 +162,9 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
             double longtitude = Float.parseFloat(splitCoord[1]);
             LatLng evacLatLng = new LatLng(latitude, longtitude);
 
+            map.addMarker(new MarkerOptions()
+                            .position(new LatLng(userLat,userLong))
+                            .title("user location"));
             map.addMarker(new MarkerOptions()
                             .position(evacLatLng)
                             .title(name));
@@ -251,6 +266,8 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         View root = binding.getRoot();
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(
+                mMessageReceiver, new IntentFilter("GPSLocationUpdates"));
         evacuationCenterMapView = root.findViewById(R.id.evacMapView);
         evacuationCenterMapView.onCreate(savedInstanceState);
         evacuationCenterMapView.onResume();
