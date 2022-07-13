@@ -2,14 +2,12 @@ package com.cnil.dagas.services.location.helpers;
 
 import android.util.Log;
 
-import com.cnil.dagas.TransactionSupplyAdapter;
 import com.cnil.dagas.http.OkHttpSingleton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.Map;
 
 import okhttp3.MediaType;
 import okhttp3.Request;

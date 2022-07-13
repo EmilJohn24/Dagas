@@ -15,7 +15,11 @@
         android:id="@+id/nav_qr_scanner"
         android:name="com.cnil.dagas.ui.home.resident.qrscanner"
         android:label="Qr Scanner"
-        tools:layout="@layout/qr_scanner" />
+        tools:layout="@layout/qr_scanner" >
+        <action
+            android:id="@+id/action_nav_qr_scanner_to_nav_transaction_receipt"
+            app:destination="@id/nav_transaction_receipt" />
+    </fragment>
     <fragment
         android:id="@+id/nav_barangay_request"
         android:name="com.cnil.dagas.ui.home.resident.BarangayRequestFragment"

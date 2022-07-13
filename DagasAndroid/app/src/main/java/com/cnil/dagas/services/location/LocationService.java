@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.cnil.dagas.R;
 import com.cnil.dagas.services.location.helpers.CustomLocationListener;
@@ -59,6 +61,7 @@ public class LocationService extends Service {
             public void onLocationChanged(Location location) {
                 LocationUpdateThread locationUpdateThread = new LocationUpdateThread(location.getLatitude(),
                                                                                     location.getLongitude());
+                sendMessageToActivity(location, "foo");
                 locationUpdateExecutor.execute(locationUpdateThread);
                 latestLocation = location;
 
@@ -66,6 +69,17 @@ public class LocationService extends Service {
         });
         return START_STICKY;
         //        return super.onStartCommand(intent, flags, startId);
+    }
+
+    private void sendMessageToActivity(Location l, String msg) {
+        Intent intent = new Intent("GPSLocationUpdates");
+        // You can also include some extra data.
+        intent.putExtra("Status", msg);
+        Bundle b = new Bundle();
+        b.putDouble("latitude", l.getLatitude());
+        b.putDouble("longitude", l.getLongitude());
+        intent.putExtra("Location", b);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     @Override

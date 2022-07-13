@@ -108,10 +108,10 @@ public class HomeActivity extends AppCompatActivity {
                 topLevelDestinations.add(R.id.nav_qr_scanner);
                 topLevelDestinations.add(R.id.nav_user_profile);
                 topLevelDestinations.add(R.id.nav_view_requests);
-                topLevelDestinations.add(R.id.nav_view_supplies);
                 topLevelDestinations.add(R.id.nav_transactions);
                 topLevelDestinations.add(R.id.nav_donor_add_supply);
                 topLevelDestinations.add(R.id.nav_barangay_request);
+                navigationView.getMenu().findItem(R.id.nav_view_supplies).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_upload_id).setVisible(false);
             }
             else if(roleVerbose.equals("4")){
