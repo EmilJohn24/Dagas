@@ -18,3 +18,4 @@ numpy
 sklearn
 pandas
 haversine
+shapely

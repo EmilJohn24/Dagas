@@ -1,6 +1,9 @@
 import copy
 import sys
+import warnings
+from datetime import timedelta
 from itertools import islice
+import random
 
 from celery import shared_task
 
@@ -8,7 +11,13 @@ from celery import shared_task
 # https://docs.celeryq.dev/en/stable/getting-started/next-steps.html#next-steps
 # https://docs.celeryq.dev/en/stable/getting-started/first-steps-with-celery.html#first-steps
 # https://docs.celeryq.dev/en/latest/django/first-steps-with-django.html#using-celery-with-django
-from relief.models import DonorProfile, BarangayRequest, User, ItemType, Supply
+from django.contrib.auth import get_user_model
+from django.contrib.sessions.backends.db import SessionStore
+from django.http import HttpRequest
+from django.utils.datetime_safe import datetime
+
+from relief.models import DonorProfile, BarangayRequest, User, ItemType, Supply, ResidentProfile, Donation, \
+    UserLocation, ItemRequest, Transaction, TransactionOrder, EvacuationCenter, BarangayProfile
 
 # Algorithm section
 # Algorithm-related imports
@@ -16,6 +25,11 @@ from sklearn.neighbors import BallTree
 import numpy as np
 import pandas as pd
 from haversine import haversine_vector, Unit
+
+# Algorithm-related stuff
+from relief.serializers import UserSerializer, EvacuationCenterSerializer, UserLocationSerializer, DonationSerializer, \
+    CustomRegisterSerializer
+from shapely.geometry import Polygon, Point
 
 
 def window(seq, n=2):
@@ -29,19 +43,6 @@ def window(seq, n=2):
         result = result[1:] + (elem,)
         yield result
 
-
-# def donor_request_count(donor_index, algo_data, data):
-#     count = 0
-#     request_list
-#     for item_type in data['item_types']:
-#         assignments = algo_data['request_assignments_' + item_type]
-#         count += assignments.count(donor_index)
-#     return count
-# def is_donor_assigned_to_request(donor_index, request_index, algo_data, data):
-#     for item_type in data['item_types']:
-#         if algo_data['request_assignments_' + item_type][request_index] == donor_index:
-#             return True
-#     return False
 
 def algo_v1(orig_data):
     # Algo-data setup
@@ -117,6 +118,7 @@ def algo_v1(orig_data):
     return algo_data, manipulated_data
 
 
+# Data handling
 def generate_data_model_from_db():
     """
     Returns a dictionary containing all relevant data sets from the database
@@ -178,7 +180,112 @@ def generate_data_model_from_db():
     return data
 
 
-# https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.BallTree.html
+@shared_task
+def generate_data(donor_count=10, evacuation_center_count=10):
+    # Clear dataset
+    warnings.filterwarnings('ignore', 'DateTimeField*')
+
+    def polygon_random_points(poly, num_points):
+        min_x, min_y, max_x, max_y = poly.bounds
+        points = []
+        while len(points) < num_points:
+            random_point = Point([random.uniform(min_x, max_x), random.uniform(min_y, max_y)])
+            if random_point.within(poly):
+                points.append(random_point)
+        return points
+
+    # A random polygon around Luzon that dictates the range of generated evacuation centers
+    generation_polygon = Polygon([(19.748940, 117.935121), (19.884123, 126.679918),
+                                  (11.482291, 127.462273), (13.664252, 117.734122)])
+
+    # Step 1: Generate users
+    #   Step 1a: Clear all donors, supplies, and donations
+    User.objects.filter(role=User.DONOR).delete()
+    DonorProfile.objects.all().delete()
+    Donation.objects.all().delete()
+    Supply.objects.all().delete()
+    Transaction.objects.all().delete()
+    TransactionOrder.objects.all().delete()
+    #   Step 1b: Create pseudo-barangay and evacuation centers
+    if not User.objects.filter(role=User.BARANGAY, username="FakeBarangay"):
+        test_barangay = get_user_model().objects.create_user(
+            username="FakeBarangay",
+            password="barangay123",
+            email="fake_barangay@gmail.com",
+            first_name="Fake",
+            last_name="Barangay",
+            role=User.BARANGAY,
+        )
+    # Step 1b-2: Generate evacuation centers
+    barangay_user = User.objects.filter(role=User.BARANGAY, username="FakeBarangay")[0]
+    barangay = BarangayProfile.objects.filter(user=barangay_user)[0]
+    generated_points = polygon_random_points(generation_polygon, evacuation_center_count)
+    for i, point in enumerate(generated_points):
+        # Generate evacuation center
+        point_str = str(point.x) + "," + str(point.y)
+        random_evacuation = EvacuationCenter.objects.create(
+            name="Evacuation" + str(i),
+            barangays=barangay,
+            address="N/A",
+            geolocation=point_str,
+        )
+        if random_evacuation:
+            # Step 2: Generate requests
+
+            request = BarangayRequest.objects.create(
+                evacuation_center=random_evacuation,
+                expected_date=datetime.now() + timedelta(days=1),
+                barangay=barangay,
+            )
+            # Generate item request for each type
+            for item_type in ItemType.objects.all():
+                random_pax = random.randrange(100, 1000)
+                ItemRequest.objects.create(
+                    barangay_request=request,
+                    date_added=datetime.now(),
+                    pax=random_pax,
+                    type=item_type,
+                )
+
+    #   Step 1c: Generate donors (with locations and donations)
+    generated_donor_points = polygon_random_points(generation_polygon, donor_count)
+    for i, point in enumerate(generated_donor_points):
+        donor_point_str = str(point.x) + "," + str(point.y)
+        if not User.objects.filter(role=User.DONOR, username="FakeDonor" + str(i)):
+            new_donor = get_user_model().objects.create_user(
+                username="FakeDonor" + str(i),
+                password="donor123",
+                email="fake_donor" + str(i) + "@gmail.com",
+                first_name="Fake",
+                last_name="Donor",
+                role=User.DONOR,
+            )
+        donor_user = User.objects.filter(role=User.DONOR, username=str("FakeDonor" + str(i)))[0]
+        donor = DonorProfile.objects.filter(user=donor_user)[0]
+        UserLocation.objects.create(
+            user=donor_user,
+            geolocation=donor_point_str,
+            time=datetime.now(),
+        )
+        pseudo_donation = Donation.objects.create(
+            donor=donor,
+            datetime_added=datetime.now(),
+        )
+
+        # Generate supplies
+        for item_type in ItemType.objects.all():
+            random_quantity = random.randrange(1000, 10000)
+            new_supply = Supply.objects.create(
+                name="GenericSupply",
+                type=item_type,
+                pax=random_quantity,
+                quantity=random_quantity,
+                donation=pseudo_donation,
+            )
+
+    # https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.BallTree.html
+
+
 def nearest_neighbor_query(lats, lons, tree, requests, k=5, ):
     distances, indices = tree.query(np.deg2rad(np.c_[lats, lons]), k=k)
     # nearest_evacs = requests['name'].iloc[indices[:, 0]]
