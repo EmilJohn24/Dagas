@@ -105,6 +105,8 @@ def algo_v1(orig_data):
                             chosen_request_index = request_index
                             chosen_position = index
         # insertion here (including all updates)
+        if chosen_donor_index is None:
+            continue
         if chosen_position is not None:
             algo_data["routes"][chosen_donor_index].insert(chosen_position, chosen_request_index)
         else:
@@ -204,6 +206,8 @@ def generate_data(donor_count=10, evacuation_center_count=10):
     DonorProfile.objects.all().delete()
     Donation.objects.all().delete()
     Supply.objects.all().delete()
+    BarangayRequest.objects.all().delete()
+    ItemRequest.objects.all().delete()
     Transaction.objects.all().delete()
     TransactionOrder.objects.all().delete()
     #   Step 1b: Create pseudo-barangay and evacuation centers
