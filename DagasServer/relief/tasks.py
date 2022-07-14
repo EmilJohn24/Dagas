@@ -44,18 +44,23 @@ def window(seq, n=2):
         yield result
 
 
-def algo_v1(orig_data):
+def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
     # Algo-data setup
     #   1: Requests assigned to each donor
     data = copy.deepcopy(orig_data)  # copy the contents of the data model
-
-    algo_data = {}
-    algo_data['donor_request_counts'] = [0] * data['num_vehicles']
-    algo_data['routes'] = []
-    for i in range(data['num_vehicles']):
-        algo_data['routes'].append([])
-    algo_data['min_add_distance'] = [sys.maxsize] * data['num_requests']
-    algo_data['request_assignments'] = [None] * data['num_requests']
+    algo_data = None
+    if algo_data_init is None:
+        algo_data = {}
+        algo_data['donor_request_counts'] = [0] * data['num_vehicles']
+        algo_data['routes'] = []
+        for i in range(data['num_vehicles']):
+            algo_data['routes'].append([])
+        algo_data['min_add_distance'] = [sys.maxsize] * data['num_requests']
+        algo_data['request_assignments'] = [None] * data['num_requests']
+    else:
+        algo_data = copy.deepcopy(algo_data_init)
+        # Copy over everything except request assignments
+        algo_data['request_assignments'] = [None] * data['num_requests']
 
     def distance_n2n(src_node, dst_node):
         return data['distance_matrix'][src_node][dst_node]
@@ -77,7 +82,6 @@ def algo_v1(orig_data):
 
     for item_type in data['item_types']:
         algo_data['request_assignments_' + item_type] = [None] * data['num_requests']
-    item_type_index = 0
     for i in range(data['num_requests']):
         # Loop through unassigned requests
         chosen_donor_index = None
@@ -99,7 +103,8 @@ def algo_v1(orig_data):
                     else:
                         index, distance = cheapest_insertion(algo_data["routes"][donor_index], donor_index,
                                                              request_index)
-                        if distance < algo_data['min_add_distance'][i]:
+                        if distance < algo_data['min_add_distance'][i] \
+                                and request_index not in algo_data["routes"][donor_index]:
                             algo_data['min_add_distance'][i] = distance
                             chosen_donor_index = donor_index
                             chosen_request_index = request_index
@@ -116,8 +121,27 @@ def algo_v1(orig_data):
         algo_data['request_assignments'][chosen_request_index] = chosen_donor_index
         data[data['supply_types'][item_type_index]][chosen_donor_index] -= supply_reduced
         data[data['demand_types'][item_type_index]][chosen_request_index] = 0
+        for i in range(item_type_index + 1, len(data['item_types'])):
+            demand_remaining = data[data['demand_types'][i]][chosen_request_index]
+            supply_remaining = data[data['supply_types'][i]][chosen_donor_index]
+            surplus = supply_remaining - demand_remaining
+            if surplus >= 0:
+                data[data['demand_types'][i]][chosen_request_index] = 0
+                data[data['supply_types'][i]][chosen_donor_index] = surplus
+            else:
+                data[data['demand_types'][i]][chosen_request_index] = abs(surplus)
+                data[data['supply_types'][i]][chosen_donor_index] = 0
+
     manipulated_data = data
     return algo_data, manipulated_data
+
+
+def algo_main(data):
+    current_data = data
+    algo_data = None
+    for i in range(len(data['item_types'])):
+        algo_data, current_data = algo_v1(current_data, item_type_index=i, algo_data_init=algo_data)
+    return algo_data, current_data
 
 
 # Data handling
@@ -203,6 +227,7 @@ def generate_data(donor_count=10, evacuation_center_count=10):
     # Step 1: Generate users
     #   Step 1a: Clear all donors, supplies, and donations
     User.objects.filter(role=User.DONOR).delete()
+    UserLocation.objects.all().delete()
     DonorProfile.objects.all().delete()
     Donation.objects.all().delete()
     Supply.objects.all().delete()
@@ -287,9 +312,8 @@ def generate_data(donor_count=10, evacuation_center_count=10):
                 donation=pseudo_donation,
             )
 
-    # https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.BallTree.html
 
-
+# https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.BallTree.html
 def nearest_neighbor_query(lats, lons, tree, requests, k=5, ):
     distances, indices = tree.query(np.deg2rad(np.c_[lats, lons]), k=k)
     # nearest_evacs = requests['name'].iloc[indices[:, 0]]
@@ -318,7 +342,7 @@ def generate_tree(evacuation_centers, geolocations):
 def algorithm():
     data = generate_data_model_from_db()
     # print(data['distance_matrix'])
-    results, manipulated_data = algo_v1(data)
+    results, manipulated_data = algo_main(data)
     # donors = DonorProfile.objects.all()
     # barangay_requests = BarangayRequest.objects.all()
     # evacuation_centers = BarangayRequest.objects.values_list('evacuation_center', flat=True)
