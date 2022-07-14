@@ -60,6 +60,7 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
     else:
         algo_data = copy.deepcopy(algo_data_init)
         # Copy over everything except request assignments
+        algo_data['min_add_distance'] = [sys.maxsize] * data['num_requests']
         algo_data['request_assignments'] = [None] * data['num_requests']
 
     def distance_n2n(src_node, dst_node):
@@ -80,8 +81,8 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
         min_distance = min(distances)
         return distances.index(min_distance) + 1, min_distance
 
-    for item_type in data['item_types']:
-        algo_data['request_assignments_' + item_type] = [None] * data['num_requests']
+    # for item_type in data['item_types']:
+    #     algo_data['request_assignments_' + item_type] = [None] * data['num_requests']
     for i in range(data['num_requests']):
         # Loop through unassigned requests
         chosen_donor_index = None
