@@ -343,22 +343,4 @@ def algorithm():
     data = generate_data_model_from_db()
     # print(data['distance_matrix'])
     results, manipulated_data = algo_main(data)
-    # donors = DonorProfile.objects.all()
-    # barangay_requests = BarangayRequest.objects.all()
-    # evacuation_centers = BarangayRequest.objects.values_list('evacuation_center', flat=True)
-    # geolocations = list(BarangayRequest.objects.values_list('evacuation_center__geolocation', flat=True))
-    # tree, requests = generate_tree(evacuation_centers=evacuation_centers, geolocations=geolocations)
-
-    # query_valid = []
-    # query_lat = []
-    # query_lon = []
-    # for donor in donors:
-    #     # TODO: Consider creating geolocation for user directly.
-    #     if donor.user.get_most_recent_location():
-    #         query_lat.append(donor.user.get_most_recent_location().geolocation.lat)
-    #         query_lon.append(donor.user.get_most_recent_location().geolocation.lon)
-    #         query_valid.append(donor)
-
-    # _, indices = nearest_neighbor_query(query_lat, query_lon, tree, requests)
-    # print(indices)
     return
