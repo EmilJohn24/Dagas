@@ -320,3 +320,24 @@ class VictimRequest(models.Model):
     # Nullable because this can be requested through the barangay
     resident = models.ForeignKey(to=ResidentProfile, on_delete=models.CASCADE,
                                  related_name='resident_requests', null=True, blank=True)
+
+
+# Algorithm-related models
+class RouteSuggestion(models.Model):
+    # TODO: Add date/time?
+    donor = models.ForeignKey(to=DonorProfile, on_delete=models.CASCADE,
+                              related_name='route_donor', )
+
+
+class RouteNode(models.Model):
+    request = models.ForeignKey(to=BarangayRequest, on_delete=models.CASCADE,
+                                related_name='request', )
+    suggestion = models.ForeignKey(to=RouteSuggestion, on_delete=models.CASCADE, related_name='nodes')
+    distance_from_prev = models.FloatField(null=True,)
+
+
+class Fulfillment(models.Model):
+    """Single item fulfillment connected to routenode"""
+    node = models.ForeignKey(to=RouteNode, on_delete=models.CASCADE, )
+    type = models.ForeignKey(to=ItemType, on_delete=models.CASCADE, )
+    pax = models.IntegerField()

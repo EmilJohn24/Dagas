@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from django_google_maps import widgets as map_widgets
 from django_google_maps import fields as map_fields
 from relief.models import User, Transaction, EvacuationCenter, BarangayProfile, DonorProfile, Donation, Supply, \
-    BarangayRequest, ItemRequest
+    BarangayRequest, ItemRequest, RouteNode, RouteSuggestion, Fulfillment
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Transaction)
@@ -15,6 +15,9 @@ admin.site.register(Donation)
 admin.site.register(Supply)
 admin.site.register(BarangayRequest)
 admin.site.register(ItemRequest)
+admin.site.register(RouteNode)
+admin.site.register(RouteSuggestion)
+admin.site.register(Fulfillment)
 
 
 class EvacuationCenterAdmin(admin.ModelAdmin):

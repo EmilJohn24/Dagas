@@ -17,7 +17,8 @@ from django.http import HttpRequest
 from django.utils.datetime_safe import datetime
 
 from relief.models import DonorProfile, BarangayRequest, User, ItemType, Supply, ResidentProfile, Donation, \
-    UserLocation, ItemRequest, Transaction, TransactionOrder, EvacuationCenter, BarangayProfile
+    UserLocation, ItemRequest, Transaction, TransactionOrder, EvacuationCenter, BarangayProfile, Fulfillment, RouteNode, \
+    RouteSuggestion
 
 # Algorithm section
 # Algorithm-related imports
@@ -57,6 +58,8 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
             algo_data['routes'].append([])
         algo_data['min_add_distance'] = [sys.maxsize] * data['num_requests']
         algo_data['request_assignments'] = [None] * data['num_requests']
+        algo_data['fulfillment_matrix'] = np.zeros((data['num_vehicles'],
+                                                    data['num_requests'], len(data['item_types'])))
     else:
         algo_data = copy.deepcopy(algo_data_init)
         # Copy over everything except request assignments
@@ -122,6 +125,8 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
         algo_data['request_assignments'][chosen_request_index] = chosen_donor_index
         data[data['supply_types'][item_type_index]][chosen_donor_index] -= supply_reduced
         data[data['demand_types'][item_type_index]][chosen_request_index] = 0
+        # Fulfillment
+        algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][item_type_index] += supply_reduced
         for i in range(item_type_index + 1, len(data['item_types'])):
             demand_remaining = data[data['demand_types'][i]][chosen_request_index]
             supply_remaining = data[data['supply_types'][i]][chosen_donor_index]
@@ -129,10 +134,14 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
             if surplus >= 0:
                 data[data['demand_types'][i]][chosen_request_index] = 0
                 data[data['supply_types'][i]][chosen_donor_index] = surplus
+                algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][
+                    i] += demand_remaining
+
             else:
                 data[data['demand_types'][i]][chosen_request_index] = abs(surplus)
                 data[data['supply_types'][i]][chosen_donor_index] = 0
-
+                algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][
+                    i] += supply_remaining
     manipulated_data = data
     return algo_data, manipulated_data
 
@@ -160,7 +169,7 @@ def generate_data_model_from_db():
     #   Phase 2: Get Donor Latitudes and Longitudes
     donors = DonorProfile.objects.all()
 
-    valid_donor = []
+    valid_donors = []
     donor_lats = []
     donor_lons = []
     for donor in donors:
@@ -168,14 +177,14 @@ def generate_data_model_from_db():
         if donor.user.get_most_recent_location():
             donor_lats.append(donor.user.get_most_recent_location().geolocation.lat)
             donor_lons.append(donor.user.get_most_recent_location().geolocation.lon)
-            valid_donor.append(donor)
+            valid_donors.append(donor)
     #   Phase 3: Append coordinates (for haversine)
     combined_coords = list(zip(evacuation_lats + donor_lats, evacuation_lons + donor_lons))
     combined_coords_len = len(combined_coords)
     data['distance_matrix'] = haversine_vector(combined_coords, combined_coords, Unit.METERS, comb=True)
 
     # Vehicle Count (Donor count) and Request Count
-    data['num_vehicles'] = len(valid_donor)
+    data['num_vehicles'] = len(valid_donors)
     data['num_requests'] = len(evacuation_geolocations)
     # Start and end points (donor)
     data['starts'] = list(range(combined_coords_len - data['num_vehicles'], combined_coords_len))
@@ -197,13 +206,14 @@ def generate_data_model_from_db():
         data[supply_type_name] = []
         for request in barangay_requests:
             data[demand_type_name].append(request.calculate_untransacted_pax(item_type))
-        for donor in valid_donor:
+        for donor in valid_donors:
             total_supply = 0
             supplies = Supply.objects.filter(donation__donor=donor, type=item_type)
             for supply in supplies:
                 total_supply += supply.calculate_available_pax()
             data[supply_type_name].append(total_supply)
-
+    data['donor_objs'] = valid_donors
+    data['request_objs'] = list(barangay_requests)
     return data
 
 
@@ -339,9 +349,62 @@ def generate_tree(evacuation_centers, geolocations):
     #     lat.append(barangay_request.evacuation_center.)
 
 
+# Output
+def routes_to_db(input_data, algo_data):
+    Fulfillment.objects.all().delete()
+    RouteSuggestion.objects.all().delete()
+    RouteNode.objects.all().delete()
+
+    def distance_n2n(src_node, dst_node):
+        return input_data['distance_matrix'][src_node][dst_node]
+
+    donors = input_data['donor_objs']
+    requests = input_data['request_objs']
+    routes = algo_data['routes']
+    fulfillments = algo_data['fulfillment_matrix']
+    for donor_index, route in enumerate(routes):
+        current_donor = donors[donor_index]
+        current_route = routes[donor_index]
+        suggestion = RouteSuggestion.objects.create(
+            donor=current_donor,
+        )
+        for position, request_index in enumerate(current_route):
+            request_object = requests[request_index]
+            route_node = None
+            if position == 0:
+                distance_from_prev = distance_n2n(input_data['starts'][donor_index], request_index)
+                route_node = RouteNode.objects.create(
+                    request=request_object,
+                    distance_from_prev=distance_from_prev,
+                    suggestion=suggestion,
+                )
+            else:
+                distance_from_prev = distance_n2n(current_route[position - 1], request_index)
+                route_node = RouteNode.objects.create(
+                    request=request_object,
+                    distance_from_prev=distance_from_prev,
+                    suggestion=suggestion,
+                )
+
+                # class Fulfillment(models.Model):
+                #     """Single item fulfillment connected to routenode"""
+                #     node = models.ForeignKey(to=RouteNode, on_delete=models.CASCADE, )
+                #     type = models.ForeignKey(to=ItemType, on_delete=models.CASCADE, )
+                #     pax = models.IntegerField()
+            for item_type_index, item_count in enumerate(list(fulfillments[donor_index][request_index])):
+                # Create new fulfillment
+                item_type = ItemType.objects.all()[item_type_index]
+                Fulfillment.objects.create(
+                    node=route_node,
+                    type=item_type,
+                    pax=item_count,
+                )
+
+
 @shared_task
 def algorithm():
     data = generate_data_model_from_db()
     # print(data['distance_matrix'])
     results, manipulated_data = algo_main(data)
+    routes_to_db(data, results)
     return
