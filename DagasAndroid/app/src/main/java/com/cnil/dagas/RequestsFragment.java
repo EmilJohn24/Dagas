@@ -75,19 +75,21 @@ public class RequestsFragment extends Fragment {
             JSONArray requestJSONArray = new JSONArray(response.body().string());
             for (int index = 0; index < requestJSONArray.length(); index++) {
                 JSONObject requestJSONObject = requestJSONArray.getJSONObject(index);
-                Request barangayProfileRequest = client.builderFromFullUrl(requestJSONObject.getString("barangay"))
-                        .get()
-                        .build();
-                Response barangayResponse = client.newCall(barangayProfileRequest).execute();
-                JSONObject barangayJSON = new JSONObject(barangayResponse.body().string());
+//                Request barangayProfileRequest = client.builderFromFullUrl(requestJSONObject.getString("barangay"))
+//                        .get()
+//                        .build();
+//                Response barangayResponse = client.newCall(barangayProfileRequest).execute();
+//                JSONObject barangayJSON = new JSONObject(barangayResponse.body().string());
+                JSONObject barangayJSON = requestJSONObject.getJSONObject("barangay_serialized");
                 String barangayName = barangayJSON.getString("user");
 
-                Request evacuationCenterRequest = client.builderFromBaseUrl(
-                                    EVAC_CENTER_URL + requestJSONObject.getInt("evacuation_center") + "/")
-                                            .get()
-                                            .build();
-                Response evacuationCenterResponse = client.newCall(evacuationCenterRequest).execute();
-                JSONObject evacCenterJSON = new JSONObject(evacuationCenterResponse.body().string());
+//                Request evacuationCenterRequest = client.builderFromBaseUrl(
+//                                    EVAC_CENTER_URL + requestJSONObject.getInt("evacuation_center") + "/")
+//                                            .get()
+//                                            .build();
+//                Response evacuationCenterResponse = client.newCall(evacuationCenterRequest).execute();
+//                JSONObject evacCenterJSON = new JSONObject(evacuationCenterResponse.body().string());
+                JSONObject evacCenterJSON = requestJSONObject.getJSONObject("evacuation_center_serialized");
                 String evacCenterName = evacCenterJSON.getString("name");
                 String coord = evacCenterJSON.getString("geolocation");
                 String[] splitCoord = coord.split(",");

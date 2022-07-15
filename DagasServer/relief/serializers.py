@@ -142,6 +142,8 @@ class BarangayRequestSerializer(serializers.ModelSerializer):
         view_name='relief:item_request-detail'
     )
 
+    item_requests_serialized = ItemRequestSerializer(source='item_request', many=True, read_only=True, )
+
     barangay = serializers.HyperlinkedRelatedField(
         required=False,
         read_only=False,
@@ -149,6 +151,9 @@ class BarangayRequestSerializer(serializers.ModelSerializer):
         view_name='relief:barangays-detail',
     )
 
+    barangay_serialized = BarangaySerializer(source='barangay', read_only=True, many=False, )
+    evacuation_center_serialized = EvacuationCenterSerializer(source='evacuation_center',
+                                                              read_only=True, many=False, )
     expected_date = serializers.DateTimeField(required=False)
 
     # def create(self, validated_data):
@@ -158,7 +163,10 @@ class BarangayRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BarangayRequest
-        fields = ('id', 'item_request', 'evacuation_center', 'expected_date', 'barangay')
+        fields = ('id', 'item_request', 'item_requests_serialized',
+                  'evacuation_center', 'expected_date', 'barangay',
+                  'barangay_serialized', 'evacuation_center_serialized')
+        read_only_fields = ('item_requests_serialized', 'barangay_serialized', 'evacuation_center_serialized')
 
 
 # TODO: Consider using serializers.ImageField
