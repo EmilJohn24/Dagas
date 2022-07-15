@@ -7,7 +7,7 @@ from rest_framework.reverse import reverse
 
 from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \
     ItemType, ItemRequest, BarangayRequest, EvacuationDetails, Transaction, TransactionImage, EvacuationCenter, \
-    TransactionOrder, UserLocation
+    TransactionOrder, UserLocation, Fulfillment, RouteNode, RouteSuggestion
 
 
 class ItemTypeSerializer(serializers.ModelSerializer):
@@ -93,9 +93,17 @@ class DonorSerializer(serializers.ModelSerializer):
         view_name='relief:donations_details',
     )
 
+    user_link = serializers.HyperlinkedRelatedField(
+        source='user',
+        many=False,
+        read_only=True,
+        view_name='relief:users-detail',
+    )
+
     class Meta:
         model = DonorProfile
-        fields = ('id', 'user', 'donations')
+        fields = ('id', 'user', 'donations', 'user_link')
+        read_only_fields = ('user_link',)
 
 
 class GovAdminSerializer(serializers.ModelSerializer):
@@ -230,6 +238,43 @@ class TransactionSerializer(serializers.ModelSerializer):
                   'transaction_image', 'qr_code', 'transaction_orders',
                   'barangay_request', 'received', 'received_date')
         read_only_fields = ('qr_code', 'received', 'donor',)
+
+
+class FulfillmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Fulfillment
+        fields = ('id', 'node', 'type', 'pax',)
+        read_only_fields = ('node', 'type', 'pax',)
+
+
+class RouteNodeSerializer(serializers.ModelSerializer):
+    request = serializers.HyperlinkedRelatedField(
+        required=False,
+        view_name='relief:barangay_request-detail',
+        read_only=True,
+    )
+    fulfillments = FulfillmentSerializer(source='fulfillment_set',
+                                         read_only=True, many=True, )
+
+    class Meta:
+        model = RouteNode
+        fields = ('id', 'request', 'suggestion', 'fulfillments', 'distance_from_prev',)
+        read_only_fields = ('id', 'request', 'suggestion', 'fulfillments', 'distance_from_prev',)
+
+
+class RouteSuggestionSerializer(serializers.ModelSerializer):
+    donor = serializers.HyperlinkedRelatedField(
+        required=False,
+        view_name='relief:donor_details',
+        read_only=False,
+        queryset=DonorProfile.objects.all(),
+    )
+    route_nodes = RouteNodeSerializer(source='nodes', read_only=True, many=True, )
+
+    class Meta:
+        model = RouteSuggestion
+        fields = ('id', 'donor', 'route_nodes')
+        read_only_fields = ('id', 'donor', 'route_nodes')
 
 
 # Based on: https://stackoverflow.com/questions/62291394/django-rest-auth-dj-rest-auth-custom-user-registration

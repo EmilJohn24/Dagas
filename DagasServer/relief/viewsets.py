@@ -6,11 +6,13 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError, ValidationError
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
-    BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder, UserLocation
+    BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder, UserLocation, \
+    RouteSuggestion
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
     ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
-    DonationSerializer, EvacuationCenterSerializer, TransactionOrderSerializer, UserLocationSerializer
+    DonationSerializer, EvacuationCenterSerializer, TransactionOrderSerializer, UserLocationSerializer, \
+    RouteSuggestionSerializer
 
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
@@ -263,3 +265,16 @@ class ItemRequestViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(date_added=datetime.now())
+
+
+class RouteSuggestionViewSet(viewsets.ReadOnlyModelViewSet):
+    # TODO: Filter query set according to current user?
+    # queryset = RouteSuggestion.objects.all()
+    serializer_class = RouteSuggestionSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_anonymous:
+            return RouteSuggestion.objects.filter(donor__user=user)
+        else:
+            return RouteSuggestion.objects.all()
