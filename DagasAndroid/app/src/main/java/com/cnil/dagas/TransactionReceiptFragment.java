@@ -14,6 +14,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +34,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.squareup.picasso.Picasso;
@@ -65,7 +67,45 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
             // Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         }
     };
+    public static class RetrieveGeolocation extends Thread {
+        private int donorUserId;
+        private double donorLat;
+        private double donorLong;
 
+        RetrieveGeolocation(int donorUserId){
+            this.donorUserId = donorUserId;
+        }
+        public void run() {
+            OkHttpSingleton client = OkHttpSingleton.getInstance();
+            Request request = client.builderFromBaseUrl(
+                    String.format(
+                            "/relief/api/users/%d/get_most_recent_location/", donorUserId))
+                    .get()
+                    .build();
+            Response response = null;
+            try {
+                response = client.newCall(request).execute();
+                JSONObject responseJSON = new JSONObject(response.body().string());
+                String geolocationString = responseJSON.getString("geolocation");
+                Log.i(TAG, "Setting geolocation of marker to: " + geolocationString);
+                String[] geoSplit = geolocationString.split(",");
+                donorLat = Float.parseFloat(geoSplit[0]);
+                donorLong = Float.parseFloat(geoSplit[1]);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public double getDonorLong() {
+            return donorLong;
+        }
+
+        public double getDonorLat() {
+            return donorLat;
+        }
+    }
     public static class RetrieveTransactionInfo extends Thread{
         private String transactionURL;
         private JSONObject transactionJSON;
@@ -162,26 +202,36 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
             double longtitude = Float.parseFloat(splitCoord[1]);
             LatLng evacLatLng = new LatLng(latitude, longtitude);
 
-            map.addMarker(new MarkerOptions()
-                            .position(new LatLng(userLat,userLong))
-                            .title("user location"));
+            final Marker donorLocationMarker = map.addMarker(new MarkerOptions()
+                            .position(new LatLng(0,0))
+                            .title("Donor Location"));
             map.addMarker(new MarkerOptions()
                             .position(evacLatLng)
                             .title(name));
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(evacLatLng, 20));
-            locationClient.getLastLocation()
-                    .addOnSuccessListener(this.getActivity(), new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            if (location != null) {
-                                //TODO: Do location stuff
-                                LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                                map.addMarker(new MarkerOptions()
-                                        .position(userLocation)
-                                        .title("Your location"));
-                            }
-                        }
-                    });
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(evacLatLng, 1));
+
+            //Loader: https://stackoverflow.com/questions/10207612/android-execute-code-in-regular-intervals
+            final int donorUserID = thread.getTransactionJSON().getJSONObject("donor_info").getInt("user");
+            final Handler handler = new Handler();
+            Runnable donorLocationThread = new Runnable() {
+                @Override
+                public void run() {
+
+                    try{
+                        RetrieveGeolocation retrieveGeolocationThread = new RetrieveGeolocation(donorUserID);
+                        retrieveGeolocationThread.start();
+                        retrieveGeolocationThread.join();
+                        donorLocationMarker.setPosition(new LatLng(retrieveGeolocationThread.getDonorLat(),
+                                                            retrieveGeolocationThread.getDonorLong()));
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } finally{
+                        handler.postDelayed(this, 5000);
+                    }
+                }
+            };
+            handler.post(donorLocationThread);
 
         } catch (JSONException e) {
             e.printStackTrace();
