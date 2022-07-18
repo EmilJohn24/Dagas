@@ -276,6 +276,8 @@ public class CreateTransactionFragment extends Fragment {
 //            typeName.setLayoutParams(new ViewGroup.LayoutParams(
 //                                        ViewGroup.LayoutParams.WRAP_CONTENT,
 //                                        ViewGroup.LayoutParams.WRAP_CONTENT));
+            //TODO: Do dimensions.xml version:
+            // https://stackoverflow.com/questions/9494037/how-to-set-text-size-of-textview-dynamically-for-different-screens
             typeName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f);
             untransactedAmountTextView.setText(String.valueOf(untransactedAmount));
             untransactedAmountTextView.setPaddingRelative(300,10,0,10);
