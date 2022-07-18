@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -268,13 +269,16 @@ public class CreateTransactionFragment extends Fragment {
             TableRow itemRow = new TableRow(this.getContext());
             transactionRows.add(itemRow);
             itemRow.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,
-                                                                TableRow.LayoutParams.WRAP_CONTENT));
+                                                                TableRow.LayoutParams.MATCH_PARENT));
             TextView typeName = new TextView(this.getContext());
             TextView untransactedAmountTextView = new TextView(this.getContext());
             typeName.setText(itemName);
+//            typeName.setLayoutParams(new ViewGroup.LayoutParams(
+//                                        ViewGroup.LayoutParams.WRAP_CONTENT,
+//                                        ViewGroup.LayoutParams.WRAP_CONTENT));
+            typeName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f);
             untransactedAmountTextView.setText(String.valueOf(untransactedAmount));
-            typeName.setPadding(5,5,5,5);
-            untransactedAmountTextView.setPadding(5,5,5,5);
+            untransactedAmountTextView.setPaddingRelative(300,10,0,10);
             untransactedAmountTextView.setGravity(Gravity.RIGHT);
             itemRow.addView(typeName);
             itemRow.addView(untransactedAmountTextView);
