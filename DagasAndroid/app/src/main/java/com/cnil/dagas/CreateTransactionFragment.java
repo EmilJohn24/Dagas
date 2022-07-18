@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -130,6 +132,7 @@ public class CreateTransactionFragment extends Fragment {
                 int itemID = requestJSONObject.getInt("id");
                 int itemTypeID = requestJSONObject.getInt("type");
                 int pax = requestJSONObject.getInt("pax");
+                int available = requestJSONObject.getInt("available_pax");
                 Request itemTypeRequest = client.builderFromBaseUrl(
                                             String.format(SPECIFIC_ITEM_TYPE_URL, itemTypeID))
                                         .get()
@@ -138,13 +141,13 @@ public class CreateTransactionFragment extends Fragment {
                 JSONObject itemTypeJSON = new JSONObject(itemTypeResponse.body().string());
                 String itemTypeName = itemTypeJSON.getString("name");
 
-                Request availablePaxRequest = client.builderFromBaseUrl(
-                                            String.format(AVAILABLE_PAX, itemID))
-                                        .get()
-                                        .build();
-                Response availablePaxResponse = client.newCall(availablePaxRequest).execute();
-                JSONObject availablePaxJSON = new JSONObject(availablePaxResponse.body().string());
-                int available = availablePaxJSON.getInt("available");
+//                Request availablePaxRequest = client.builderFromBaseUrl(
+//                                            String.format(AVAILABLE_PAX, itemID))
+//                                        .get()
+//                                        .build();
+//                Response availablePaxResponse = client.newCall(availablePaxRequest).execute();
+//                JSONObject availablePaxJSON = new JSONObject(availablePaxResponse.body().string());
+//                int available = availablePaxJSON.getInt("available");
 
                 adapter.add(new TransactionSupplyAdapter.TransactionSupply(
                                 itemName, itemTypeName,
@@ -255,10 +258,13 @@ public class CreateTransactionFragment extends Fragment {
         } catch (InterruptedException e) {
             Log.e(TAG, e.getMessage());
         }
+        assert requestThread != null;
+        Map<String, Integer> remainingUntransactedAmounts = new HashMap<String, Integer>();
+        Map<String, TextView> amountTextViews = new HashMap<String, TextView>();
         for (int i = 0; i != itemTypesThread.getTypeIds().size(); ++i){
             String itemName = itemTypesThread.getName(i);
-            assert requestThread != null;
             Integer untransactedAmount = requestThread.getUntransactedAmounts().get(i);
+            remainingUntransactedAmounts.put(itemName, untransactedAmount);
             TableRow itemRow = new TableRow(this.getContext());
             transactionRows.add(itemRow);
             itemRow.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,
@@ -267,8 +273,12 @@ public class CreateTransactionFragment extends Fragment {
             TextView untransactedAmountTextView = new TextView(this.getContext());
             typeName.setText(itemName);
             untransactedAmountTextView.setText(String.valueOf(untransactedAmount));
+            typeName.setPadding(5,5,5,5);
+            untransactedAmountTextView.setPadding(5,5,5,5);
+            untransactedAmountTextView.setGravity(Gravity.RIGHT);
             itemRow.addView(typeName);
             itemRow.addView(untransactedAmountTextView);
+            amountTextViews.put(itemName, untransactedAmountTextView);
             transactionTable.addView(itemRow);
         }
 
@@ -279,11 +289,21 @@ public class CreateTransactionFragment extends Fragment {
             public void respond(int position, TransactionSupplyAdapter.TransactionSupply supply, int amount) {
                 //TODO: add TransactionOrder if it does not exist yet
                 supplyOrderMap.put(supply, new TransactionSupplyAdapter.TransactionOrder(amount, supply));
+                Integer updatedValue = remainingUntransactedAmounts.get(supply.getType()) - amount;
+                remainingUntransactedAmounts.replace(supply.getType(), updatedValue);
+                Objects.requireNonNull(amountTextViews.get(supply.getType())).setText(String.valueOf(updatedValue));
+
             }
 
             @Override
             public void removeRespond(TransactionSupplyAdapter.TransactionSupply supply) {
+                TransactionSupplyAdapter.TransactionOrder order = supplyOrderMap.get(supply);
+                Integer updatedValue = remainingUntransactedAmounts.get(supply.getType()) + order.getAmount();
+                remainingUntransactedAmounts.replace(supply.getType(), updatedValue);
+                Objects.requireNonNull(amountTextViews.get(supply.getType())).setText(String.valueOf(updatedValue));
                 supplyOrderMap.remove(supply);
+
+
             }
         };
 
