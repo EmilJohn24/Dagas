@@ -243,6 +243,7 @@ def generate_data(donor_count=10, evacuation_center_count=10):
     Donation.objects.all().delete()
     Supply.objects.all().delete()
     BarangayRequest.objects.all().delete()
+    EvacuationCenter.objects.all().delete()
     ItemRequest.objects.all().delete()
     Transaction.objects.all().delete()
     TransactionOrder.objects.all().delete()

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Bundle;
 
 public class LocationHelper {
     private final int REFRESH_TIME = 5000;
@@ -16,6 +17,11 @@ public class LocationHelper {
             @Override
             public void onLocationChanged(Location location) {
                 customListener.onLocationChanged(location);
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
             }
         };
         locationManager.requestLocationUpdates(
