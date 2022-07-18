@@ -69,6 +69,7 @@ public class ViewSuppliesFragment extends Fragment {
                 int itemID = requestJSONObject.getInt("id");
                 int itemTypeID = requestJSONObject.getInt("type");
                 int pax = requestJSONObject.getInt("pax");
+                int available = requestJSONObject.getInt("available_pax");
                 Request itemTypeRequest = client.builderFromBaseUrl(
                         String.format(SPECIFIC_ITEM_TYPE_URL, itemTypeID))
                         .get()
@@ -76,15 +77,16 @@ public class ViewSuppliesFragment extends Fragment {
                 Response itemTypeResponse = client.newCall(itemTypeRequest).execute();
                 JSONObject itemTypeJSON = new JSONObject(itemTypeResponse.body().string());
                 String itemTypeName = itemTypeJSON.getString("name");
-
-                Request availablePaxRequest = client.builderFromBaseUrl(
-                        String.format(AVAILABLE_PAX, itemID))
-                        .get()
-                        .build();
-                Response availablePaxResponse = client.newCall(availablePaxRequest).execute();
-                JSONObject availablePaxJSON = new JSONObject(availablePaxResponse.body().string());
-                int available = availablePaxJSON.getInt("available");
-
+                //CHANGE: Removing unnecessary request for available pax
+                /*
+                    Request availablePaxRequest = client.builderFromBaseUrl(
+                            String.format(AVAILABLE_PAX, itemID))
+                            .get()
+                            .build();
+                    Response availablePaxResponse = client.newCall(availablePaxRequest).execute();
+                    JSONObject availablePaxJSON = new JSONObject(availablePaxResponse.body().string());
+                    int available = availablePaxJSON.getInt("available");
+                */
                 adapter.add(new ViewSupplyAdapter.ViewSupply(
                         itemName, itemTypeName,
                         available, String.format(SUPPLY_URL, itemID), itemID)
