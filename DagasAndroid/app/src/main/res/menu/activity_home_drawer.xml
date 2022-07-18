@@ -48,5 +48,11 @@
             android:icon="@drawable/ic_launcher_background"
             android:title="User Profile"/>
 
+        <item
+            android:id="@+id/nav_suggestions"
+            android:icon="@drawable/ic_launcher_background"
+            android:title="Suggestions"/>
+
+
     </group>
 </menu>

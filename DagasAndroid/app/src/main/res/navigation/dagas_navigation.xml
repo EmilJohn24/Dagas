@@ -87,4 +87,9 @@
         android:name="com.cnil.dagas.UserProfileFragment"
         android:label="fragment_user_profile"
         tools:layout="@layout/user_profile" />
+    <fragment
+        android:id="@+id/nav_suggestions"
+        android:name="com.cnil.dagas.SuggestionNodeFragment"
+        android:label="fragment_card_suggestions"
+        tools:layout="@layout/fragment_card_suggestions" />
 </navigation>

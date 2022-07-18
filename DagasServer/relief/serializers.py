@@ -252,10 +252,15 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 
 class FulfillmentSerializer(serializers.ModelSerializer):
+    type_name = serializers.StringRelatedField(
+        read_only=True,
+        source='type',
+    )
+
     class Meta:
         model = Fulfillment
-        fields = ('id', 'node', 'type', 'pax',)
-        read_only_fields = ('node', 'type', 'pax',)
+        fields = ('id', 'node', 'type', 'type_name', 'pax',)
+        read_only_fields = ('node', 'type', 'type_name', 'pax',)
 
 
 class RouteNodeSerializer(serializers.ModelSerializer):
@@ -264,13 +269,25 @@ class RouteNodeSerializer(serializers.ModelSerializer):
         view_name='relief:barangay_request-detail',
         read_only=True,
     )
+    barangay_name = serializers.StringRelatedField(
+        required=False,
+        read_only=True,
+        source='request.barangay',
+    )
+
+    evacuation_center_name = serializers.StringRelatedField(
+        read_only=True,
+        source='request.evacuation_center',
+    )
     fulfillments = FulfillmentSerializer(source='fulfillment_set',
                                          read_only=True, many=True, )
 
     class Meta:
         model = RouteNode
-        fields = ('id', 'request', 'suggestion', 'fulfillments', 'distance_from_prev',)
-        read_only_fields = ('id', 'request', 'suggestion', 'fulfillments', 'distance_from_prev',)
+        fields = ('id', 'request', 'suggestion', 'barangay_name', 'evacuation_center_name',
+                        'fulfillments', 'distance_from_prev',)
+        read_only_fields = ('id', 'request', 'suggestion', 'barangay_name', 'evacuation_center_name',
+                            'fulfillments', 'distance_from_prev',)
 
 
 class RouteSuggestionSerializer(serializers.ModelSerializer):
@@ -280,12 +297,17 @@ class RouteSuggestionSerializer(serializers.ModelSerializer):
         read_only=False,
         queryset=DonorProfile.objects.all(),
     )
+    donor_name = serializers.StringRelatedField(
+        required=False,
+        read_only=True,
+        source='donor',
+    )
     route_nodes = RouteNodeSerializer(source='nodes', read_only=True, many=True, )
 
     class Meta:
         model = RouteSuggestion
-        fields = ('id', 'donor', 'route_nodes')
-        read_only_fields = ('id', 'donor', 'route_nodes')
+        fields = ('id', 'donor', 'donor_name', 'route_nodes')
+        read_only_fields = ('id', 'donor', 'donor_name', 'route_nodes')
 
 
 # Based on: https://stackoverflow.com/questions/62291394/django-rest-auth-dj-rest-auth-custom-user-registration
