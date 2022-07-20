@@ -134,5 +134,6 @@ dmypy.json
 **/.idea/tasks.xml
 
 # Migrations
-**/migrations/
+**/migrations/*
+!**/migrations/0001_initial.py
 **/.idea/
