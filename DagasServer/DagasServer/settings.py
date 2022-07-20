@@ -19,6 +19,7 @@ import django_heroku
 # 1. Heroku + Celery
 # https://devcenter.heroku.com/articles/celery-heroku
 # https://realpython.com/django-hosting-on-heroku/#update-local-database-schema-optional
+# https://devcenter.heroku.com/articles/getting-started-with-python
 # Run the following to deploy to Heroku specifically: git subtree push --prefix DagasServer heroku master
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
