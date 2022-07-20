@@ -1,4 +1,4 @@
-from django.db.models import Sum
+from django.db.models import Sum, QuerySet
 from django.utils.datetime_safe import datetime
 from rest_framework.response import Response
 from rest_framework import viewsets, status, serializers
@@ -7,7 +7,7 @@ from rest_framework.exceptions import ParseError, ValidationError
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
     BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder, UserLocation, \
-    RouteSuggestion
+    RouteSuggestion, RouteNode, Fulfillment
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
     ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
@@ -159,8 +159,42 @@ class TransactionViewSet(viewsets.ModelViewSet):
         serializer = EvacuationCenterSerializer(barangay_request.evacuation_center)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['post'], name='Convert suggestion into transactions',
+            permission_classes=[IsProfileUserOrReadOnly])
+    def transactions_from_suggestion(self, request, pk=None):
+        # TODO: Consider moving to DonorViewSet
+        donor = DonorProfile.objects.filter(user=request.user)[0]
+        suggestion = RouteSuggestion.objects.filter(donor__user=request.user)[0]
+        route_nodes = RouteNode.objects.filter(suggestion=suggestion)
+        created_transactions = []
+        supplies = Supply.objects.filter(donation__donor=donor)
+        for route_node in route_nodes:
+            fulfillments = Fulfillment.objects.filter(node=route_node)
+            created_transaction = Transaction.objects.create(donor=donor, received=Transaction.PACKAGING,
+                                                             barangay_request=route_node.request, )
+            created_transactions.append(created_transaction)
+            for fulfillment in fulfillments:
+                remaining_fulfillment_pax = fulfillment.pax
+                for supply in supplies:
+                    if remaining_fulfillment_pax == 0:
+                        break
+                    available_pax = supply.calculate_available_pax()
+                    if available_pax >= remaining_fulfillment_pax:
+                        TransactionOrder.objects.create(pax=remaining_fulfillment_pax, supply=supply,
+                                                        transaction=created_transaction, )
+                        remaining_fulfillment_pax = 0
+                    else:
+                        Transaction.objects.create(pax=available_pax, supply=supply, transaction=created_transaction, )
+                        remaining_fulfillment_pax = remaining_fulfillment_pax - available_pax
+
+        # serializer = EvacuationCenterSerializer(barangay_request.evacuation_center)
+        return Response(TransactionSerializer(created_transactions,
+                                              many=True,
+                                              context={'request': request}).data, status=201)
+
     def perform_create(self, serializer):
         current_donor = DonorProfile.objects.get(user=self.request.user)
+        # TODO: Possible re-run algorithm here
         serializer.save(donor=current_donor, received=Transaction.PACKAGING, )
     # Note: Based on total pool of donations
     # TODO: Consider checking for oversupply
