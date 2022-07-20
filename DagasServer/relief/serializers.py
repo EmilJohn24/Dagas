@@ -279,15 +279,20 @@ class RouteNodeSerializer(serializers.ModelSerializer):
         read_only=True,
         source='request.evacuation_center',
     )
+
+    evacuation_center_geolocation = serializers.StringRelatedField(
+        read_only=True,
+        source='request.evacuation_center.geolocation',
+    )
     fulfillments = FulfillmentSerializer(source='fulfillment_set',
                                          read_only=True, many=True, )
 
     class Meta:
         model = RouteNode
         fields = ('id', 'request', 'suggestion', 'barangay_name', 'evacuation_center_name',
-                        'fulfillments', 'distance_from_prev',)
+                  'evacuation_center_geolocation', 'fulfillments', 'distance_from_prev',)
         read_only_fields = ('id', 'request', 'suggestion', 'barangay_name', 'evacuation_center_name',
-                            'fulfillments', 'distance_from_prev',)
+                            'evacuation_center_geolocation', 'fulfillments', 'distance_from_prev',)
 
 
 class RouteSuggestionSerializer(serializers.ModelSerializer):

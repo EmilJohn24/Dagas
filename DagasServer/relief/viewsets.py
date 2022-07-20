@@ -60,6 +60,16 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         most_recent_location_serialized = UserLocationSerializer(most_recent_location)
         return Response(most_recent_location_serialized.data)
 
+    @action(detail=False, methods=['get'], name='Get Own Most Recent Location')
+    def get_own_most_recent_location(self, request, pk=None):
+        if request.user.is_anonymous:
+            return Response({"error": "Not logged in"}, 403)
+        requested_user = request.user
+        user_locations = UserLocation.objects.filter(user=requested_user)
+        most_recent_location = user_locations.last()
+        most_recent_location_serialized = UserLocationSerializer(most_recent_location)
+        return Response(most_recent_location_serialized.data)
+
 
 class UserLocationViewSet(viewsets.ModelViewSet):
     queryset = UserLocation.objects.all()

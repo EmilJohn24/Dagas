@@ -232,8 +232,8 @@ def generate_data(donor_count=10, evacuation_center_count=10):
         return points
 
     # A random polygon around Luzon that dictates the range of generated evacuation centers
-    generation_polygon = Polygon([(19.748940, 117.935121), (19.884123, 126.679918),
-                                  (11.482291, 127.462273), (13.664252, 117.734122)])
+    generation_polygon = Polygon([(14.798263, 120.921852), (14.873512, 121.074507),
+                                  (14.553057, 121.164575), (14.516944, 121.004209)])
 
     # Step 1: Generate users
     #   Step 1a: Clear all donors, supplies, and donations
