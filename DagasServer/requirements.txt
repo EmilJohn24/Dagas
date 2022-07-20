@@ -20,3 +20,4 @@ pandas
 haversine
 shapely
 django-heroku
+gunicorn

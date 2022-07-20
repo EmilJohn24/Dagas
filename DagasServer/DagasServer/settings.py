@@ -13,6 +13,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 import rest_framework
+import django_heroku
 
 # Preparing for Deployment:
 # 1. Heroku + Celery
@@ -225,7 +226,6 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost:3000',
 ]
 
-
 CORS_ALLOW_CREDENTIALS = True
 # CORS_ALLOW_ALL_ORIGINS = True
 
@@ -271,5 +271,5 @@ CELERY_TIMEZONE = "Australia/Tasmania"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
-import django_heroku
+
 django_heroku.settings(locals())
