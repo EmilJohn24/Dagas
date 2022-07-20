@@ -19,3 +19,4 @@ sklearn
 pandas
 haversine
 shapely
+django-heroku

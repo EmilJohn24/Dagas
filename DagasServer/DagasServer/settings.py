@@ -14,6 +14,10 @@ from datetime import timedelta
 from pathlib import Path
 import rest_framework
 
+# Preparing for Deployment:
+# 1. Heroku + Celery
+# https://devcenter.heroku.com/articles/celery-heroku
+# https://realpython.com/django-hosting-on-heroku/#update-local-database-schema-optional
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -265,3 +269,6 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = "Australia/Tasmania"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
+
+import django_heroku
+django_heroku.settings(locals())
