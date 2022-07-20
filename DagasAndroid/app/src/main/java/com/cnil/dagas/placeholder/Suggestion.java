@@ -1,5 +1,7 @@
 package com.cnil.dagas.placeholder;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,14 +60,16 @@ public class Suggestion {
         public final String suggestedBarangayName;
         public final String suggestedEvacuationCenterName;
         public final Map<String, Integer> fulfillments;
+        private final LatLng evacCoordinate;
 
         public void addFulfillment(String itemType, Integer amount){
             fulfillments.put(itemType, amount);
         }
-        public SuggestionNode(String id, String suggestedBarangayName, String suggestedEvacuationCenterName) {
+        public SuggestionNode(String id, String suggestedBarangayName, String suggestedEvacuationCenterName, LatLng evacCoordinate) {
             this.id = id;
             this.suggestedBarangayName = suggestedBarangayName;
             this.suggestedEvacuationCenterName = suggestedEvacuationCenterName;
+            this.evacCoordinate = evacCoordinate;
             fulfillments = new HashMap<>();
         }
 
@@ -73,6 +77,10 @@ public class Suggestion {
         @Override
         public String toString() {
             return suggestedBarangayName;
+        }
+
+        public LatLng getEvacCoordinate() {
+            return evacCoordinate;
         }
     }
 }

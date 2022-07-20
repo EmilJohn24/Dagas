@@ -5,16 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.location.Location;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +15,13 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import com.cnil.dagas.data.CurrentUserThread;
 import com.cnil.dagas.databinding.FragmentTransactionReceiptBinding;
@@ -39,7 +37,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
@@ -82,6 +79,7 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
         }
     };
     public static class RetrieveGeolocation extends Thread {
+        public static int SELF = -1;
         private int donorUserId;
         private double donorLat;
         private double donorLong;
@@ -91,11 +89,19 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
         }
         public void run() {
             OkHttpSingleton client = OkHttpSingleton.getInstance();
-            Request request = client.builderFromBaseUrl(
-                    String.format(
-                            "/relief/api/users/%d/get_most_recent_location/", donorUserId))
-                    .get()
-                    .build();
+            Request request = null;
+            if (donorUserId == SELF){
+                request = client.builderFromBaseUrl("/relief/api/users/get_own_most_recent_location/")
+                        .get()
+                        .build();
+
+            } else {
+               request = client.builderFromBaseUrl(
+                        String.format(
+                                "/relief/api/users/%d/get_most_recent_location/", donorUserId))
+                        .get()
+                        .build();
+            }
             Response response = null;
             try {
                 response = client.newCall(request).execute();
