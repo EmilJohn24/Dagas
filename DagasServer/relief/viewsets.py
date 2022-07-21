@@ -1,7 +1,8 @@
 from django.db.models import Sum, QuerySet
 from django.utils.datetime_safe import datetime
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
-from rest_framework import viewsets, status, serializers
+from rest_framework import viewsets, status, serializers, filters
 from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError, ValidationError
 
@@ -16,6 +17,7 @@ from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializ
 
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
+# Filtering Guide: https://www.django-rest-framework.org/api-guide/filtering/
 # TODO: Add permission classes
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
@@ -222,6 +224,9 @@ class TransactionViewSet(viewsets.ModelViewSet):
 class BarangayRequestViewSet(viewsets.ModelViewSet):
     queryset = BarangayRequest.objects.all()
     serializer_class = BarangayRequestSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
+    filterset_fields = ['barangay', 'evacuation_center', ]
+    search_fields = ['barangay__user__username', 'evacuation_center__name',]
 
     def perform_create(self, serializer):
         serializer.save(barangay=BarangayProfile.objects.get(user=self.request.user))

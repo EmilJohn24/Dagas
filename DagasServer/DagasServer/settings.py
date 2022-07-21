@@ -66,6 +66,9 @@ INSTALLED_APPS = [
     # Background tasks for algorithm: https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html/
     # Extra tutorial: https://realpython.com/asynchronous-tasks-with-django-and-celery/#step-1-add-celerypy
     'celery',
+    # Django Filters
+    'django_filters',
+
 ]
 
 MIDDLEWARE = [
@@ -185,7 +188,9 @@ REST_FRAMEWORK = {
         # 'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
-    ]
+    ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+
 }
 REST_USE_JWT = True
 JWT_AUTH_COOKIE = 'jwt-auth'

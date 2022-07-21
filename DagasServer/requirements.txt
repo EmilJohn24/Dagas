@@ -21,3 +21,4 @@ haversine
 shapely
 django-heroku
 gunicorn
+django-filter
