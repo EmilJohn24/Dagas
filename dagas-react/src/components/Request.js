@@ -37,6 +37,8 @@ function ListRequests(props){
 }
 
 function AddRequest(props){
+    // Standard POST formats
+    [requestID, setRequestID] = useState(-1);
     const postItemRequest = (item_request_json) => {
         /*
         Format:
@@ -64,6 +66,11 @@ function AddRequest(props){
                 "credentials": "include",
                 "withCredentials": true
             })
+            .then((result) => {
+                setRequestID(result.data.id);
+            })
             .catch((error) => console.log(error));
+        
     }
+    // END Standard POST formats
 }
