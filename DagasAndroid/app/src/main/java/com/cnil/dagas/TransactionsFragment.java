@@ -1,19 +1,17 @@
 package com.cnil.dagas;
 
-import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.cnil.dagas.databinding.FragmentCreateTransactionBinding;
-import com.cnil.dagas.databinding.FragmentRequestsBinding;
 import com.cnil.dagas.databinding.FragmentTransactionBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
 
@@ -40,10 +38,19 @@ public class TransactionsFragment extends Fragment {
         private static final String TRANSACTION_URL = "/relief/api/transactions/";
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         private TransactionAdapter adapter;
+        private boolean isQueried;
+        private String query;
 //        private JSONObject donationAddResponse;
 
         public GrabTransactions(TransactionAdapter adapter) {
             this.adapter = adapter;
+            this.isQueried = false;
+            this.query = "";
+        }
+
+        public void addQuery(String query){
+            this.query = query;
+            this.isQueried = true;
         }
 
         public void run() {
@@ -57,9 +64,16 @@ public class TransactionsFragment extends Fragment {
         private void grabTransactions() throws IOException, JSONException {
             OkHttpSingleton client = OkHttpSingleton.getInstance();
 //            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
-            Request request = client.builderFromBaseUrl(TRANSACTION_URL)
-                    .get()
-                    .build();
+            Request request;
+            if (!this.isQueried) {
+                request = client.builderFromBaseUrl(TRANSACTION_URL)
+                        .get()
+                        .build();
+            } else{
+                request = client.builderFromBaseUrl(TRANSACTION_URL + "?search=" + this.query)
+                        .get()
+                        .build();
+            }
             Response response = client.newCall(request).execute();
             JSONArray transactionJSONArray = new JSONArray(response.body().string());
             for (int index = 0; index < transactionJSONArray.length(); index++) {
@@ -91,6 +105,8 @@ public class TransactionsFragment extends Fragment {
         binding = FragmentTransactionBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
         RecyclerView transactionRecyclerView = root.findViewById(R.id.transactionsRecycler);
+        EditText queryTextBox = binding.transactionQueryEditText;
+        Button queryButton = binding.transactionQueryButton;
         TransactionAdapter adapter = new TransactionAdapter();
         GrabTransactions thread = new GrabTransactions(adapter);
         thread.start();
@@ -98,6 +114,18 @@ public class TransactionsFragment extends Fragment {
             thread.join();
             transactionRecyclerView.setAdapter(adapter);
             transactionRecyclerView.setLayoutManager(new LinearLayoutManager(root.getContext()));
+            queryButton.setOnClickListener(view -> {
+                adapter.clear();
+                String query = queryTextBox.getText().toString();
+                GrabTransactions queryThread = new GrabTransactions(adapter);
+                queryThread.addQuery(query);
+                queryThread.start();
+                try {
+                    queryThread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
         } catch (InterruptedException e) {
             Log.e(TAG, e.getMessage());
         }

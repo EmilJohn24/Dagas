@@ -51,7 +51,16 @@ public class TransactionAdapter extends RecyclerView.Adapter<TransactionAdapter.
 
     public void add(@NonNull Transaction transaction){
         transactions.add(transaction);
+        notifyItemInserted(transactions.size());
     }
+
+    // Based on: https://stackoverflow.com/questions/41843758/how-to-clear-recyclerview-adapter-data
+    public void clear(){
+        int size = transactions.size();
+        transactions.clear();
+        notifyItemRangeRemoved(0, size);
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

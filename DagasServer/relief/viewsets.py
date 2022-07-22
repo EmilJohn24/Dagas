@@ -121,6 +121,10 @@ class TransactionOrderViewSet(viewsets.ModelViewSet):
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
+    filterset_fields = ['donor', 'barangay_request', 'received', ]
+    search_fields = ['donor__user__username', 'barangay_request__barangay__user__username',
+                     'barangay_request__evacuation_center__name', ]
 
     @action(detail=True, methods=['patch', 'put'], name='Quick Update status',
             permission_classes=[IsProfileUserOrReadOnly])
@@ -226,7 +230,7 @@ class BarangayRequestViewSet(viewsets.ModelViewSet):
     serializer_class = BarangayRequestSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
     filterset_fields = ['barangay', 'evacuation_center', ]
-    search_fields = ['barangay__user__username', 'evacuation_center__name',]
+    search_fields = ['barangay__user__username', 'evacuation_center__name', ]
 
     def perform_create(self, serializer):
         serializer.save(barangay=BarangayProfile.objects.get(user=self.request.user))
