@@ -29,6 +29,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
             this.id = id;
         }
 
+
         public String getEvacuationCenterName() {
             return evacuationCenterName;
         }
@@ -57,7 +58,15 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
 
     public void add(@NonNull BarangayRequest barangayRequest){
         barangayRequests.add(barangayRequest);
+        notifyItemInserted(barangayRequests.size());
     }
+    // Based on: https://stackoverflow.com/questions/41843758/how-to-clear-recyclerview-adapter-data
+    public void clear(){
+        int size = barangayRequests.size();
+        barangayRequests.clear();
+        notifyItemRangeRemoved(0, size);
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

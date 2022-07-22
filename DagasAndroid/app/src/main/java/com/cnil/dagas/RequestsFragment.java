@@ -3,23 +3,22 @@ package com.cnil.dagas;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.cnil.dagas.databinding.FragmentRequestsBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONArray;
@@ -27,7 +26,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -49,10 +47,13 @@ public class RequestsFragment extends Fragment {
         private RequestsAdapter adapter;
         private Location userLocation;
         private JSONObject donationAddResponse;
-
+        private String query;
+        private boolean isQueried;
         public GrabRequests(RequestsAdapter adapter, Location userLocation) {
             this.adapter = adapter;
             this.userLocation = userLocation;
+            this.query = "";
+            this.isQueried = false;
         }
 
 
@@ -64,31 +65,32 @@ public class RequestsFragment extends Fragment {
                 Log.e(TAG, e.getMessage());
             }
         }
+
+        public void createQuery(String query){
+            this.query = query;
+            this.isQueried = true;
+        }
+
         private void grabRequests() throws IOException, JSONException {
             OkHttpSingleton client = OkHttpSingleton.getInstance();
 //            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
-            Request request = client.builderFromBaseUrl(REQUESTS_URL)
-                    .get()
-                    .build();
+            Request request;
+            if (!isQueried) {
+                request = client.builderFromBaseUrl(REQUESTS_URL)
+                        .get()
+                        .build();
+            } else{
+                request = client.builderFromBaseUrl(REQUESTS_URL + "?search=" + query)
+                        .get()
+                        .build();
+            }
             Response response = client.newCall(request).execute();
             //TODO: Add success check
             JSONArray requestJSONArray = new JSONArray(response.body().string());
             for (int index = 0; index < requestJSONArray.length(); index++) {
                 JSONObject requestJSONObject = requestJSONArray.getJSONObject(index);
-//                Request barangayProfileRequest = client.builderFromFullUrl(requestJSONObject.getString("barangay"))
-//                        .get()
-//                        .build();
-//                Response barangayResponse = client.newCall(barangayProfileRequest).execute();
-//                JSONObject barangayJSON = new JSONObject(barangayResponse.body().string());
                 JSONObject barangayJSON = requestJSONObject.getJSONObject("barangay_serialized");
                 String barangayName = barangayJSON.getString("user");
-
-//                Request evacuationCenterRequest = client.builderFromBaseUrl(
-//                                    EVAC_CENTER_URL + requestJSONObject.getInt("evacuation_center") + "/")
-//                                            .get()
-//                                            .build();
-//                Response evacuationCenterResponse = client.newCall(evacuationCenterRequest).execute();
-//                JSONObject evacCenterJSON = new JSONObject(evacuationCenterResponse.body().string());
                 JSONObject evacCenterJSON = requestJSONObject.getJSONObject("evacuation_center_serialized");
                 String evacCenterName = evacCenterJSON.getString("name");
                 String coord = evacCenterJSON.getString("geolocation");
@@ -120,6 +122,7 @@ public class RequestsFragment extends Fragment {
         View root = binding.getRoot();
         RecyclerView requestRecyclerView = root.findViewById(R.id.requestRecycler);
         RequestsAdapter adapter = new RequestsAdapter();
+
         locationClient.getLastLocation()
                 .addOnSuccessListener(this.getActivity(), new OnSuccessListener<Location>() {
                     @Override
@@ -132,6 +135,21 @@ public class RequestsFragment extends Fragment {
                                 thread.join();
                                 requestRecyclerView.setAdapter(adapter);
                                 requestRecyclerView.setLayoutManager(new LinearLayoutManager(root.getContext()));
+
+                                Button queryButton = binding.requestSearchButton;
+                                TextView queryBox = binding.searchQueryTextView;
+                                queryButton.setOnClickListener(view -> {
+                                    adapter.clear(); // Clear adapter
+                                    GrabRequests searchThread = new GrabRequests(adapter, location);
+                                    String query = queryBox.getText().toString();
+                                    searchThread.createQuery(query);
+                                    searchThread.start();
+                                    try {
+                                        searchThread.join();
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
                             } catch (InterruptedException e) {
                                 Log.e(TAG, e.getMessage());
                             }

@@ -26,4 +26,6 @@
     <string name="createText">Create</string>
     <string name="cancelText">Cancel</string>
     <string name="action_logout">Logout</string>
+    <string name="search">Search...</string>
+    <string name="search_button_text">Search</string>
 </resources>
