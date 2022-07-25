@@ -2,13 +2,12 @@ import '../App.css';
 import { Component } from 'react';
 import axios from "axios";
 import { useFormik, Formik } from 'formik';
+import './Login.css';
 import {
     Button,
     Card,
     CardHeader,
     CardBody,
-    FormGroup,
-    Form,
     Input,
     InputGroupAddon,
     InputGroupText,
@@ -18,7 +17,10 @@ import {
     Col
   } from "reactstrap";
 
-  import packageJson from '../../package.json';
+import Form from "react-bootstrap/Form";
+  
+
+import packageJson from '../../package.json';
 
 
 
@@ -47,44 +49,53 @@ function Login(props){
     });
 
     return (
-      <Container className="login">
-        <Form onSubmit={loginForm.handleSubmit}>
-            <FormGroup className="mb-3">
-                <InputGroup className="input-group-alternative">
-                    <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                        Username
-                        </InputGroupText>
-                    </InputGroupAddon>
-                    <Input 
-                        placeholder="Username" 
-                        id="username"
-                        type="text" 
-                        value={loginForm.values.username}
-                        onChange={loginForm.handleChange}/>
-                </InputGroup>
-            </FormGroup>
-            <FormGroup>
-                <InputGroup className="input-group-alternative">
-                <InputGroupAddon addonType="prepend">
-                    <InputGroupText>
-                    Password
-                    </InputGroupText>
-                </InputGroupAddon>
-                    <Input
-                        placeholder="Password"
-                        id="password"
-                        type="password" 
-                        value={loginForm.values.password}
-                        onChange={loginForm.handleChange}
-                    />
-                </InputGroup>
-            </FormGroup>
-            <div className="text-center">
-                <Button className="my-4" color="primary" type="submit">Sign in</Button>
+        <div className = 'bg-image'>
+            <div className = 'color-overlay d-flex justify-content-center align-items-center'>
+                <Form onSubmit={loginForm.handleSubmit} className="rounded p-4 p-sm-3">
+                    <div className='mb-3'>
+                        <img src = "logo.png" alt='logo'/>
+                    </div>
+                    <Form.Group className="mb-3" controlId='formUsername'>
+                        <InputGroup className="input-group-alternative">
+                            <InputGroupAddon addonType="prepend">
+                                <InputGroupText>
+                                Username
+                                </InputGroupText>
+                            </InputGroupAddon>
+                            <Input 
+                                placeholder="Username" 
+                                id="username"
+                                type="text" 
+                                value={loginForm.values.username}
+                                onChange={loginForm.handleChange}/>
+                        </InputGroup>
+                    </Form.Group>
+
+                    <Form.Group className="mb-3" controlId='formPassword'>
+                        <InputGroup className="input-group-alternative">
+                        <InputGroupAddon addonType="prepend">
+                            <InputGroupText>
+                            Password
+                            </InputGroupText>
+                        </InputGroupAddon>
+                            <Input
+                                placeholder="Password"
+                                id="password"
+                                type="password" 
+                                value={loginForm.values.password}
+                                onChange={loginForm.handleChange}
+                            />
+                        </InputGroup>
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId='formCheckbox'>
+                        <Form.Check type= "checkbox" label="Remember Me"/>
+                    </Form.Group>
+                    <div className="text-center" controlId='formSubmitButton'>
+                        <Button className="my-4" color="primary" type="submit">Sign in</Button>
+                    </div>
+                </Form>
             </div>
-        </Form>
-      </Container>
+        </div>
     )
   }
 export default Login;
