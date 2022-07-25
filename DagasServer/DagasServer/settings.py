@@ -68,6 +68,8 @@ INSTALLED_APPS = [
     'celery',
     # Django Filters
     'django_filters',
+    # Notifications
+    'notifications',
 
 ]
 
