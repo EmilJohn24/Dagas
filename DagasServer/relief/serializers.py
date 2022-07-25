@@ -1,8 +1,8 @@
 from django.db import transaction
 from django.db.models import Sum
 from rest_framework import serializers
-# from rest_auth.registration.serializers import RegisterSerializer
-from dj_rest_auth.registration.serializers import RegisterSerializer
+from rest_auth.registration.serializers import RegisterSerializer
+# from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework.reverse import reverse
 
 from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \

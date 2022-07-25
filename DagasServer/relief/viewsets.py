@@ -1,6 +1,7 @@
 from django.db.models import Sum, QuerySet
 from django.utils.datetime_safe import datetime
 from django_filters.rest_framework import DjangoFilterBackend
+from notifications.signals import notify
 from rest_framework.response import Response
 from rest_framework import viewsets, status, serializers, filters
 from rest_framework.decorators import action
@@ -134,6 +135,14 @@ class TransactionViewSet(viewsets.ModelViewSet):
         if user.role == User.BARANGAY:
             if transaction.received == Transaction.INCOMING:
                 transaction.received = Transaction.RECEIVED
+                # Create notification for Residents
+                # TODO: Consider moving to a Transaction signal instead
+                resident_users = User.objects.filter(resident_profile__barangay__user=user)
+                notif_verb = "Package Arrival"
+                notif_message = 'The packages for evacuation center ' + \
+                             transaction.barangay_request.evacuation_center.name + 'has arrived'
+                notify.send(sender=user, recipient=resident_users, target=transaction,
+                            verb=notif_verb, description=notif_message)
             elif transaction.received == Transaction.PACKAGING:
                 raise ValidationError(detail="Order still being packaged")
             elif transaction.received == Transaction.RECEIVED:
