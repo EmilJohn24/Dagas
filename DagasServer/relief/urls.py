@@ -12,7 +12,7 @@ from .serializers import UserSerializer, ResidentSerializer
 # Settings
 from .viewsets import UserViewSet, ResidentViewSet, SupplyViewSet, ItemTypeViewSet, ItemRequestViewSet, \
     TransactionViewSet, BarangayRequestViewSet, BarangayViewSet, DonationViewSet, EvacuationCenterViewSet, \
-    TransactionOrderViewSet, UserLocationViewSet, RouteSuggestionViewSet
+    TransactionOrderViewSet, UserLocationViewSet, RouteSuggestionViewSet, NotificationViewSet
 
 USE_ROUTER = True
 
@@ -46,4 +46,5 @@ router.register('api/donations', DonationViewSet, basename='donations')
 router.register('api/evacuation-center', EvacuationCenterViewSet, basename='evac_center')
 router.register('api/transaction-order', TransactionOrderViewSet, basename='transaction_orders')
 router.register('api/suggestions', RouteSuggestionViewSet, basename='suggestions')
+router.register('api/notifications', NotificationViewSet, basename='notifications')
 urlpatterns += router.urls
