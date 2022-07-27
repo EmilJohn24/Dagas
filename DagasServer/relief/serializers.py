@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.db.models import Sum
+from notifications.models import Notification
 from rest_framework import serializers
 from rest_auth.registration.serializers import RegisterSerializer
 # from dj_rest_auth.registration.serializers import RegisterSerializer
@@ -341,3 +342,30 @@ class CustomRegisterSerializer(RegisterSerializer):
         user.role = self.validated_data.get('role')
         user.save()
         return user
+
+
+class GenericNotificationRelatedField(serializers.RelatedField):
+
+    def to_representation(self, value):
+        if isinstance(value, Transaction):
+            # serializer = TransactionSerializer(value, )
+            # Serializer by-pass
+            return {'transaction_id': value.id}
+        if isinstance(value, BarangayProfile):
+            serializer = BarangaySerializer(value)
+
+        return serializer.data
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    recipient = UserSerializer(User, read_only=True)
+    unread = serializers.BooleanField(read_only=True)
+    target = GenericNotificationRelatedField(read_only=True)
+    target_object_id = serializers.StringRelatedField(read_only=True)
+    verb = serializers.StringRelatedField(read_only=True)
+    description = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ('recipient', 'unread', 'target', 'target_object_id', 'verb', 'description',)
+        read_only_fields = ('recipient', 'unread', 'target', 'target_object_id', 'verb', 'description',)

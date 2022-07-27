@@ -2,6 +2,7 @@ from django.db.models import Sum, QuerySet
 from django.utils.datetime_safe import datetime
 from django_filters.rest_framework import DjangoFilterBackend
 from notifications.signals import notify
+from notifications.models import Notification
 from rest_framework.response import Response
 from rest_framework import viewsets, status, serializers, filters
 from rest_framework.decorators import action
@@ -14,7 +15,7 @@ from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
     ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
     DonationSerializer, EvacuationCenterSerializer, TransactionOrderSerializer, UserLocationSerializer, \
-    RouteSuggestionSerializer
+    RouteSuggestionSerializer, NotificationSerializer
 
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
@@ -140,7 +141,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
                 resident_users = User.objects.filter(resident_profile__barangay__user=user)
                 notif_verb = "Package Arrival"
                 notif_message = 'The packages for evacuation center ' + \
-                             transaction.barangay_request.evacuation_center.name + 'has arrived'
+                                transaction.barangay_request.evacuation_center.name + 'has arrived'
                 notify.send(sender=user, recipient=resident_users, target=transaction,
                             verb=notif_verb, description=notif_message)
             elif transaction.received == Transaction.PACKAGING:
@@ -340,3 +341,24 @@ class RouteSuggestionViewSet(viewsets.ReadOnlyModelViewSet):
             return RouteSuggestion.objects.filter(donor__user=user)
         else:
             return RouteSuggestion.objects.all()
+
+
+class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = NotificationSerializer
+
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
+    filterset_fields = ['unread', ]
+
+    @action(detail=False, methods=['get'], name='Mark All Notifications of current user',
+            permission_classes=[IsProfileUserOrReadOnly])
+    def mark_all_as_read(self, request, pk=None):
+        recipient = self.request.user
+        Notification.objects.mark_all_as_read(recipient)
+        return Response({"success": "All notifications marked as read"})
+
+    def get_queryset(self):
+        recipient = self.request.user
+        if recipient.is_anonymous:
+            return Notification.objects.all()
+        notifications = Notification.objects.filter(recipient=recipient)
+        return notifications

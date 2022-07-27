@@ -1,10 +1,7 @@
 package com.cnil.dagas.ui.home;
 
-import static androidx.camera.core.CameraX.getContext;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -22,10 +19,9 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.cnil.dagas.R;
 import com.cnil.dagas.data.CurrentUserThread;
-import com.cnil.dagas.data.ResidentRegisterActivity;
 import com.cnil.dagas.databinding.ActivityHomeBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
-import com.cnil.dagas.services.location.LocationService;
+import com.cnil.dagas.services.notifications.DagasNotificationService;
 import com.cnil.dagas.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
 import com.squareup.picasso.Picasso;
@@ -57,7 +53,8 @@ public class HomeActivity extends AppCompatActivity {
 //                        .setAction("Action", null).show();
 //            }
 //        });
-        startService(new Intent(this, LocationService.class));
+//        startService(new Intent(this, LocationService.class));
+        startService(new Intent(this, DagasNotificationService.class));
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         TextView nameTxt = (TextView) navigationView.getHeaderView(0).findViewById(R.id.nameTxt);

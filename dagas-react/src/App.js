@@ -36,6 +36,7 @@ class App extends Component{
     return (
         <div className='App flex flex-col min-h-screen overflow-hidden'>
           <BrowserRouter>
+            <Login/>
             <Routes>
               <Route path="/login" element={<Login/>}/>
               <Route path="/register" element={<Registration/>}/>

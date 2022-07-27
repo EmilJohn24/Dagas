@@ -1,4 +1,12 @@
 import '../App.css';
+
+
+import './Login.css';
+
+
+
+
+
 import React from 'react';
 import { useFormik, Formik, Field, Form, ErrorMessage } from 'formik';
 import { useNavigate } from "react-router-dom";
@@ -49,22 +57,29 @@ class Login extends React.Component {
                 //     history.push('/home');
                 // }}
                 render={({ errors, status, touched }) => (
-                    <Form>
-                        <div className="form-group">
-                            <label htmlFor="username">Username</label>
-                            <Field name="username" type="text" className={'form-control' + (errors.username && touched.username ? ' is-invalid' : '')} />
-                            <ErrorMessage name="username" component="div" className="invalid-feedback" />
+                    <div className = 'bg-image'>
+                        <div className = 'color-overlay d-flex justify-content-center align-items-center'>
+                            <Form className="rounded p-4 p-sm-3">
+                                <div>
+                                    <img src='logo.png' alt='logo' />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="username">Username</label>
+                                    <Field name="username" type="text" className={'form-control' + (errors.username && touched.username ? ' is-invalid' : '')} />
+                                    <ErrorMessage name="username" component="div" className="invalid-feedback" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor="password">Password</label>
+                                    <Field name="password" type="password" className={'form-control' + (errors.password && touched.password ? ' is-invalid' : '')} />
+                                    <ErrorMessage name="password" component="div" className="invalid-feedback" />
+                                </div>
+                                <div className="form-group">
+                                    <button type="submit" className="btn btn-primary mr-2">Login</button>
+                                    <button type="reset" className="btn btn-secondary">Reset</button>
+                                </div>
+                            </Form>
                         </div>
-                        <div className="form-group">
-                            <label htmlFor="password">Password</label>
-                            <Field name="password" type="password" className={'form-control' + (errors.password && touched.password ? ' is-invalid' : '')} />
-                            <ErrorMessage name="password" component="div" className="invalid-feedback" />
-                        </div>
-                        <div className="form-group">
-                            <button type="submit" className="btn btn-primary mr-2">Login</button>
-                            <button type="reset" className="btn btn-secondary">Reset</button>
-                        </div>
-                    </Form>
+                    </div>
                 )} />
                 <button type="button" onClick={()=>{navigation('/register')}}> Register</button></>  
         )

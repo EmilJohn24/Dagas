@@ -1,0 +1,22 @@
+.bg-image{
+    position: relative;
+    background-image: url("images/PDI-file3.jpg");
+    min-height: 100vh;
+}
+
+.color-overlay{
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.2);
+    height: 100%;
+    width: 100%;
+    mix-blend-mode: normal;
+}
+
+form{
+    background-color: white;
+    box-shadow: 5px 5px 5px rgba(0,0,0.2);
+}
+
+.form-group{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
