@@ -127,21 +127,21 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
         data[data['demand_types'][item_type_index]][chosen_request_index] = 0
         # Fulfillment
         algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][item_type_index] += supply_reduced
-        for i in range(item_type_index + 1, len(data['item_types'])):
+        for j in range(item_type_index + 1, len(data['item_types'])):
             demand_remaining = data[data['demand_types'][i]][chosen_request_index]
             supply_remaining = data[data['supply_types'][i]][chosen_donor_index]
             surplus = supply_remaining - demand_remaining
             if surplus >= 0:
-                data[data['demand_types'][i]][chosen_request_index] = 0
-                data[data['supply_types'][i]][chosen_donor_index] = surplus
+                data[data['demand_types'][j]][chosen_request_index] = 0
+                data[data['supply_types'][j]][chosen_donor_index] = surplus
                 algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][
-                    i] += demand_remaining
+                    j] += demand_remaining
 
             else:
-                data[data['demand_types'][i]][chosen_request_index] = abs(surplus)
-                data[data['supply_types'][i]][chosen_donor_index] = 0
+                data[data['demand_types'][j]][chosen_request_index] = abs(surplus)
+                data[data['supply_types'][j]][chosen_donor_index] = 0
                 algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][
-                    i] += supply_remaining
+                    j] += supply_remaining
     manipulated_data = data
     return algo_data, manipulated_data
 
@@ -238,6 +238,7 @@ def generate_data(donor_count=10, evacuation_center_count=10):
     # Step 1: Generate users
     #   Step 1a: Clear all donors, supplies, and donations
     User.objects.filter(role=User.DONOR).delete()
+    User.objects.filter(role=User.BARANGAY).delete()
     UserLocation.objects.all().delete()
     DonorProfile.objects.all().delete()
     Donation.objects.all().delete()
@@ -257,6 +258,7 @@ def generate_data(donor_count=10, evacuation_center_count=10):
             last_name="Barangay",
             role=User.BARANGAY,
         )
+        test_barangay.save()
     # Step 1b-2: Generate evacuation centers
     barangay_user = User.objects.filter(role=User.BARANGAY, username="FakeBarangay")[0]
     barangay = BarangayProfile.objects.filter(user=barangay_user)[0]

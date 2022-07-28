@@ -1,0 +1,42 @@
+
+.logoSize{
+    width: 50px;
+    height: 50px;
+}
+
+.bg-image{
+    position: relative;
+    background-image: url("images/PDI-file3.jpg");
+    min-height: 100vh;
+}
+
+.color-overlay{
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.2);
+    height: 100%;
+    width: 100%;
+    mix-blend-mode: normal;
+}
+
+.gradient-custom {
+
+    background-color: #20bf55;
+    background-image: linear-gradient(315deg, #20bf55 0%, #01baef 74%);
+}
+    
+@media (min-width: 768px) {
+    .bg-image {
+        height: 100vh !important;
+    }
+}
+
+@media (min-width: 769px) {
+    .gradient-custom {
+        border-top-right-radius: .3rem;
+        border-bottom-right-radius: .3rem;
+    }
+}
+
+.font-group{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}

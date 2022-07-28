@@ -13,7 +13,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
-
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
@@ -29,9 +28,13 @@
         android:theme="@style/Theme.DagasAndroid"
         android:usesCleartextTraffic="true">
         <service
-            android:name=".services.location.LocationService"
+            android:name=".services.notifications.DagasNotificationService"
             android:enabled="true"
             android:exported="true"></service>
+        <service
+            android:name=".services.location.LocationService"
+            android:enabled="true"
+            android:exported="true" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

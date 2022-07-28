@@ -78,17 +78,20 @@ class DonorProfile(models.Model):
         User information exclusive to donors
     """
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, null=True, related_name="donor_profile")
+    current_disaster = models.ForeignKey(to="Disaster", on_delete=models.CASCADE, related_name='donors',
+                                         null=True, blank=True)
 
     def __str__(self):
-        return self.user.__str__()
+        return self.user.username
 
 
 class BarangayProfile(models.Model):
     """
         User information exclusive to barangays
     """
-    # TODO: Add geolocation and evacuation centers
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, null=True, related_name="barangay_profile")
+    current_disaster = models.ForeignKey(to='Disaster', on_delete=models.CASCADE, related_name='barangays',
+                                         null=True, blank=True)
 
     def __str__(self):
         return self.user.username
@@ -118,6 +121,16 @@ def generate_user_profile(sender, instance, created, **kwargs):
 
 
 # END User Management
+class Disaster(models.Model):
+    name = models.CharField(max_length=200)
+    ongoing = models.BooleanField(default=True)
+    date_started = models.DateTimeField(default=timezone.now)
+    date_ended = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 class EvacuationDetails(models.Model):
     # TODO: Add datetime validation later
     barangay = models.ForeignKey(to=BarangayProfile, on_delete=models.CASCADE)
@@ -333,7 +346,7 @@ class RouteNode(models.Model):
     request = models.ForeignKey(to=BarangayRequest, on_delete=models.CASCADE,
                                 related_name='request', )
     suggestion = models.ForeignKey(to=RouteSuggestion, on_delete=models.CASCADE, related_name='nodes')
-    distance_from_prev = models.FloatField(null=True,)
+    distance_from_prev = models.FloatField(null=True, )
 
 
 class Fulfillment(models.Model):
