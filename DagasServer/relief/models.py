@@ -18,6 +18,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django_google_maps import fields as map_fields
+from notifications.signals import notify
+
 from DagasServer import settings
 
 
@@ -118,6 +120,18 @@ def generate_user_profile(sender, instance, created, **kwargs):
     else:
         return
     instance.save()
+
+
+@receiver(post_save, sender=BarangayProfile)
+def notify_residents_disaster(sender, instance, created, **kwargs):
+    barangay = instance
+    if barangay.current_disaster is None or not barangay.current_disaster.ongoing:
+        return
+    resident_users = User.objects.filter(resident_profile__barangay=barangay)
+    notif_verb = "Disaster Declaration"
+    notif_message = 'Your barangay has been declared under ' + str(barangay.current_disaster)
+    notify.send(sender=barangay.user, recipient=resident_users, target=barangay.current_disaster,
+                verb=notif_verb, description=notif_message)
 
 
 # END User Management
@@ -267,6 +281,7 @@ class BarangayRequest(models.Model):
                                 on_delete=models.CASCADE)  # contains both the barangay and the evac center
     expected_date = models.DateTimeField(null=True, default=datetime.now)
 
+    # TODO: Add field for date created
     def __str__(self):
         return self.barangay.user.username + " (" + str(self.id) + ")"
 

@@ -67,8 +67,8 @@ class DisasterSerializer(serializers.ModelSerializer):
     # TODO: Eventually add serializer showing all affected barangays? (This might not be useful)
     class Meta:
         model = Disaster
-        fields = ('id', 'name', 'date_started', 'date_ended')
-        read_only_fields = ('name', 'date_started', 'date_ended')
+        fields = ('id', 'name', 'date_started', 'ongoing', 'date_ended')
+        read_only_fields = ('name', 'date_started', 'ongoing', 'date_ended')
 
 
 # Profile serializers
@@ -365,6 +365,8 @@ class GenericNotificationRelatedField(serializers.RelatedField):
             return {'transaction_id': value.id}
         if isinstance(value, BarangayProfile):
             serializer = BarangaySerializer(value)
+        if isinstance(value, Disaster):
+            serializer = DisasterSerializer(value)
 
         return serializer.data
 
