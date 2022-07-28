@@ -6,7 +6,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,6 +21,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.cnil.dagas.R;
 import com.cnil.dagas.data.CurrentUserThread;
+import com.cnil.dagas.data.DisasterListThread;
 import com.cnil.dagas.databinding.ActivityHomeBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
 import com.cnil.dagas.services.notifications.DagasNotificationService;
@@ -26,9 +29,14 @@ import com.cnil.dagas.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -140,8 +148,27 @@ public class HomeActivity extends AppCompatActivity {
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
         }
-
-
+        // Disaster Spinner loader
+        DisasterListThread disasterListThread = new DisasterListThread();
+        disasterListThread.start();
+        try {
+            disasterListThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        JSONArray disasterJSONArray = disasterListThread.getDisasterJSONArray();
+        Map<String, Integer> disasterIDs = new HashMap<>();
+        for (int i = 0; i != disasterJSONArray.length(); i++){
+            try {
+                JSONObject disasterJSON = disasterJSONArray.getJSONObject(i);
+                disasterIDs.put(disasterJSON.getString("name"), disasterJSON.getInt("id"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        Spinner disasterSpinner = (Spinner) navigationView.getHeaderView(0).findViewById(R.id.disasterSpinner);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, new ArrayList<>(disasterIDs.keySet()));
+        disasterSpinner.setAdapter(adapter);
         //End load current user data
 
         // Passing each menu ID as a set of Ids because each
