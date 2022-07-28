@@ -8,7 +8,7 @@ from rest_framework.reverse import reverse
 
 from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \
     ItemType, ItemRequest, BarangayRequest, EvacuationDetails, Transaction, TransactionImage, EvacuationCenter, \
-    TransactionOrder, UserLocation, Fulfillment, RouteNode, RouteSuggestion
+    TransactionOrder, UserLocation, Fulfillment, RouteNode, RouteSuggestion, Disaster
 
 
 class ItemTypeSerializer(serializers.ModelSerializer):
@@ -63,6 +63,14 @@ class UserLocationSerializer(serializers.ModelSerializer):
         read_only_fields = ('user', 'time',)
 
 
+class DisasterSerializer(serializers.ModelSerializer):
+    # TODO: Eventually add serializer showing all affected barangays? (This might not be useful)
+    class Meta:
+        model = Disaster
+        fields = ('id', 'name', 'date_started', 'date_ended')
+        read_only_fields = ('name', 'date_started', 'date_ended')
+
+
 # Profile serializers
 class BarangaySerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
@@ -70,10 +78,12 @@ class BarangaySerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username',
     )
+    current_disaster = DisasterSerializer(many=False, read_only=True)
 
     class Meta:
         model = BarangayProfile
-        fields = ('id', 'user')
+        fields = ('id', 'user', 'current_disaster')
+        read_only_fields = ('current_disaster',)
 
 
 class ResidentSerializer(serializers.ModelSerializer):
@@ -103,10 +113,12 @@ class DonorSerializer(serializers.ModelSerializer):
         view_name='relief:users-detail',
     )
 
+    current_disaster = DisasterSerializer(many=False, read_only=True)
+
     class Meta:
         model = DonorProfile
-        fields = ('id', 'user', 'donations', 'user_link')
-        read_only_fields = ('user_link',)
+        fields = ('id', 'user', 'donations', 'user_link', 'current_disaster')
+        read_only_fields = ('user_link', 'current_disaster')
 
 
 class GovAdminSerializer(serializers.ModelSerializer):

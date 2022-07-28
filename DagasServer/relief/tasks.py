@@ -238,6 +238,7 @@ def generate_data(donor_count=10, evacuation_center_count=10):
     # Step 1: Generate users
     #   Step 1a: Clear all donors, supplies, and donations
     User.objects.filter(role=User.DONOR).delete()
+    User.objects.filter(role=User.BARANGAY).delete()
     UserLocation.objects.all().delete()
     DonorProfile.objects.all().delete()
     Donation.objects.all().delete()
@@ -257,6 +258,7 @@ def generate_data(donor_count=10, evacuation_center_count=10):
             last_name="Barangay",
             role=User.BARANGAY,
         )
+        test_barangay.save()
     # Step 1b-2: Generate evacuation centers
     barangay_user = User.objects.filter(role=User.BARANGAY, username="FakeBarangay")[0]
     barangay = BarangayProfile.objects.filter(user=barangay_user)[0]
