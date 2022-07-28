@@ -88,134 +88,146 @@ function Registration(props){
     });
 
     return (
-      <Container className="login">
-        <Form onSubmit={registrationForm.handleSubmit}>
-            <FormGroup className="mb-3">
-                <InputGroup className="input-group-alternative">
-                    <InputGroupAddon addonType="prepend">
-                        <InputGroupText>
-                        Username
-                        </InputGroupText>
-                    </InputGroupAddon>
-                    <Input 
-                        placeholder="Username" 
-                        id="username"
-                        type="text" 
-                        value={registrationForm.values.username}
-                        onChange={registrationForm.handleChange}/>
-                </InputGroup>
-            </FormGroup>
-            <FormGroup>
-                <InputGroup className="input-group-alternative">
-                <InputGroupAddon addonType="prepend">
-                    <InputGroupText>
-                    Email
-                    </InputGroupText>
-                </InputGroupAddon>
-                    <Input
-                        placeholder="Email"
-                        id="email"
-                        type="email" 
-                        value={registrationForm.values.email}
-                        onChange={registrationForm.handleChange}
-                    />
-                </InputGroup>
-            </FormGroup>
-            <FormGroup>
-                <InputGroup className="input-group-alternative">
-                <InputGroupAddon addonType="prepend">
-                    <InputGroupText>
-                    Password
-                    </InputGroupText>
-                </InputGroupAddon>
-                    <Input
-                        placeholder="Password"
-                        id="password1"
-                        type="password" 
-                        value={registrationForm.values.password1}
-                        onChange={registrationForm.handleChange}
-                    />
-                </InputGroup>
-            </FormGroup>
-            <FormGroup>
-                <InputGroup className="input-group-alternative">
-                <InputGroupAddon addonType="prepend">
-                    <InputGroupText>
-                    Confirm Password
-                    </InputGroupText>
-                </InputGroupAddon>
-                    <Input
-                        placeholder="Confirm Password"
-                        id="password2"
-                        type="password" 
-                        value={registrationForm.values.password2}
-                        onChange={registrationForm.handleChange}
-                    />
-                </InputGroup>
-            </FormGroup>
-            <FormGroup>
-                <InputGroup className="input-group-alternative">
-                <InputGroupAddon addonType="prepend">
-                    <InputGroupText>
-                    First Name
-                    </InputGroupText>
-                </InputGroupAddon>
-                    <Input
-                        placeholder="Confirm Password"
-                        id="first_name"
-                        type="text" 
-                        value={registrationForm.values.first_name}
-                        onChange={registrationForm.handleChange}
-                    />
-                </InputGroup>
-            </FormGroup>
-            <FormGroup>
-                <InputGroup className="input-group-alternative">
-                <InputGroupAddon addonType="prepend">
-                    <InputGroupText>
-                    Last Name
-                    </InputGroupText>
-                </InputGroupAddon>
-                    <Input
-                        placeholder="Last Name"
-                        id="last_name"
-                        type="text" 
-                        value={registrationForm.values.last_name}
-                        onChange={registrationForm.handleChange}
-                    />
-                </InputGroup>
-            </FormGroup>
-            <FormGroup>
-                <InputGroup className="input-group-alternative">
-                <InputGroupAddon addonType="prepend">
-                    <InputGroupText>
-                    Role
-                    </InputGroupText>
-                </InputGroupAddon>
-                    <Input
-                        id="role"
-                        type="number"
-                        value={registrationForm.values.role}
-                        onChange={registrationForm.handleChange}>
-                        <option value="1">
-                            Resident
-                        </option>
-                        <option value="2">
-                            Donor
-                        </option>
-                        <option value="3">
-                            Barangay
-                        </option>
-                        
-                    </Input>
-                </InputGroup>
-            </FormGroup>
+        <section className="vh-100">
+            <div className="container h-100">
+                <div className="row d-flex justify-content-center align-items-center h-100">
+                    <div className="col-xl-9">
+                        <div className="card">
+                            <div className="card-body">
+                            <Form onSubmit={registrationForm.handleSubmit}>
+                                <FormGroup className="row align-items-center pt-4 pb-3">
+                                    <InputGroup className="input-group-alternative">
+                                        <InputGroupAddon addonType="prepend">
+                                            <InputGroupText>
+                                            Username
+                                            </InputGroupText>
+                                        </InputGroupAddon>
+                                        <Input 
+                                            placeholder="Username" 
+                                            id="username"
+                                            type="text" 
+                                            value={registrationForm.values.username}
+                                            onChange={registrationForm.handleChange}/>
+                                    </InputGroup>
+                                </FormGroup>
+                                <FormGroup>
+                                    <InputGroup className="input-group-alternative">
+                                    <InputGroupAddon addonType="prepend">
+                                        <InputGroupText>
+                                        Email
+                                        </InputGroupText>
+                                    </InputGroupAddon>
+                                        <Input
+                                            placeholder="Email"
+                                            id="email"
+                                            type="email" 
+                                            value={registrationForm.values.email}
+                                            onChange={registrationForm.handleChange}
+                                        />
+                                    </InputGroup>
+                                </FormGroup>
+                                <FormGroup>
+                                    <InputGroup className="input-group-alternative">
+                                    <InputGroupAddon addonType="prepend">
+                                        <InputGroupText>
+                                        Password
+                                        </InputGroupText>
+                                    </InputGroupAddon>
+                                        <Input
+                                            placeholder="Password"
+                                            id="password1"
+                                            type="password" 
+                                            value={registrationForm.values.password1}
+                                            onChange={registrationForm.handleChange}
+                                        />
+                                    </InputGroup>
+                                </FormGroup>
+                                <FormGroup>
+                                    <InputGroup className="input-group-alternative">
+                                    <InputGroupAddon addonType="prepend">
+                                        <InputGroupText>
+                                        Confirm Password
+                                        </InputGroupText>
+                                    </InputGroupAddon>
+                                        <Input
+                                            placeholder="Confirm Password"
+                                            id="password2"
+                                            type="password" 
+                                            value={registrationForm.values.password2}
+                                            onChange={registrationForm.handleChange}
+                                        />
+                                    </InputGroup>
+                                </FormGroup>
+                                <FormGroup>
+                                    <InputGroup className="input-group-alternative">
+                                    <InputGroupAddon addonType="prepend">
+                                        <InputGroupText>
+                                        First Name
+                                        </InputGroupText>
+                                    </InputGroupAddon>
+                                        <Input
+                                            placeholder="Confirm Password"
+                                            id="first_name"
+                                            type="text" 
+                                            value={registrationForm.values.first_name}
+                                            onChange={registrationForm.handleChange}
+                                        />
+                                    </InputGroup>
+                                </FormGroup>
+                                <FormGroup>
+                                    <InputGroup className="input-group-alternative">
+                                    <InputGroupAddon addonType="prepend">
+                                        <InputGroupText>
+                                        Last Name
+                                        </InputGroupText>
+                                    </InputGroupAddon>
+                                        <Input
+                                            placeholder="Last Name"
+                                            id="last_name"
+                                            type="text" 
+                                            value={registrationForm.values.last_name}
+                                            onChange={registrationForm.handleChange}
+                                        />
+                                    </InputGroup>
+                                </FormGroup>
+                                <FormGroup>
+                                    <InputGroup className="input-group-alternative">
+                                    <InputGroupAddon addonType="prepend">
+                                        <InputGroupText>
+                                        Role
+                                        </InputGroupText>
+                                    </InputGroupAddon>
+                                        <Input
+                                            id="role"
+                                            type="number"
+                                            value={registrationForm.values.role}
+                                            onChange={registrationForm.handleChange}>
+                                            <option value="1">
+                                                Resident
+                                            </option>
+                                            <option value="2">
+                                                Donor
+                                            </option>
+                                            <option value="3">
+                                                Barangay
+                                            </option>
+                                            
+                                        </Input>
+                                    </InputGroup>
+                                </FormGroup>
 
-            <div className="text-center">
-                <Button className="my-4" color="primary" type="submit">Sign in</Button>
+                                <div className="text-center">
+                                    <Button className="my-4" color="primary" type="submit">Sign in</Button>
+                                </div>
+                            </Form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </Form>
-      </Container>
+        </section>
+
+
     )
   }
 export default Registration;
