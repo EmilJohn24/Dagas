@@ -296,6 +296,7 @@ class DisasterViewSet(viewsets.ReadOnlyModelViewSet):
         current_donor = DonorProfile.objects.get(user=self.request.user)
         if current_donor is not None:
             current_donor.current_disaster = self.get_object()
+            current_donor.save()
             return Response(DonorSerializer(current_donor, context={'request': request}, many=False).data)
         else:
             return Response({'error': 'Only donors can change their disaster assignment'},
@@ -309,6 +310,7 @@ class DisasterViewSet(viewsets.ReadOnlyModelViewSet):
         current_donor = DonorProfile.objects.get(user=self.request.user)
         if current_donor is not None:
             current_donor.current_disaster = None
+            current_donor.save()
             return Response(DonorSerializer(current_donor, context={'request': request}, many=False).data)
         else:
             return Response({'error': 'Only donors can change their disaster assignment'},

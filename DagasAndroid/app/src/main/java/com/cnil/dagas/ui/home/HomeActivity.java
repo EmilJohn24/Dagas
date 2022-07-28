@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -22,6 +24,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.cnil.dagas.R;
 import com.cnil.dagas.data.CurrentUserThread;
 import com.cnil.dagas.data.DisasterListThread;
+import com.cnil.dagas.data.DisasterUpdateThread;
 import com.cnil.dagas.databinding.ActivityHomeBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
 import com.cnil.dagas.services.notifications.DagasNotificationService;
@@ -158,6 +161,7 @@ public class HomeActivity extends AppCompatActivity {
         }
         JSONArray disasterJSONArray = disasterListThread.getDisasterJSONArray();
         Map<String, Integer> disasterIDs = new HashMap<>();
+        disasterIDs.put(" ", DisasterUpdateThread.NONE);
         for (int i = 0; i != disasterJSONArray.length(); i++){
             try {
                 JSONObject disasterJSON = disasterJSONArray.getJSONObject(i);
@@ -169,6 +173,22 @@ public class HomeActivity extends AppCompatActivity {
         Spinner disasterSpinner = (Spinner) navigationView.getHeaderView(0).findViewById(R.id.disasterSpinner);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, new ArrayList<>(disasterIDs.keySet()));
         disasterSpinner.setAdapter(adapter);
+        //TODO: Set initial selection to currently set disaster
+        disasterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String disasterName = adapter.getItem(i);
+                Integer disasterId = disasterIDs.get(disasterName);
+                DisasterUpdateThread updateThread = new DisasterUpdateThread(disasterId);
+                updateThread.start();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        //End disaster spinner
         //End load current user data
 
         // Passing each menu ID as a set of Ids because each
