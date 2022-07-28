@@ -179,6 +179,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
         }
         if(!roleVerbose.equals("3")) {
             root.findViewById(R.id.addEvacButton).setVisibility(View.INVISIBLE);
+            root.findViewById(R.id.searchBarContainer).setVisibility(View.INVISIBLE);
             root.findViewById(R.id.addressSearchBar).setVisibility(View.INVISIBLE);
         }
         return root;
@@ -274,7 +275,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
             //        map.addMarker(new MarkerOptions().)
             EditText editTextEvacName = root.findViewById(R.id.editTextEvacName);
             FloatingActionButton addEvacButton = root.findViewById(R.id.addEvacButton);
-            final Marker[] marker = {null};
+//            final Marker[] marker = {null};
             addressSearchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
                 @Override
                 public boolean onEditorAction(TextView textView, int actionID, KeyEvent keyEvent) {
@@ -290,8 +291,8 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
 
                                 Log.d("lat-long", "" + lat + "......." + lon);
                                 final LatLng user = new LatLng(lat, lon);
-                                if (marker[0] != null) marker[0].remove();
-                                marker[0] = map.addMarker(new MarkerOptions()
+                                if (newEvacMarker != null) newEvacMarker.remove();
+                                newEvacMarker = map.addMarker(new MarkerOptions()
                                         .position(user)
                                         .title(address));
                                 // Move the camera instantly to hamburg with a zoom of 15.
@@ -312,7 +313,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
             map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                 @Override
                 public void onMapClick(@NonNull LatLng latLng) {
-                    if (marker[0] != null) marker[0].remove();
+//                    if (marker[0] != null) marker[0].remove();
                     if (newEvacMarker != null) newEvacMarker.remove();
                     newEvacMarker = map.addMarker(new MarkerOptions()
                             .position(latLng)
@@ -327,8 +328,8 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
                         // Add Evacuation Center
                         //TODO: Find better ways to get address
                         try {
-                            if (marker[0] != null)
-                                marker[0].remove(); //remove marker from search bar
+//                            if (marker[0] != null)
+//                                marker[0].remove(); //remove marker from search bar
                             String name = editTextEvacName.getText().toString();
                             AddEvacThread addEvacThread = new AddEvacThread(name, EvacuationVisualMapFragment.this.getContext(),
                                     newEvacMarker.getPosition().latitude, newEvacMarker.getPosition().longitude);
