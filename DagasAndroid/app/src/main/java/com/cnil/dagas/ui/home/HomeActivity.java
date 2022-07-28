@@ -152,42 +152,44 @@ public class HomeActivity extends AppCompatActivity {
             Log.e(TAG, e.getMessage());
         }
         // Disaster Spinner loader
-        DisasterListThread disasterListThread = new DisasterListThread();
-        disasterListThread.start();
-        try {
-            disasterListThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        JSONArray disasterJSONArray = disasterListThread.getDisasterJSONArray();
-        Map<String, Integer> disasterIDs = new HashMap<>();
-        disasterIDs.put(" ", DisasterUpdateThread.NONE);
-        for (int i = 0; i != disasterJSONArray.length(); i++){
+        if (roleVerbose.equals("2")) {
+            DisasterListThread disasterListThread = new DisasterListThread();
+            disasterListThread.start();
             try {
-                JSONObject disasterJSON = disasterJSONArray.getJSONObject(i);
-                disasterIDs.put(disasterJSON.getString("name"), disasterJSON.getInt("id"));
-            } catch (JSONException e) {
+                disasterListThread.join();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+            JSONArray disasterJSONArray = disasterListThread.getDisasterJSONArray();
+            Map<String, Integer> disasterIDs = new HashMap<>();
+            disasterIDs.put(" ", DisasterUpdateThread.NONE);
+            for (int i = 0; i != disasterJSONArray.length(); i++) {
+                try {
+                    JSONObject disasterJSON = disasterJSONArray.getJSONObject(i);
+                    disasterIDs.put(disasterJSON.getString("name"), disasterJSON.getInt("id"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+            Spinner disasterSpinner = (Spinner) navigationView.getHeaderView(0).findViewById(R.id.disasterSpinner);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, new ArrayList<>(disasterIDs.keySet()));
+            disasterSpinner.setAdapter(adapter);
+            //TODO: Set initial selection to currently set disaster
+            disasterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                    String disasterName = adapter.getItem(i);
+                    Integer disasterId = disasterIDs.get(disasterName);
+                    DisasterUpdateThread updateThread = new DisasterUpdateThread(disasterId);
+                    updateThread.start();
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> adapterView) {
+
+                }
+            });
         }
-        Spinner disasterSpinner = (Spinner) navigationView.getHeaderView(0).findViewById(R.id.disasterSpinner);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, new ArrayList<>(disasterIDs.keySet()));
-        disasterSpinner.setAdapter(adapter);
-        //TODO: Set initial selection to currently set disaster
-        disasterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String disasterName = adapter.getItem(i);
-                Integer disasterId = disasterIDs.get(disasterName);
-                DisasterUpdateThread updateThread = new DisasterUpdateThread(disasterId);
-                updateThread.start();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
         //End disaster spinner
         //End load current user data
 
