@@ -10,12 +10,12 @@ from rest_framework.exceptions import ParseError, ValidationError
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
     BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder, UserLocation, \
-    RouteSuggestion, RouteNode, Fulfillment
+    RouteSuggestion, RouteNode, Fulfillment, Disaster
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
     ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
     DonationSerializer, EvacuationCenterSerializer, TransactionOrderSerializer, UserLocationSerializer, \
-    RouteSuggestionSerializer, NotificationSerializer
+    RouteSuggestionSerializer, NotificationSerializer, DisasterSerializer
 
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
@@ -113,6 +113,11 @@ class BarangayViewSet(viewsets.ModelViewSet):
     # Can also be applied to views
     # def perform_create(self, serializer):
     #     serializer.save(owner=self.request.user)
+
+
+class DonorViewSet(viewsets.ModelViewSet):
+    queryset = DonorProfile.objects.all()
+    serializer_class = DonorSerializer
 
 
 class TransactionOrderViewSet(viewsets.ModelViewSet):
@@ -236,11 +241,20 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
 
 class BarangayRequestViewSet(viewsets.ModelViewSet):
-    queryset = BarangayRequest.objects.all()
+    # queryset = BarangayRequest.objects.all()
     serializer_class = BarangayRequestSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
     filterset_fields = ['barangay', 'evacuation_center', ]
     search_fields = ['barangay__user__username', 'evacuation_center__name', ]
+
+    def get_queryset(self):
+        current_user = self.request.user
+        queryset = BarangayRequest.objects.all()
+        if current_user.role == User.DONOR:
+            donor_profile = DonorProfile.objects.get(user=current_user)
+            if donor_profile.current_disaster is not None:
+                queryset = queryset.filter(barangay__current_disaster=donor_profile.current_disaster)
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(barangay=BarangayProfile.objects.get(user=self.request.user))
@@ -267,6 +281,40 @@ class DonationViewSet(viewsets.ModelViewSet):
         serializer.save(datetime_added=datetime.now(),
                         donor=DonorProfile.objects.get(user=self.request.user),
                         )
+
+
+class DisasterViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Disaster.objects.all()
+    serializer_class = DisasterSerializer
+
+    @action(detail=True, methods=['get'], name='Change to Disaster',
+            permission_classes=[IsProfileUserOrReadOnly])
+    def change_to_disaster(self, request, pk=None):
+        # TODO: Change to permission
+        if self.request.user.is_anonymous:
+            return Response({'error': 'Please log in'})
+        current_donor = DonorProfile.objects.get(user=self.request.user)
+        if current_donor is not None:
+            current_donor.current_disaster = self.get_object()
+            current_donor.save()
+            return Response(DonorSerializer(current_donor, context={'request': request}, many=False).data)
+        else:
+            return Response({'error': 'Only donors can change their disaster assignment'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'], name='Remove Disaster',
+            permission_classes=[IsProfileUserOrReadOnly])
+    def remove_disaster(self, request, pk=None):
+        if self.request.user.is_anonymous:
+            return Response({'error': 'Please log in'})
+        current_donor = DonorProfile.objects.get(user=self.request.user)
+        if current_donor is not None:
+            current_donor.current_disaster = None
+            current_donor.save()
+            return Response(DonorSerializer(current_donor, context={'request': request}, many=False).data)
+        else:
+            return Response({'error': 'Only donors can change their disaster assignment'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class EvacuationCenterViewSet(viewsets.ModelViewSet):

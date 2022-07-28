@@ -12,7 +12,8 @@ from .serializers import UserSerializer, ResidentSerializer
 # Settings
 from .viewsets import UserViewSet, ResidentViewSet, SupplyViewSet, ItemTypeViewSet, ItemRequestViewSet, \
     TransactionViewSet, BarangayRequestViewSet, BarangayViewSet, DonationViewSet, EvacuationCenterViewSet, \
-    TransactionOrderViewSet, UserLocationViewSet, RouteSuggestionViewSet, NotificationViewSet
+    TransactionOrderViewSet, UserLocationViewSet, RouteSuggestionViewSet, NotificationViewSet, DisasterViewSet, \
+    DonorViewSet
 
 USE_ROUTER = True
 
@@ -40,6 +41,7 @@ router.register('api/requests', BarangayRequestViewSet, basename='barangay_reque
 router.register('api/transactions', TransactionViewSet, basename='transactions')
 router.register('api/users/residents/r', ResidentViewSet, basename='residents_others')
 router.register('api/users/barangays', BarangayViewSet, basename='barangays')
+router.register('api/users/donors/r', DonorViewSet, basename='donor_alt')
 router.register('api/users', viewset=UserViewSet, basename='users')
 router.register('api/user-location', viewset=UserLocationViewSet, basename='user-locations')
 router.register('api/donations', DonationViewSet, basename='donations')
@@ -47,4 +49,5 @@ router.register('api/evacuation-center', EvacuationCenterViewSet, basename='evac
 router.register('api/transaction-order', TransactionOrderViewSet, basename='transaction_orders')
 router.register('api/suggestions', RouteSuggestionViewSet, basename='suggestions')
 router.register('api/notifications', NotificationViewSet, basename='notifications')
+router.register('api/disasters', DisasterViewSet, basename='disasters')
 urlpatterns += router.urls
