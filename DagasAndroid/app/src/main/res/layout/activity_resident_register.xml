@@ -9,9 +9,12 @@
 
     <EditText
         android:id="@+id/usernameTxt"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
         android:layout_height="wrap_content"
         android:ems="10"
+        android:drawableLeft="@drawable/ic_loginusername_foreground"
         android:hint="@string/usernameHint"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
@@ -20,19 +23,28 @@
 
     <EditText
         android:id="@+id/emailTxt"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="5dp"
+        android:drawableLeft="@drawable/ic_mail_foreground"
+        android:layout_marginRight="20dp"
         android:ems="10"
-        android:inputType="textEmailAddress"
         android:hint="@string/emailHint"
+        android:inputType="textEmailAddress"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.6"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/usernameTxt" />
 
     <EditText
         android:id="@+id/passwordTxt"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="20dp"
+        android:drawableLeft="@drawable/ic_loginpassword_foreground"
         android:ems="10"
         android:hint="@string/passwordHint"
         android:inputType="textPassword"
@@ -42,8 +54,12 @@
 
     <EditText
         android:id="@+id/confirmPasswordTxt"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="20dp"
+        android:drawableLeft="@drawable/ic_loginpassword_foreground"
         android:ems="10"
         android:hint="@string/confirmPasswordHint"
         android:inputType="textPassword"
@@ -53,9 +69,13 @@
 
     <EditText
         android:id="@+id/firstNameTxt"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="20dp"
         android:ems="10"
+        android:drawableLeft="@drawable/ic_loginusername_foreground"
         android:hint="@string/firstNameHint"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
@@ -64,13 +84,17 @@
 
     <EditText
         android:id="@+id/lastNameTxt"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="20dp"
         android:ems="10"
         android:hint="@string/lastNameHint"
+        android:drawableLeft="@drawable/ic_loginusername_foreground"
         android:inputType="textPersonName"
-
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.6"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/firstNameTxt" />
 
@@ -79,6 +103,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ems="150"
+        android:textColor="@color/black"
         android:text="User Regisration"
         android:textAlignment="center"
         android:textSize="34sp"
@@ -91,12 +116,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/register_button_text"
         android:enabled="false"
+        android:text="@string/register_button_text"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/donorCheckBox" />
+        app:layout_constraintTop_toBottomOf="@+id/donorCheckBox"
+        app:layout_constraintVertical_bias="0.355" />
 
     <Spinner
         android:id="@+id/barangaySpinner"
@@ -107,15 +134,16 @@
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/residentCheckBox"
         app:layout_constraintEnd_toEndOf="@+id/lastNameTxt"
-        app:layout_constraintHorizontal_bias="0.782"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/residentCheckBox"
-        app:layout_constraintTop_toBottomOf="@+id/lastNameTxt" />
+        app:layout_constraintTop_toBottomOf="@+id/lastNameTxt"
+        app:layout_constraintVertical_bias="0.916" />
 
     <CheckBox
         android:id="@+id/residentCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:text="Resident"
         app:layout_constraintEnd_toEndOf="@+id/lastNameTxt"
         app:layout_constraintHorizontal_bias="0.0"
@@ -126,7 +154,7 @@
         android:id="@+id/donorCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="20dp"
         android:text="Donor"
         app:layout_constraintEnd_toEndOf="@+id/lastNameTxt"
         app:layout_constraintHorizontal_bias="0.0"
