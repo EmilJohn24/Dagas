@@ -56,23 +56,24 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/searchBarContainer"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:id="@+id/searchBarContainer"
+        android:scaleX=".95"
         android:background="@drawable/searchbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/evacCenterSpinner"
-        app:layout_constraintVertical_bias="0.0">
+        app:layout_constraintVertical_bias="0.">
 
         <EditText
             android:id="@+id/addressSearchBar"
             android:layout_width="0dp"
+            android:layout_height="match_parent"
             android:background="@null"
             android:drawableLeft="@drawable/ic_search_foreground"
-            android:layout_height="match_parent"
             android:ems="10"
             android:hint="Search"
             android:inputType="textPostalAddress"

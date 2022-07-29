@@ -279,9 +279,34 @@ public class CreateTransactionFragment extends Fragment {
             //TODO: Do dimensions.xml version:
             // https://stackoverflow.com/questions/9494037/how-to-set-text-size-of-textview-dynamically-for-different-screens
             typeName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f);
+            typeName.setBackgroundResource(R.drawable.createtransactionsearch);
             untransactedAmountTextView.setText(String.valueOf(untransactedAmount));
+            untransactedAmountTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f);
             untransactedAmountTextView.setPaddingRelative(300,10,0,10);
+            untransactedAmountTextView.setBackgroundResource(R.drawable.createtransactionsearch);
             untransactedAmountTextView.setGravity(Gravity.RIGHT);
+            if(i == 0){
+                TableRow headerRow = new TableRow(this.getContext());
+
+                headerRow.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,
+                        TableRow.LayoutParams.MATCH_PARENT));
+                TextView itemTypeHeader = new TextView(this.getContext());
+                TextView amountHeader = new TextView(this.getContext());
+                itemTypeHeader.setText("Item Type");
+                itemTypeHeader.setGravity(Gravity.CENTER);
+                itemTypeHeader.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f);
+                itemTypeHeader.setGravity(Gravity.CENTER);
+                itemTypeHeader.setBackgroundResource(R.drawable.createtransactionsearch);
+                headerRow.addView(itemTypeHeader);
+                amountHeader.setText("Amount");
+                amountHeader.setGravity(Gravity.CENTER);
+                amountHeader.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f);
+                amountHeader.setGravity(Gravity.CENTER);
+                amountHeader.setPaddingRelative(300,10,0,10);
+                amountHeader.setBackgroundResource(R.drawable.createtransactionsearch);
+                headerRow.addView(amountHeader);
+                transactionTable.addView(headerRow);
+            }
             itemRow.addView(typeName);
             itemRow.addView(untransactedAmountTextView);
             amountTextViews.put(itemName, untransactedAmountTextView);

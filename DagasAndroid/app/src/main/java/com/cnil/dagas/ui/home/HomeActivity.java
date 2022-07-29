@@ -27,6 +27,7 @@ import com.cnil.dagas.data.DisasterListThread;
 import com.cnil.dagas.data.DisasterUpdateThread;
 import com.cnil.dagas.databinding.ActivityHomeBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
+import com.cnil.dagas.services.location.LocationService;
 import com.cnil.dagas.services.notifications.DagasNotificationService;
 import com.cnil.dagas.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
@@ -97,6 +98,7 @@ public class HomeActivity extends AppCompatActivity {
                 navigationView.getMenu().findItem(R.id.nav_view_requests).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_view_supplies).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_donor_add_supply).setVisible(false);
+                navigationView.getMenu().findItem(R.id.nav_suggestions).setVisible(false);
             }
             else if(roleVerbose.equals("2")){
                 roleVerbose = "Donor";
@@ -121,6 +123,7 @@ public class HomeActivity extends AppCompatActivity {
                 navigationView.getMenu().findItem(R.id.nav_donor_add_supply).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_view_supplies).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_upload_id).setVisible(false);
+                navigationView.getMenu().findItem(R.id.nav_suggestions).setVisible(false);
             }
             else if(roleVerbose.equals("4")){
                 roleVerbose = "Admin";
@@ -136,6 +139,7 @@ public class HomeActivity extends AppCompatActivity {
                 topLevelDestinations.add(R.id.nav_upload_id);
                 topLevelDestinations.add(R.id.nav_user_profile);
                 navigationView.getMenu().findItem(R.id.nav_donor_add_supply).setVisible(false);
+                navigationView.getMenu().findItem(R.id.nav_suggestions).setVisible(false);
             }
         } catch (JSONException e) {
             e.printStackTrace();

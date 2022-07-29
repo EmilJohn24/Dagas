@@ -4,7 +4,6 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:background="@drawable/searchbar"
     android:layout_height="wrap_content">
 
     <androidx.cardview.widget.CardView
@@ -14,12 +13,14 @@
         android:layout_gravity="center"
         app:cardBackgroundColor="@color/white"
         app:cardMaxElevation="@dimen/movie_card_elev"
+        card_view:cardElevation="0dp"
         app:cardPreventCornerOverlap="false"
         app:cardUseCompatPadding="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/content"
             android:layout_width="match_parent"
+            android:background="@drawable/cardviewstring"
             android:layout_height="wrap_content">
 
 
@@ -27,6 +28,8 @@
                 android:id="@+id/addToTransaction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="9dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -34,6 +37,7 @@
                 android:id="@+id/transactionSupplyName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
                 android:text="Name"
                 app:layout_constraintStart_toEndOf="@id/addToTransaction"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -57,6 +61,7 @@
 
             <EditText
                 android:id="@+id/donateAmount"
+                android:drawableLeft="@drawable/ic_quantity_foreground"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:hint="Amount"
