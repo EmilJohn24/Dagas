@@ -18,11 +18,12 @@ class ItemTypeSerializer(serializers.ModelSerializer):
 
 
 class SupplySerializer(serializers.ModelSerializer):
-    available_pax = serializers.IntegerField(source='calculate_available_pax')
+    available_pax = serializers.IntegerField(source='calculate_available_pax', read_only = True,)
 
     class Meta:
         model = Supply
         fields = ('id', 'name', 'type', 'quantity', 'pax', 'donation', 'available_pax',)
+        read_only = ('available_pax',)
 
 
 class DonationSerializer(serializers.ModelSerializer):
