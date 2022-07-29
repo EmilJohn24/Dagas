@@ -15,6 +15,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.sessions.backends.db import SessionStore
 from django.http import HttpRequest
 from django.utils.datetime_safe import datetime
+from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 
 from relief.models import DonorProfile, BarangayRequest, User, ItemType, Supply, ResidentProfile, Donation, \
     UserLocation, ItemRequest, Transaction, TransactionOrder, EvacuationCenter, BarangayProfile, Fulfillment, RouteNode, \
@@ -43,6 +44,126 @@ def window(seq, n=2):
     for elem in it:
         result = result[1:] + (elem,)
         yield result
+
+
+def print_or_solution(data, manager, routing, solution):
+    print(f'Objective: {solution.ObjectiveValue()}')
+    total_distance = 0
+    total_loads = [0] * len(data['demand_types'])
+    for vehicle_id in range(data['num_vehicles']):
+        index = routing.Start(vehicle_id)
+        plan_output = 'Route for vehicle {}:\n'.format(vehicle_id)
+        route_distance = 0
+        route_loads = [0] * len(data['demand_types'])
+        while not routing.IsEnd(index):
+            node_index = manager.IndexToNode(index)
+            plan_output += ' {0} Load('.format(node_index)
+            if node_index not in data['starts']:
+                for i in range(len(data['demand_types'])):
+                    plan_output += str(data[data['demand_types'][i]][node_index]) + ','
+                    route_loads[i] += data[data['demand_types'][i]][node_index]
+            plan_output += ') ->'
+
+            previous_index = index
+            index = solution.Value(routing.NextVar(index))
+            route_distance += routing.GetArcCostForVehicle(
+                previous_index, index, vehicle_id)
+        plan_output += 'Cumulative: {0} Load('.format(manager.IndexToNode(index))
+        for i in range(len(data['demand_types'])):
+            plan_output += str(route_loads[i]) + ','
+        plan_output += ') \n'
+        plan_output += 'Distance of the route: {}m\n'.format(route_distance)
+        # plan_output += 'Load of the route: {}\n'.format(route_load)
+        print(plan_output)
+        total_distance += route_distance
+        total_loads = [a + b for a, b in zip(total_loads, route_loads)]
+    print('Total distance of all routes: {}m'.format(total_distance))
+    print('Total load of all routes: {}'.format(total_loads))
+
+
+def algo_or(data, algo_data_init=None):
+    """Solve the problem using Google OR"""
+    # Step 1: Initial routes
+    manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']),
+                                           data['num_vehicles'],
+                                           data['starts'],
+                                           data['ends'], )
+    routing = pywrapcp.RoutingModel(manager)
+
+    # Distance callback
+    def distance_callback(from_index, to_index):
+        from_node = manager.IndexToNode(from_index)
+        to_node = manager.IndexToNode(to_index)
+        return int(data['distance_matrix'][from_node][to_node])
+
+    transit_callback_index = routing.RegisterTransitCallback(distance_callback)
+    routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
+
+    # Constraints:
+    # 1: Distance
+    # distance_constraint_name = "Distance"
+    # routing.AddDimension(
+    #     transit_callback_index,
+    #     0,
+    #     2000,
+    #     True,
+    #     distance_constraint_name,
+    # )
+    # distance_dimension = routing.GetDimensionOrDie(distance_constraint_name)
+    # distance_dimension.SetGlobalSpanCostCoefficient(100)
+
+    # 2: Demands
+    def demand_callback_with_index(type_index):
+        def demand_callback(from_index):
+            local_type_index = type_index
+            from_node = manager.IndexToNode(from_index)
+            # print("New: " + str(from_node))
+            # print(local_type_index)
+            if from_node in data['starts']:
+                return 0
+            demand_type_name = data['demand_types'][local_type_index]
+            demand_data = data[demand_type_name]
+            # print(demand_data)
+            demand = demand_data[from_node]
+            # print(demand)
+            return demand
+
+        return demand_callback
+
+    for i in range(len(data['demand_types'])):
+        a = demand_callback_with_index(i)
+        demand_callback_index = routing.RegisterUnaryTransitCallback(
+            demand_callback_with_index(i))
+        routing.AddDimensionWithVehicleCapacity(
+            demand_callback_index,
+            0,
+            data[data['supply_types'][i]],
+            True,
+            data['item_types'][i],
+        )
+
+    # Perform algorithm
+    # Setting first solution heuristic.
+    if algo_data_init:
+        initial_solution = routing.ReadAssignmentFromRoutes(algo_data_init['routes'], True)
+        if initial_solution is not None:
+            print_or_solution(data, manager, routing, initial_solution)
+    search_parameters = pywrapcp.DefaultRoutingSearchParameters()
+    search_parameters.first_solution_strategy = (
+        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+    search_parameters.local_search_metaheuristic = (
+        routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH)
+    search_parameters.time_limit.FromSeconds(1)
+
+    # Solve the problem.
+    solution = routing.SolveWithParameters(search_parameters)
+
+    # Print solution on console.
+    if solution:
+        print_or_solution(data, manager, routing, solution)
+    # Print Solution
+
+    return solution
 
 
 def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
@@ -96,7 +217,7 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
             for donor_index in range(data['num_vehicles']):
                 donor_supply = data[data['supply_types'][item_type_index]][donor_index]
                 request_demand = data[data['demand_types'][item_type_index]][request_index]
-                if donor_supply >= request_demand:
+                if donor_supply >= request_demand > 0 and donor_supply > 0:
                     if algo_data['donor_request_counts'][donor_index] == 0:
                         distance = distance_n2n(data['starts'][donor_index], request_index)
                         if distance < algo_data['min_add_distance'][i]:
@@ -128,8 +249,8 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
         # Fulfillment
         algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][item_type_index] += supply_reduced
         for j in range(item_type_index + 1, len(data['item_types'])):
-            demand_remaining = data[data['demand_types'][i]][chosen_request_index]
-            supply_remaining = data[data['supply_types'][i]][chosen_donor_index]
+            demand_remaining = data[data['demand_types'][j]][chosen_request_index]
+            supply_remaining = data[data['supply_types'][j]][chosen_donor_index]
             surplus = supply_remaining - demand_remaining
             if surplus >= 0:
                 data[data['demand_types'][j]][chosen_request_index] = 0
@@ -402,6 +523,14 @@ def routes_to_db(input_data, algo_data):
                     type=item_type,
                     pax=item_count,
                 )
+
+
+def algo_test():
+    # print("Generating dataset...")
+    # generate_data(40, 40)
+    data = generate_data_model_from_db()
+    results, _ = algo_main(data)
+    algo_or(data, algo_data_init=results)
 
 
 @shared_task
