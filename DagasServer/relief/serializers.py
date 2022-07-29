@@ -18,7 +18,7 @@ class ItemTypeSerializer(serializers.ModelSerializer):
 
 
 class SupplySerializer(serializers.ModelSerializer):
-    available_pax = serializers.IntegerField(source='calculate_available_pax', read_only = True,)
+    available_pax = serializers.IntegerField(source='calculate_available_pax', read_only=True, )
 
     class Meta:
         model = Supply
@@ -51,10 +51,26 @@ class DonationSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    current_disaster = serializers.SerializerMethodField(method_name='get_current_disaster')
+
+    def get_current_disaster(self, user):
+        if user.role == User.BARANGAY:
+            barangay: BarangayProfile = user.barangay_profile
+            return DisasterSerializer(barangay.current_disaster).data
+        elif user.role == User.DONOR:
+            donor: DonorProfile = user.donor_profile
+            return DisasterSerializer(donor.current_disaster).data
+        elif user.role == User.RESIDENT:
+            resident_barangay = ResidentProfile.objects.get(user=user).barangay
+            return DisasterSerializer(resident_barangay.current_disaster).data
+        else:
+            return None
+
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'email', 'role', 'profile_picture')
-        read_only_fields = ('profile_picture',)
+        fields = ('id', 'username', 'first_name', 'last_name', 'email',
+                  'role', 'profile_picture', 'current_disaster',)
+        read_only_fields = ('profile_picture', 'current_disaster',)
 
 
 class UserLocationSerializer(serializers.ModelSerializer):

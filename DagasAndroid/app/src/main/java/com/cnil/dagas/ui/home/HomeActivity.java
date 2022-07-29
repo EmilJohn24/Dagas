@@ -27,7 +27,6 @@ import com.cnil.dagas.data.DisasterListThread;
 import com.cnil.dagas.data.DisasterUpdateThread;
 import com.cnil.dagas.databinding.ActivityHomeBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
-import com.cnil.dagas.services.location.LocationService;
 import com.cnil.dagas.services.notifications.DagasNotificationService;
 import com.cnil.dagas.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
@@ -156,7 +155,7 @@ public class HomeActivity extends AppCompatActivity {
             Log.e(TAG, e.getMessage());
         }
         // Disaster Spinner loader
-        if (roleVerbose.equals("2")) {
+        if (roleVerbose.equals("Donor")) {
             DisasterListThread disasterListThread = new DisasterListThread();
             disasterListThread.start();
             try {
@@ -193,6 +192,19 @@ public class HomeActivity extends AppCompatActivity {
 
                 }
             });
+        }
+        else if (roleVerbose.equals("Resident") || roleVerbose.equals("Barangay")){
+            Spinner disasterSpinner = (Spinner) navigationView.getHeaderView(0).findViewById(R.id.disasterSpinner);
+            disasterSpinner.setEnabled(false);
+            JSONObject currentDisaster = currentUserThread.getUser().optJSONObject("current_disaster");
+            if (currentDisaster != null) {
+                String disasterName = currentDisaster.optString("name", "Unknown");
+                ArrayList<String> disasterNameContainer = new ArrayList<>();
+                disasterNameContainer.add(disasterName);
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, disasterNameContainer);
+                disasterSpinner.setAdapter(adapter);
+            }
+
         }
         //End disaster spinner
         //End load current user data
