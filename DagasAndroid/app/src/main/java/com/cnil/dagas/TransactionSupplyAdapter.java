@@ -118,9 +118,17 @@ public class TransactionSupplyAdapter extends RecyclerView.Adapter<TransactionSu
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
                 if (checked){
+                    if(donateAmount.getText().toString().equals("")) {
+                        addToTransaction.setChecked(false);
+                        return;
+                    }
                     callback.respond(currentPosition, supply,
                                 Integer.parseInt(donateAmount.getText().toString()));
                 } else{
+                    if(donateAmount.getText().toString().equals("")) {
+                        addToTransaction.setChecked(true);
+                        return;
+                    }
                     callback.removeRespond(supply);
                 }
             }

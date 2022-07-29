@@ -4,6 +4,7 @@
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
+    android:background="@drawable/searchbar"
     android:layout_height="wrap_content">
 
     <androidx.cardview.widget.CardView
@@ -13,14 +14,13 @@
         android:layout_gravity="center"
         app:cardBackgroundColor="@color/white"
         app:cardMaxElevation="@dimen/movie_card_elev"
-        app:cardPreventCornerOverlap="true"
+        app:cardPreventCornerOverlap="false"
         app:cardUseCompatPadding="true">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
 
 
             <CheckBox
