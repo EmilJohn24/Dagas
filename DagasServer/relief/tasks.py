@@ -339,7 +339,9 @@ def generate_data_model_from_db():
 
 
 @shared_task
-def generate_data(donor_count=10, evacuation_center_count=10):
+def generate_data(donor_count=10, evacuation_center_count=10,
+                  min_demand=100, max_demand=1000,
+                  min_supply=1000, max_supply=10000):
     # Clear dataset
     warnings.filterwarnings('ignore', 'DateTimeField*')
 
@@ -403,7 +405,7 @@ def generate_data(donor_count=10, evacuation_center_count=10):
             )
             # Generate item request for each type
             for item_type in ItemType.objects.all():
-                random_pax = random.randrange(100, 1000)
+                random_pax = random.randrange(min_demand, max_demand)
                 ItemRequest.objects.create(
                     barangay_request=request,
                     date_added=datetime.now(),
@@ -438,7 +440,7 @@ def generate_data(donor_count=10, evacuation_center_count=10):
 
         # Generate supplies
         for item_type in ItemType.objects.all():
-            random_quantity = random.randrange(1000, 10000)
+            random_quantity = random.randrange(min_supply, max_supply)
             new_supply = Supply.objects.create(
                 name="GenericSupply",
                 type=item_type,
@@ -527,10 +529,15 @@ def routes_to_db(input_data, algo_data):
 
 def algo_test():
     # print("Generating dataset...")
-    # generate_data(40, 40)
+    # generate_data(donor_count=40, evacuation_center_count=40,
+    #               min_demand=100, max_demand=1000,
+    #               min_supply=100, max_supply=1000)
+    print("Generating data model...")
     data = generate_data_model_from_db()
-    results, _ = algo_main(data)
-    algo_or(data, algo_data_init=results)
+    print("Calculating custom algorithm...")
+    results, manipulated_data = algo_main(data)
+    print("Calculating using Google OR algorithm...")
+    algo_or(data, algo_data_init=None)
 
 
 @shared_task
