@@ -3,14 +3,14 @@ package com.cnil.dagas;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.cnil.dagas.http.DagasJSONServer;
 
 import java.util.ArrayList;
 
@@ -22,6 +22,7 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
     }
 
     public static class ViewSupply{
+        private final int supplyId;
         private final String name;
         private final String type;
         private final int available;
@@ -29,6 +30,7 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
             this.name = name;
             this.type = type;
             this.available = available;
+            this.supplyId = supplyID;
         }
 
         public String getName() {
@@ -43,6 +45,10 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
             return available;
         }
 
+
+        public int getSupplyId() {
+            return supplyId;
+        }
     }
     public static class TransactionOrder{
         private final int amount;
@@ -92,6 +98,20 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
         transactionSupplyName.setText(supply.getName());
         typeTextView.setText(supply.getType());
         availableAmountTextView.setText(String.format("%d left", supply.getAvailablePax()));
+        Button deleteButton = supplyCard.findViewById(R.id.supplyDeleteButton);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                supplies.remove(position);
+                notifyItemRemoved(position);
+                try {
+                    DagasJSONServer.delete("/relief/api/supplies/", supply.getSupplyId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 
     @Override
@@ -105,6 +125,7 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
             super(itemView);
             //TODO: Click listener for stuff
             supplyCard = itemView.findViewById(R.id.view_supplyCard);
+//            ViewSupplyAdapter.this.notifyItemRemoved()
         }
 
         public CardView getSupplyCard() {
