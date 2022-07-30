@@ -22,7 +22,7 @@ class SupplySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Supply
-        fields = ('id', 'name', 'type', 'quantity', 'pax', 'donation', 'available_pax',)
+        fields = ('id', 'name', 'type', 'quantity', 'pax', 'donation', 'available_pax', 'picture',)
         read_only = ('available_pax',)
 
 

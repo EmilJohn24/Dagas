@@ -347,6 +347,16 @@ class SupplyViewSet(viewsets.ModelViewSet):
     queryset = Supply.objects.all()
     serializer_class = SupplySerializer
 
+    @action(detail=True, methods=['put', 'patch'], name='Upload Picture')
+    def upload_picture(self, request, pk=None):
+        supply = self.get_object()
+        if len(list(request.FILES.values())) > 0:
+            supply.picture = list(request.FILES.values())[0]  # Get first file
+        else:
+            return Response({'status': 'Please upload a picture'})
+        supply.save()
+        return Response({'status': 'File uploaded'})
+
     @action(detail=False, methods=['get'], name='Get Current Supplies',
             permission_classes=[IsProfileUserOrReadOnly])
     def current_supplies(self, request, pk=None):

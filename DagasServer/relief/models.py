@@ -190,6 +190,10 @@ class ItemType(models.Model):
         return self.name
 
 
+def supply_image_path(instance, filename):
+    return 'supply/id_{0}/{1}'.format(instance.id, filename)
+
+
 # TODO: Add some kind of type to Supply (e.g. Food, Water)
 class Supply(models.Model):
     name = models.CharField(max_length=250)
@@ -199,6 +203,7 @@ class Supply(models.Model):
     donation = models.ForeignKey(Donation, on_delete=models.CASCADE, related_name='supplies')
     transaction = models.ForeignKey(to="Transaction", on_delete=models.CASCADE, related_name='transaction_supply',
                                     null=True)
+    picture = models.ImageField(null=True, blank=True, upload_to=supply_image_path)
 
     # Not in transaction
     def calculate_available_pax(self):
