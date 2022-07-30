@@ -1,9 +1,11 @@
 package com.cnil.dagas;
 
+import static androidx.core.content.FileProvider.getUriForFile;
+
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,13 +16,21 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.fragment.app.Fragment;
+
+import com.cnil.dagas.data.ImageAssistor;
 import com.cnil.dagas.databinding.FragmentDonorAddSupplyBinding;
+import com.cnil.dagas.http.DagasJSONServer;
 import com.cnil.dagas.http.OkHttpSingleton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -43,6 +53,7 @@ public class DonorAddSupply extends Fragment {
         private final int quantity, pax;
         private final int type;
         private String responseSupplyName;
+        private int responseSupplyId;
 
         String getResponseSupplyName(){
             return this.responseSupplyName;
@@ -84,8 +95,14 @@ public class DonorAddSupply extends Fragment {
             Response response = client.newCall(request).execute();
             JSONObject supplyAddResponse = new JSONObject(response.body().string());
             this.responseSupplyName = supplyAddResponse.getString("name");
+            this.responseSupplyId = supplyAddResponse.getInt("id");
 //            this.donationAddResponse = new JSONObject(response.body().string());
         }
+
+        public int getResponseSupplyId() {
+            return responseSupplyId;
+        }
+
     }
 
     class DonorAddThread extends Thread {
@@ -180,6 +197,35 @@ public class DonorAddSupply extends Fragment {
         EditText editNumberQuantity = root.findViewById(R.id.editNumberQuantity);
         EditText editNumberPax = root.findViewById(R.id.editNumberPax);
 
+        // Upload image button
+        Button takeSupplyPictureButton = root.findViewById(R.id.takeSupplyPictureButton);
+        File photoFile = null;
+        ImageAssistor assistor = new ImageAssistor(this.getActivity());
+        try {
+            photoFile = assistor.createImageFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        final File[] finalPhotoFile = {photoFile};
+
+        ActivityResultLauncher<Uri> mGetContent = registerForActivityResult(new ActivityResultContracts.TakePicture(),
+                new ActivityResultCallback<Boolean>() {
+                    @Override
+                    public void onActivityResult(Boolean result) {
+                        if (result) {
+                            Bitmap idBitMap = BitmapFactory.decodeFile(finalPhotoFile[0].getAbsolutePath());
+                        }
+                        //TODO: Add placeholder for image
+//                        idImageView.setImageBitmap(idBitMap);
+                    }
+                });
+        takeSupplyPictureButton.setOnClickListener(view -> {
+            // Continue only if the File was successfully created
+            Uri photoURI = getUriForFile(DonorAddSupply.this.requireContext(),
+                    "com.example.android.fileprovider",
+                    finalPhotoFile[0]);
+            mGetContent.launch(photoURI);
+        });
 
         // Add supply button
         Button supplySubmitButton = root.findViewById(R.id.supplySubmitButton);
@@ -201,8 +247,14 @@ public class DonorAddSupply extends Fragment {
                     editNumberPax.getText().clear();
                     editNumberQuantity.getText().clear();
                     spinnerType.setSelection(0);
+                    if (finalPhotoFile[0].exists())
+                        DagasJSONServer.uploadWithPut(DagasJSONServer.createDetailUrl(
+                                "/relief/api/supplies/",
+                                supplyThread.getResponseSupplyId()) + "upload_picture/", finalPhotoFile[0]);
                 } catch (JSONException | InterruptedException e) {
                     Log.e(TAG, e.getMessage());
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });

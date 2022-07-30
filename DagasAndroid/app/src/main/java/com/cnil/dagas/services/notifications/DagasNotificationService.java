@@ -88,7 +88,7 @@ public class DagasNotificationService extends Service {
                 } catch (InterruptedException | JSONException e) {
                     e.printStackTrace();
                 } finally{
-                    handler.postDelayed(this, 10000);
+                    handler.postDelayed(this, 100000);
                 }
             }
         };

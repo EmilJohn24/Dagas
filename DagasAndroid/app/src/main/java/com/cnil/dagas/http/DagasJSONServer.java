@@ -4,10 +4,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
 
 import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -15,7 +17,7 @@ import okhttp3.Response;
 public class DagasJSONServer {
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final OkHttpSingleton client = OkHttpSingleton.getInstance();
-    private static String createDetailUrl(String relativeUrl, Object id){
+    public static String createDetailUrl(String relativeUrl, Object id){
         return relativeUrl + id.toString() + "/";
     }
     public static JSONObject getDetail(String relativeUrl, Object id) throws Exception {
@@ -54,6 +56,18 @@ public class DagasJSONServer {
         String detailUrl = createDetailUrl(relativeUrl, id);
         Request request = client.builderFromBaseUrl(detailUrl)
                 .delete()
+                .build();
+        connectJSON(request);
+    }
+
+    public static void uploadWithPut(String relativeUrl, File file) throws Exception {
+        RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("file", file.getName(),
+                        RequestBody.create(file, MediaType.parse("image/*")))
+                .addFormDataPart("some-field", "some-value")
+                .build();
+        Request request = client.builderFromBaseUrl(relativeUrl)
+                .put(requestBody)
                 .build();
         connectJSON(request);
     }
