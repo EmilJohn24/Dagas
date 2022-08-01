@@ -1,8 +1,6 @@
 package com.cnil.dagas.ui.home.resident;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,20 +10,15 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
 import com.budiyev.android.codescanner.DecodeCallback;
 import com.cnil.dagas.R;
-import com.cnil.dagas.TransactionAdapter;
-import com.cnil.dagas.TransactionsFragment;
-import com.cnil.dagas.databinding.EvacuationcentervisualmapBinding;
 import com.cnil.dagas.databinding.QrScannerBinding;
+import com.cnil.dagas.http.DagasJSONServer;
 import com.cnil.dagas.http.OkHttpSingleton;
 import com.google.zxing.Result;
 
@@ -34,7 +27,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -108,12 +100,31 @@ public class qrscanner extends Fragment {
                     activity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            GrabTransaction thread = new GrabTransaction(result.getText());
-                            thread.start();
-                            try {
-                                thread.join();
-                            } catch (InterruptedException e) {
-                                Log.e(TAG, e.getMessage());
+                            if (result.getText().charAt(0) == '*'){
+                                // TODO: Transaction stub stuff
+                                // TODO: Get the stub info to verify if it is an actual QR
+                                String qrCode = result.getText().substring(1); // Take actual UUID component
+                                String receivedUrl = DagasJSONServer
+                                        .createDetailUrl("/relief/api/stubs/", qrCode)
+                                                + "mark_as_received/";
+                                try {
+                                    DagasJSONServer.put(receivedUrl, new JSONObject());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                } finally{
+                                    // TODO: Transfer to success fragment
+                                }
+
+
+                            } else {
+
+                                GrabTransaction thread = new GrabTransaction(result.getText());
+                                thread.start();
+                                try {
+                                    thread.join();
+                                } catch (InterruptedException e) {
+                                    Log.e(TAG, e.getMessage());
+                                }
                             }
                             //Toast.makeText(activity, result.getText(), Toast.LENGTH_SHORT).show();
                             if(isTransaction){
