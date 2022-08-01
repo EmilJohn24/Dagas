@@ -8,7 +8,7 @@ from rest_framework.reverse import reverse
 
 from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \
     ItemType, ItemRequest, BarangayRequest, EvacuationDetails, Transaction, TransactionImage, EvacuationCenter, \
-    TransactionOrder, UserLocation, Fulfillment, RouteNode, RouteSuggestion, Disaster
+    TransactionOrder, UserLocation, Fulfillment, RouteNode, RouteSuggestion, Disaster, TransactionStub
 
 
 class ItemTypeSerializer(serializers.ModelSerializer):
@@ -289,6 +289,7 @@ class TransactionStubSerializer(serializers.ModelSerializer):
     transaction = TransactionSerializer(many=False, read_only=True, )
 
     class Meta:
+        model = TransactionStub
         fields = ('id', 'qr_code', 'transaction', 'received',)
         read_only_fields = ('qr_code', 'transaction',)
 

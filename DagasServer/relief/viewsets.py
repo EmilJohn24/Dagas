@@ -396,11 +396,14 @@ class TransactionStubViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionStubSerializer
 
     def get_queryset(self):
-        return TransactionStub.objects.filter(resident__user=self.request.user)
+        if self.request.user.role == User.BARANGAY:
+            return TransactionStub.objects.filter(resident__barangay__user=self.request.user)
+        else:
+            return TransactionStub.objects.filter(resident__user=self.request.user)
 
     @action(methods=['patch', 'put'], detail=True, name='Mark as received')
     def mark_as_received(self, request, pk=None):
-        transaction_stub = request.get_object()
+        transaction_stub = TransactionStub.objects.get(pk=pk)
         transaction_stub.received = True
         transaction_stub.save()
         return Response(
