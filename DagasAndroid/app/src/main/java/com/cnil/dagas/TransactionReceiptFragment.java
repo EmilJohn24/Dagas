@@ -22,9 +22,12 @@ import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.cnil.dagas.data.CurrentUserThread;
 import com.cnil.dagas.databinding.FragmentTransactionReceiptBinding;
+import com.cnil.dagas.http.DagasJSONServer;
 import com.cnil.dagas.http.OkHttpSingleton;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -48,6 +51,7 @@ import com.google.maps.model.DirectionsStep;
 import com.google.maps.model.EncodedPolyline;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -196,6 +200,18 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
         TextView statusLabel = binding.statusLabel;
         TextView statusTextView = binding.statusTextView;
         Button statusUpdateButton = binding.statusUpdateButton;
+        RecyclerView supplyRecycler = binding.supplyListRecycler;
+        ViewSupplyAdapter.ViewSupplyCallback callback = new ViewSupplyAdapter.ViewSupplyCallback() {
+            @Override
+            public void respond(int position, ViewSupplyAdapter.ViewSupply supply, int amount) {
+                //TODO: add TransactionOrder if it does not exist yet
+            }
+
+            @Override
+            public void removeRespond(ViewSupplyAdapter.ViewSupply supply) {
+            }
+        };
+
         RetrieveTransactionInfo thread = new RetrieveTransactionInfo(transactionURL);
         thread.start();
         try {
@@ -209,6 +225,26 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
                     .into(qrCodeImageView);
             referenceNumberTextView.setText(thread.getTransactionJSON().getString("id"));
             donorNameTextView.setText(thread.getTransactionJSON().getString("donor_name"));
+
+            //Load in supply data
+            ViewSupplyAdapter adapter = new ViewSupplyAdapter(callback);
+            supplyRecycler.setAdapter(adapter);
+            supplyRecycler.setLayoutManager(new LinearLayoutManager(root.getContext()));
+            JSONArray transactionSupplyOrders = thread.getTransactionJSON().optJSONArray("transaction_orders");
+            if (transactionSupplyOrders != null) {
+                for (int i = 0; i != transactionSupplyOrders.length(); i++){
+
+                    JSONObject supplyInfo = transactionSupplyOrders
+                                                .getJSONObject(i)
+                                                .getJSONObject("supply_info");
+                    String name = supplyInfo.getString("name");
+                    Integer id = supplyInfo.getInt("id");
+                    String type = supplyInfo.getString("type_str");
+                    String supplyUrl = DagasJSONServer.createDetailUrl("/relief/api/supplies/", id);
+                    int availablePax = supplyInfo.getInt("available_pax");
+                    adapter.add(new ViewSupplyAdapter.ViewSupply(name, type, availablePax, supplyUrl, id));
+                }
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }

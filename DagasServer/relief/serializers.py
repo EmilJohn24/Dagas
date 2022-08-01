@@ -19,11 +19,12 @@ class ItemTypeSerializer(serializers.ModelSerializer):
 
 class SupplySerializer(serializers.ModelSerializer):
     available_pax = serializers.IntegerField(source='calculate_available_pax', read_only=True, )
+    type_str = serializers.StringRelatedField(source='type', read_only=True, )
 
     class Meta:
         model = Supply
-        fields = ('id', 'name', 'type', 'quantity', 'pax', 'donation', 'available_pax', 'picture',)
-        read_only = ('available_pax',)
+        fields = ('id', 'name', 'type', 'type_str', 'quantity', 'pax', 'donation', 'available_pax', 'picture',)
+        read_only = ('available_pax', 'type_str',)
 
 
 class DonationSerializer(serializers.ModelSerializer):
@@ -62,7 +63,10 @@ class UserSerializer(serializers.ModelSerializer):
             return DisasterSerializer(donor.current_disaster).data
         elif user.role == User.RESIDENT:
             resident_barangay = ResidentProfile.objects.get(user=user).barangay
-            return DisasterSerializer(resident_barangay.current_disaster).data
+            if resident_barangay is not None:
+                return DisasterSerializer(resident_barangay.current_disaster).data
+            else:
+                return None
         else:
             return None
 
