@@ -285,6 +285,14 @@ class TransactionSerializer(serializers.ModelSerializer):
         read_only_fields = ('qr_code', 'received', 'donor', 'donor_info')
 
 
+class TransactionStubSerializer(serializers.ModelSerializer):
+    transaction = TransactionSerializer(many=False, read_only=True, )
+
+    class Meta:
+        fields = ('id', 'qr_code', 'transaction', 'received',)
+        read_only_fields = ('qr_code', 'transaction',)
+
+
 class FulfillmentSerializer(serializers.ModelSerializer):
     type_name = serializers.StringRelatedField(
         read_only=True,

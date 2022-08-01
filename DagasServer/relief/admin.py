@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from django_google_maps import widgets as map_widgets
 from django_google_maps import fields as map_fields
 from relief.models import User, Transaction, EvacuationCenter, BarangayProfile, DonorProfile, Donation, Supply, \
-    BarangayRequest, ItemRequest, RouteNode, RouteSuggestion, Fulfillment, Disaster, ResidentProfile
+    BarangayRequest, ItemRequest, RouteNode, RouteSuggestion, Fulfillment, Disaster, ResidentProfile, TransactionStub
 
 # Guide: https://docs.djangoproject.com/en/4.0/ref/contrib/admin/
 # 3.2 Guide: https://docs.djangoproject.com/en/3.2/ref/contrib/admin/
@@ -32,6 +32,7 @@ class SupplyAdmin(admin.ModelAdmin):
     list_filter = ('type',)
 
 
+admin.site.register(TransactionStub)
 admin.site.register(Transaction)
 admin.site.register(BarangayProfile)
 admin.site.register(DonorProfile, DonorAdmin)

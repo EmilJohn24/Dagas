@@ -355,6 +355,25 @@ class VictimRequest(models.Model):
                                  related_name='resident_requests', null=True, blank=True)
 
 
+class TransactionStub(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    qr_code = models.ImageField(upload_to='resident_stub_QRs', blank=True, null=True)
+    transaction = models.ForeignKey(to=Transaction, on_delete=models.CASCADE)
+    resident = models.ForeignKey(to=ResidentProfile, on_delete=models.CASCADE)
+    received = models.BooleanField(default=False)
+    created_on = models.DateTimeField(default=datetime.now, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            filename = 'qr_%s.png' % self.id
+            qr_code_file = ContentFile(b'', name=filename)
+            img = qrcode.make('*' + str(self.id))  # Add an asterisk (*) to differentiate it from Transaction QRs
+            img.save(qr_code_file)
+            self.qr_code = qr_code_file
+
+        super(TransactionStub, self).save(*args, **kwargs)
+
+
 # Algorithm-related models
 class RouteSuggestion(models.Model):
     # TODO: Add date/time?

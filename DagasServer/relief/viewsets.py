@@ -10,12 +10,12 @@ from rest_framework.exceptions import ParseError, ValidationError
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
     BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder, UserLocation, \
-    RouteSuggestion, RouteNode, Fulfillment, Disaster
+    RouteSuggestion, RouteNode, Fulfillment, Disaster, TransactionStub
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
     ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
     DonationSerializer, EvacuationCenterSerializer, TransactionOrderSerializer, UserLocationSerializer, \
-    RouteSuggestionSerializer, NotificationSerializer, DisasterSerializer
+    RouteSuggestionSerializer, NotificationSerializer, DisasterSerializer, TransactionStubSerializer
 
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
@@ -143,12 +143,16 @@ class TransactionViewSet(viewsets.ModelViewSet):
                 transaction.received = Transaction.RECEIVED
                 # Create notification for Residents
                 # TODO: Consider moving to a Transaction signal instead
+                resident_profiles = ResidentProfile.objects.filter(barangay__user=user)
                 resident_users = User.objects.filter(resident_profile__barangay__user=user)
                 notif_verb = "Package Arrival"
                 notif_message = 'The packages for evacuation center ' + \
                                 transaction.barangay_request.evacuation_center.name + 'has arrived'
                 notify.send(sender=user, recipient=resident_users, target=transaction,
                             verb=notif_verb, description=notif_message)
+                # TODO: Consider doing this in a Celery task
+                for resident_profile in resident_profiles:
+                    TransactionStub.objects.create(transaction=transaction, resident=resident_profile)
             elif transaction.received == Transaction.PACKAGING:
                 raise ValidationError(detail="Order still being packaged")
             elif transaction.received == Transaction.RECEIVED:
@@ -386,6 +390,21 @@ class ItemRequestViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(date_added=datetime.now())
+
+
+class TransactionStubViewSet(viewsets.ModelViewSet):
+    serializer_class = TransactionStubSerializer
+
+    def get_queryset(self):
+        return TransactionStub.objects.filter(resident__user=self.request.user)
+
+    @action(methods=['patch', 'put'], detail=True, name='Mark as received')
+    def mark_as_received(self, request, pk=None):
+        transaction_stub = request.get_object()
+        transaction_stub.received = True
+        transaction_stub.save()
+        return Response(
+            {'message': 'Marked as received', }, status=status.HTTP_200_OK, )
 
 
 class RouteSuggestionViewSet(viewsets.ReadOnlyModelViewSet):
