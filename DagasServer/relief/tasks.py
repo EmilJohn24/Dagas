@@ -81,6 +81,55 @@ def print_or_solution(data, manager, routing, solution):
     print('Total load of all routes: {}'.format(total_loads))
 
 
+# Routing without constraints
+def simple_detail_routing(data, donor_mat_index, route):
+    # Step 0: If there are less than 2 nodes, there is no need for detail routing, so return the same route
+    if len(route) <= 1:
+        return route
+
+    # Step 1: Initialize model
+    donor_node = len(route)
+    manager = pywrapcp.RoutingIndexManager(len(route) + 1,  # route nodes + donor init node
+                                           1,  # number of vehicles
+                                           donor_node)  # starting point for donor
+    routing = pywrapcp.RoutingModel(manager)
+
+    def distance_callback(from_index, to_index):
+        """This custom callback removes the need for making a sub-matrix of the distance matrix"""
+        from_node = manager.IndexToNode(from_index)
+        to_node = manager.IndexToNode(to_index)
+        if from_node == donor_node:
+            from_node = donor_mat_index
+        else:
+            from_node = route[from_node]
+
+        if to_node == donor_node:
+            to_node = donor_mat_index
+        else:
+            to_node = route[to_node]
+        return int(data['distance_matrix'][from_node][to_node])
+    transit_callback_index = routing.RegisterTransitCallback(distance_callback)
+    routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
+
+    search_parameters = pywrapcp.DefaultRoutingSearchParameters()
+    search_parameters.first_solution_strategy = (
+        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+    search_parameters.local_search_metaheuristic = (
+        routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH)
+    search_parameters.time_limit.FromSeconds(1)
+    solution = routing.SolveWithParameters(search_parameters)
+
+    # Convert solution back to large matrix indices
+    new_route = []
+    index = routing.Start(0)
+    while not routing.IsEnd(index):
+        previous_index = index
+        index = solution.Value(routing.NextVar(index))
+        index_node = manager.IndexToNode(index)
+        new_route.append(route[index_node])
+    return new_route
+
+
 def algo_or(data, algo_data_init=None, item_type=None):
     """Solve the problem using Google OR"""
     # Step 1: Initial routes
@@ -129,6 +178,7 @@ def algo_or(data, algo_data_init=None, item_type=None):
             return demand
 
         return demand_callback
+
     if item_type is None:
         for i in range(len(data['demand_types'])):
             demand_callback_index = routing.RegisterUnaryTransitCallback(
@@ -550,6 +600,7 @@ def algo_test():
     print("Calculating using Google OR algorithm...")
     algo_or(data, algo_data_init=algo_data, item_type=0)
     return
+
 
 @shared_task
 def algorithm():
