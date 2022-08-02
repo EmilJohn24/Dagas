@@ -81,7 +81,7 @@ def print_or_solution(data, manager, routing, solution):
     print('Total load of all routes: {}'.format(total_loads))
 
 
-def algo_or(data, algo_data_init=None):
+def algo_or(data, algo_data_init=None, item_type=None):
     """Solve the problem using Google OR"""
     # Step 1: Initial routes
     manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']),
@@ -129,19 +129,27 @@ def algo_or(data, algo_data_init=None):
             return demand
 
         return demand_callback
-
-    for i in range(len(data['demand_types'])):
-        a = demand_callback_with_index(i)
+    if item_type is None:
+        for i in range(len(data['demand_types'])):
+            demand_callback_index = routing.RegisterUnaryTransitCallback(
+                demand_callback_with_index(i))
+            routing.AddDimensionWithVehicleCapacity(
+                demand_callback_index,
+                0,
+                data[data['supply_types'][i]],
+                True,
+                data['item_types'][i],
+            )
+    else:
         demand_callback_index = routing.RegisterUnaryTransitCallback(
-            demand_callback_with_index(i))
+            demand_callback_with_index(item_type))
         routing.AddDimensionWithVehicleCapacity(
             demand_callback_index,
             0,
-            data[data['supply_types'][i]],
+            data[data['supply_types'][item_type]],
             True,
-            data['item_types'][i],
+            data['item_types'][item_type],
         )
-
     # Perform algorithm
     # Setting first solution heuristic.
     if algo_data_init:
@@ -534,11 +542,14 @@ def algo_test():
     #               min_supply=100, max_supply=1000)
     print("Generating data model...")
     data = generate_data_model_from_db()
-    print("Calculating custom algorithm...")
-    results, manipulated_data = algo_main(data)
-    print("Calculating using Google OR algorithm...")
-    algo_or(data, algo_data_init=None)
+    # print("Calculating custom algorithm...")
+    # results, manipulated_data = algo_main(data)
+    print("Calculating one-supply type problem for custom algorithm...")
+    algo_data, _ = algo_v1(data, item_type_index=0)
 
+    print("Calculating using Google OR algorithm...")
+    algo_or(data, algo_data_init=algo_data, item_type=0)
+    return
 
 @shared_task
 def algorithm():
