@@ -60,8 +60,8 @@ def print_or_solution(data, manager, routing, solution):
             # plan_output += ' {0} Load('.format(node_index)
             # if node_index not in data['starts']:
             #     for i in range(len(data['demand_types'])):
-                    # plan_output += str(data[data['demand_types'][i]][node_index]) + ','
-                    # route_loads[i] += data[data['demand_types'][i]][node_index]
+            # plan_output += str(data[data['demand_types'][i]][node_index]) + ','
+            # route_loads[i] += data[data['demand_types'][i]][node_index]
             # plan_output += ') ->'
 
             previous_index = index
@@ -89,18 +89,21 @@ def simple_detail_routing(data, donor_mat_index, route):
     # Step 0: If there are less than 2 nodes, there is no need for detail routing, so return the same route
     if len(route) <= 1:
         return route
-
     # Step 1: Initialize model
     donor_node = len(route)
-    manager = pywrapcp.RoutingIndexManager(len(route) + 1,  # route nodes + donor init node
+    end_node_index = len(route) + 1
+    manager = pywrapcp.RoutingIndexManager(len(route) + 2,  # route nodes + donor init node (1) + pseudo-node (1)
                                            1,  # number of vehicles
-                                           donor_node)  # starting point for donor
+                                           [donor_node, ],
+                                           [end_node_index, ], )  # starting point for donor
     routing = pywrapcp.RoutingModel(manager)
 
     def distance_callback(from_index, to_index):
         """This custom callback removes the need for making a sub-matrix of the distance matrix"""
         from_node = manager.IndexToNode(from_index)
         to_node = manager.IndexToNode(to_index)
+        if from_node == end_node_index or to_node == end_node_index:
+            return 0
         if from_node == donor_node:
             from_node = donor_mat_index
         else:
@@ -111,6 +114,7 @@ def simple_detail_routing(data, donor_mat_index, route):
         else:
             to_node = route[to_node]
         return int(data['distance_matrix'][from_node][to_node])
+
     transit_callback_index = routing.RegisterTransitCallback(distance_callback)
     routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
 
@@ -138,16 +142,21 @@ def simple_detail_routing(data, donor_mat_index, route):
 def algo_or(data, algo_data_init=None, item_type=None):
     """Solve the problem using Google OR"""
     # Step 1: Initial routes
-    manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']),
+    end_node_index = len(data['distance_matrix'])
+    end_nodes = [end_node_index] * data['num_vehicles']
+    manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']) + 1,  # +1 for the pseudo-node
                                            data['num_vehicles'],
                                            data['starts'],
-                                           data['ends'], )
+                                           end_nodes, )  # from data['ends'])
     routing = pywrapcp.RoutingModel(manager)
 
     # Distance callback
     def distance_callback(from_index, to_index):
         from_node = manager.IndexToNode(from_index)
         to_node = manager.IndexToNode(to_index)
+        if from_node == end_node_index or to_node == end_node_index:
+            return 0
+
         return int(data['distance_matrix'][from_node][to_node])
 
     transit_callback_index = routing.RegisterTransitCallback(distance_callback)
@@ -174,6 +183,8 @@ def algo_or(data, algo_data_init=None, item_type=None):
             # print("New: " + str(from_node))
             # print(local_type_index)
             if from_node in data['starts']:
+                return 0
+            if from_node == end_node_index:
                 return 0
             demand_type_name = data['demand_types'][local_type_index]
             demand_data = data[demand_type_name]
