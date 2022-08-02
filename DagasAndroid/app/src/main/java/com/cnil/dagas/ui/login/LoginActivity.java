@@ -43,7 +43,6 @@ public class LoginActivity extends AppCompatActivity {
 
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
 
@@ -52,6 +51,11 @@ public class LoginActivity extends AppCompatActivity {
         final Button loginButton = binding.login;
         final ProgressBar loadingProgressBar = binding.loading;
         final Button registerRedirectButton = binding.registerRedirectButton;
+        final TextView logo = binding.getRoot().findViewById(R.id.logo);
+
+        logo.setTranslationX(800);
+        logo.setAlpha(0);
+        logo.animate().translationX(0).alpha(1).setDuration(800).setStartDelay(200).start();
 
         registerRedirectButton.setOnClickListener(new View.OnClickListener() {
             @Override
