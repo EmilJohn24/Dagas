@@ -52,29 +52,32 @@ def print_or_solution(data, manager, routing, solution):
     total_loads = [0] * len(data['demand_types'])
     for vehicle_id in range(data['num_vehicles']):
         index = routing.Start(vehicle_id)
-        plan_output = 'Route for vehicle {}:\n'.format(vehicle_id)
+        # plan_output = 'Route for vehicle {}:\n'.format(vehicle_id)
         route_distance = 0
         route_loads = [0] * len(data['demand_types'])
         while not routing.IsEnd(index):
             node_index = manager.IndexToNode(index)
-            plan_output += ' {0} Load('.format(node_index)
-            if node_index not in data['starts']:
-                for i in range(len(data['demand_types'])):
-                    plan_output += str(data[data['demand_types'][i]][node_index]) + ','
-                    route_loads[i] += data[data['demand_types'][i]][node_index]
-            plan_output += ') ->'
+            # plan_output += ' {0} Load('.format(node_index)
+            # if node_index not in data['starts']:
+            #     for i in range(len(data['demand_types'])):
+                    # plan_output += str(data[data['demand_types'][i]][node_index]) + ','
+                    # route_loads[i] += data[data['demand_types'][i]][node_index]
+            # plan_output += ') ->'
 
             previous_index = index
             index = solution.Value(routing.NextVar(index))
+            # Ignore return trip
+            if index == routing.End(vehicle_id):
+                break
             route_distance += routing.GetArcCostForVehicle(
                 previous_index, index, vehicle_id)
-        plan_output += 'Cumulative: {0} Load('.format(manager.IndexToNode(index))
-        for i in range(len(data['demand_types'])):
-            plan_output += str(route_loads[i]) + ','
-        plan_output += ') \n'
-        plan_output += 'Distance of the route: {}m\n'.format(route_distance)
-        # plan_output += 'Load of the route: {}\n'.format(route_load)
-        print(plan_output)
+        # plan_output += 'Cumulative: {0} Load('.format(manager.IndexToNode(index))
+        # for i in range(len(data['demand_types'])):
+        #     plan_output += str(route_loads[i]) + ','
+        # plan_output += ') \n'
+        # plan_output += 'Distance of the route: {}m\n'.format(route_distance)
+        # # plan_output += 'Load of the route: {}\n'.format(route_load)
+        # print(plan_output)
         total_distance += route_distance
         total_loads = [a + b for a, b in zip(total_loads, route_loads)]
     print('Total distance of all routes: {}m'.format(total_distance))
@@ -126,7 +129,9 @@ def simple_detail_routing(data, donor_mat_index, route):
         previous_index = index
         index = solution.Value(routing.NextVar(index))
         index_node = manager.IndexToNode(index)
-        new_route.append(route[index_node])
+        if index == routing.End(0):
+            break
+        new_route.append(route[index])
     return new_route
 
 
@@ -211,7 +216,7 @@ def algo_or(data, algo_data_init=None, item_type=None):
         routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
     search_parameters.local_search_metaheuristic = (
         routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH)
-    search_parameters.time_limit.FromSeconds(1)
+    search_parameters.time_limit.FromSeconds(30)
 
     # Solve the problem.
     solution = routing.SolveWithParameters(search_parameters)
@@ -321,6 +326,13 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
                 data[data['supply_types'][j]][chosen_donor_index] = 0
                 algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][
                     j] += supply_remaining
+        donor_mat_index = data['starts'][chosen_donor_index]
+        algo_route = algo_data['routes'][chosen_donor_index]
+        algo_data['routes'][chosen_donor_index] = simple_detail_routing(data, donor_mat_index, algo_route)
+    # for i in range(len(algo_data['routes'])):
+    #     donor_mat_index = data['starts'][i]
+    #     algo_data['routes'][i] = simple_detail_routing(data, donor_mat_index, algo_data['routes'][i])
+
     manipulated_data = data
     return algo_data, manipulated_data
 
@@ -595,10 +607,10 @@ def algo_test():
     # print("Calculating custom algorithm...")
     # results, manipulated_data = algo_main(data)
     print("Calculating one-supply type problem for custom algorithm...")
-    algo_data, _ = algo_v1(data, item_type_index=0)
+    algo_data, _ = algo_v1(data, item_type_index=1)
 
     print("Calculating using Google OR algorithm...")
-    algo_or(data, algo_data_init=algo_data, item_type=0)
+    algo_or(data, algo_data_init=algo_data, item_type=1)
     return
 
 
