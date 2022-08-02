@@ -52,48 +52,111 @@ def print_or_solution(data, manager, routing, solution):
     total_loads = [0] * len(data['demand_types'])
     for vehicle_id in range(data['num_vehicles']):
         index = routing.Start(vehicle_id)
-        plan_output = 'Route for vehicle {}:\n'.format(vehicle_id)
+        # plan_output = 'Route for vehicle {}:\n'.format(vehicle_id)
         route_distance = 0
         route_loads = [0] * len(data['demand_types'])
         while not routing.IsEnd(index):
             node_index = manager.IndexToNode(index)
-            plan_output += ' {0} Load('.format(node_index)
+            # plan_output += ' {0} Load('.format(node_index)
             if node_index not in data['starts']:
                 for i in range(len(data['demand_types'])):
-                    plan_output += str(data[data['demand_types'][i]][node_index]) + ','
+                    # plan_output += str(data[data['demand_types'][i]][node_index]) + ','
                     route_loads[i] += data[data['demand_types'][i]][node_index]
-            plan_output += ') ->'
+            # plan_output += ') ->'
 
             previous_index = index
             index = solution.Value(routing.NextVar(index))
+            # Ignore return trip
+            if index == routing.End(vehicle_id):
+                break
             route_distance += routing.GetArcCostForVehicle(
                 previous_index, index, vehicle_id)
-        plan_output += 'Cumulative: {0} Load('.format(manager.IndexToNode(index))
-        for i in range(len(data['demand_types'])):
-            plan_output += str(route_loads[i]) + ','
-        plan_output += ') \n'
-        plan_output += 'Distance of the route: {}m\n'.format(route_distance)
-        # plan_output += 'Load of the route: {}\n'.format(route_load)
-        print(plan_output)
+        # plan_output += 'Cumulative: {0} Load('.format(manager.IndexToNode(index))
+        # for i in range(len(data['demand_types'])):
+        #     plan_output += str(route_loads[i]) + ','
+        # plan_output += ') \n'
+        # plan_output += 'Distance of the route: {}m\n'.format(route_distance)
+        # # plan_output += 'Load of the route: {}\n'.format(route_load)
+        # print(plan_output)
         total_distance += route_distance
         total_loads = [a + b for a, b in zip(total_loads, route_loads)]
-    print('Total distance of all routes: {}m'.format(total_distance))
+    print('Total distance of all routes: {}km'.format(total_distance / 1000))
     print('Total load of all routes: {}'.format(total_loads))
 
 
-def algo_or(data, algo_data_init=None):
+# Routing without constraints
+def simple_detail_routing(data, donor_mat_index, route):
+    # Step 0: If there are less than 2 nodes, there is no need for detail routing, so return the same route
+    if len(route) <= 1:
+        return route
+    # Step 1: Initialize model
+    donor_node = len(route)
+    end_node_index = len(route) + 1
+    manager = pywrapcp.RoutingIndexManager(len(route) + 2,  # route nodes + donor init node (1) + pseudo-node (1)
+                                           1,  # number of vehicles
+                                           [donor_node, ],
+                                           [end_node_index, ], )  # starting point for donor
+    routing = pywrapcp.RoutingModel(manager)
+
+    def distance_callback(from_index, to_index):
+        """This custom callback removes the need for making a sub-matrix of the distance matrix"""
+        from_node = manager.IndexToNode(from_index)
+        to_node = manager.IndexToNode(to_index)
+        if from_node == end_node_index or to_node == end_node_index:
+            return 0
+        if from_node == donor_node:
+            from_node = donor_mat_index
+        else:
+            from_node = route[from_node]
+
+        if to_node == donor_node:
+            to_node = donor_mat_index
+        else:
+            to_node = route[to_node]
+        return int(data['distance_matrix'][from_node][to_node])
+
+    transit_callback_index = routing.RegisterTransitCallback(distance_callback)
+    routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
+
+    search_parameters = pywrapcp.DefaultRoutingSearchParameters()
+    search_parameters.first_solution_strategy = (
+        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
+    search_parameters.local_search_metaheuristic = (
+        routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH)
+    search_parameters.time_limit.FromSeconds(1)
+    solution = routing.SolveWithParameters(search_parameters)
+
+    # Convert solution back to large matrix indices
+    new_route = []
+    index = routing.Start(0)
+    while not routing.IsEnd(index):
+        previous_index = index
+        index = solution.Value(routing.NextVar(index))
+        index_node = manager.IndexToNode(index)
+        if index == routing.End(0):
+            break
+        new_route.append(route[index])
+    return new_route
+
+
+def algo_or(data, algo_data_init=None, item_type=None):
     """Solve the problem using Google OR"""
     # Step 1: Initial routes
-    manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']),
+    end_node_index = len(data['distance_matrix'])
+    end_nodes = [end_node_index] * data['num_vehicles']
+    manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']) + 1,  # +1 for the pseudo-node
                                            data['num_vehicles'],
                                            data['starts'],
-                                           data['ends'], )
+                                           end_nodes, )  # from data['ends'])
     routing = pywrapcp.RoutingModel(manager)
 
     # Distance callback
     def distance_callback(from_index, to_index):
         from_node = manager.IndexToNode(from_index)
         to_node = manager.IndexToNode(to_index)
+        if from_node == end_node_index or to_node == end_node_index:
+            return 0
+
         return int(data['distance_matrix'][from_node][to_node])
 
     transit_callback_index = routing.RegisterTransitCallback(distance_callback)
@@ -121,6 +184,8 @@ def algo_or(data, algo_data_init=None):
             # print(local_type_index)
             if from_node in data['starts']:
                 return 0
+            if from_node == end_node_index:
+                return 0
             demand_type_name = data['demand_types'][local_type_index]
             demand_data = data[demand_type_name]
             # print(demand_data)
@@ -130,20 +195,30 @@ def algo_or(data, algo_data_init=None):
 
         return demand_callback
 
-    for i in range(len(data['demand_types'])):
-        a = demand_callback_with_index(i)
+    if item_type is None:
+        for i in range(len(data['demand_types'])):
+            demand_callback_index = routing.RegisterUnaryTransitCallback(
+                demand_callback_with_index(i))
+            routing.AddDimensionWithVehicleCapacity(
+                demand_callback_index,
+                0,
+                data[data['supply_types'][i]],
+                True,
+                data['item_types'][i],
+            )
+    else:
         demand_callback_index = routing.RegisterUnaryTransitCallback(
-            demand_callback_with_index(i))
+            demand_callback_with_index(item_type))
         routing.AddDimensionWithVehicleCapacity(
             demand_callback_index,
             0,
-            data[data['supply_types'][i]],
+            data[data['supply_types'][item_type]],
             True,
-            data['item_types'][i],
+            data['item_types'][item_type],
         )
-
     # Perform algorithm
     # Setting first solution heuristic.
+    initial_solution = None
     if algo_data_init:
         initial_solution = routing.ReadAssignmentFromRoutes(algo_data_init['routes'], True)
         if initial_solution is not None:
@@ -153,7 +228,7 @@ def algo_or(data, algo_data_init=None):
         routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
     search_parameters.local_search_metaheuristic = (
         routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH)
-    search_parameters.time_limit.FromSeconds(1)
+    search_parameters.time_limit.FromSeconds(30)
 
     # Solve the problem.
     solution = routing.SolveWithParameters(search_parameters)
@@ -161,8 +236,10 @@ def algo_or(data, algo_data_init=None):
     # Print solution on console.
     if solution:
         print_or_solution(data, manager, routing, solution)
-    # Print Solution
 
+    solution_from_init = routing.SolveFromAssignmentWithParameters(initial_solution, search_parameters)
+    if solution_from_init:
+        print_or_solution(data, manager, routing, solution_from_init)
     return solution
 
 
@@ -263,6 +340,13 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
                 data[data['supply_types'][j]][chosen_donor_index] = 0
                 algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][
                     j] += supply_remaining
+        donor_mat_index = data['starts'][chosen_donor_index]
+        algo_route = algo_data['routes'][chosen_donor_index]
+        algo_data['routes'][chosen_donor_index] = simple_detail_routing(data, donor_mat_index, algo_route)
+    # for i in range(len(algo_data['routes'])):
+    #     donor_mat_index = data['starts'][i]
+    #     algo_data['routes'][i] = simple_detail_routing(data, donor_mat_index, algo_data['routes'][i])
+
     manipulated_data = data
     return algo_data, manipulated_data
 
@@ -534,10 +618,14 @@ def algo_test():
     #               min_supply=100, max_supply=1000)
     print("Generating data model...")
     data = generate_data_model_from_db()
-    print("Calculating custom algorithm...")
-    results, manipulated_data = algo_main(data)
+    # print("Calculating custom algorithm...")
+    # results, manipulated_data = algo_main(data)
+    print("Calculating one-supply type problem for custom algorithm...")
+    algo_data, _ = algo_v1(data, item_type_index=1)
+
     print("Calculating using Google OR algorithm...")
-    algo_or(data, algo_data_init=None)
+    algo_or(data, algo_data_init=algo_data, item_type=1)
+    return
 
 
 @shared_task

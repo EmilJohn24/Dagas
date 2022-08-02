@@ -1,30 +1,37 @@
 import '../App.css';
-import { Component } from 'react';
+import './Registration.css';
+import { Component, useState } from 'react';
 import axios from "axios";
 import { useFormik, Formik } from 'formik';
 import * as Yup from 'yup';
-import {
-    Button,
-    Card,
-    CardHeader,
-    CardBody,
-    Dropdown,
-    DropdownToggle,
-    DropdownMenu,
-    DropdownItem,
-    FormGroup,
-    Form,
-    Input,
-    InputGroupAddon,
-    InputGroupText,
-    InputGroup,
-    Container,
-    Row,
-    Col,
-    option
-  } from "reactstrap";
+// import {
+//     Button,
+//     Card,
+//     CardHeader,
+//     CardBody,
+//     Dropdown,
+//     DropdownToggle,
+//     DropdownMenu,
+//     DropdownItem,
+//     FormGroup,
+//     Form,
+//     Input,
+//     InputGroupAddon,
+//     InputGroupText,
+//     InputGroup,
+//     Container,
+//     Row,
+//     Col,
+//     option
+//   } from "reactstrap";
 
-  import packageJson from '../../package.json';
+import Form from 'react-bootstrap/Form';
+
+import packageJson from '../../package.json';
+
+
+
+
 
 
 
@@ -32,6 +39,21 @@ import {
 // TODO: Consider using class-based handling using <Formik> (https://stackblitz.com/edit/react-formik-form-validation-gge2u7?file=App%2FRegister.jsx)
 function Registration(props){
     const {history} = props;
+
+    const [value, setValue] = useState('');
+
+    const [isActive, setIsActive] = useState(false);
+
+
+    function handleTextChange(text) {
+        setValue(text);
+      
+        if (text !== '') {
+          setIsActive(true);
+        } else {
+          setIsActive(false);
+        }
+      }
     //Formik Handling
     const registrationForm = useFormik({
         initialValues: {
@@ -88,144 +110,301 @@ function Registration(props){
     });
 
     return (
-        <section className="vh-100">
-            <div className="container h-100">
-                <div className="row d-flex justify-content-center align-items-center h-100">
-                    <div className="col-xl-9">
-                        <div className="card">
-                            <div className="card-body">
-                            <Form onSubmit={registrationForm.handleSubmit}>
-                                <FormGroup className="row align-items-center pt-4 pb-3">
-                                    <InputGroup className="input-group-alternative">
-                                        <InputGroupAddon addonType="prepend">
-                                            <InputGroupText>
-                                            Username
-                                            </InputGroupText>
-                                        </InputGroupAddon>
-                                        <Input 
+
+        <section className="vh-100 bg-image">
+          <div className="color-overlay">
+            <div className="container py-5 h-100">
+                <div className="row justify-content-center align-items-center h-100">
+                    <div className="col-12 col-lg-9 col-xl-7">
+                        <div className="card shadow-2-strong card-registration">
+                            <div className="card-body p-4 p-md-5">
+                                <h3 className="mb-4 pb-2 pb-md-0 mb-md-5">Registration Form</h3>
+                                <Form onSubmit={registrationForm.handleSubmit}>
+                                    
+                                    <div className="row">
+                                        <div className="col-md-6 mb-4">
+
+                                        <div className="form-outline">
+                                            <label className="form-label" htmlFor="firstName">First Name</label>
+                                            <input type="text" 
+                                            className="form-control form-control-sm" 
+                                            placeholder="First Name" 
+                                            id="first_name" 
+                                            value={registrationForm.values.first_name}
+                                            onChange={registrationForm.handleChange}/>
+                                            
+                                        </div>
+
+                                        </div>
+                                        <div className="col-md-6 mb-4">
+
+                                        <div className="form-outline">
+                                            <label className="form-label" for="lastName">Last Name</label>
+                                            
+                                            <input type="text" 
+                                            className="form-control form-control-sm" 
+                                            placeholder="Last Name" 
+                                            id="last_name" 
+                                            value={registrationForm.values.last_name}
+                                            onChange={registrationForm.handleChange}/>
+                                            
+                                        </div>
+
+                                        </div>
+                                    </div>
+
+                                    <div className="row">
+                                        <div className="col-md-6 mb-4">
+
+                                        <div className="form-outline">
+                                            <label className="form-label" htmlFor="email">Email Address</label>
+                                            <input type="email" 
+                                            className="form-control form-control-sm" 
+                                            placeholder="Email" 
+                                            id="email" 
+                                            value={registrationForm.values.email}
+                                            onChange={registrationForm.handleChange}/>
+                                            
+                                        </div>
+
+                                        </div>
+                                        <div className="col-md-6 mb-4">
+
+                                        <div className="form-outline">
+                                            <label className="form-label" htmlFor="username">Username</label>
+                                            <input type="text" 
+                                            className="form-control form-control-sm" 
                                             placeholder="Username" 
-                                            id="username"
-                                            type="text" 
+                                            id="username" 
                                             value={registrationForm.values.username}
                                             onChange={registrationForm.handleChange}/>
-                                    </InputGroup>
-                                </FormGroup>
-                                <FormGroup>
-                                    <InputGroup className="input-group-alternative">
-                                    <InputGroupAddon addonType="prepend">
-                                        <InputGroupText>
-                                        Email
-                                        </InputGroupText>
-                                    </InputGroupAddon>
-                                        <Input
-                                            placeholder="Email"
-                                            id="email"
-                                            type="email" 
-                                            value={registrationForm.values.email}
-                                            onChange={registrationForm.handleChange}
-                                        />
-                                    </InputGroup>
-                                </FormGroup>
-                                <FormGroup>
-                                    <InputGroup className="input-group-alternative">
-                                    <InputGroupAddon addonType="prepend">
-                                        <InputGroupText>
-                                        Password
-                                        </InputGroupText>
-                                    </InputGroupAddon>
-                                        <Input
-                                            placeholder="Password"
-                                            id="password1"
-                                            type="password" 
+                                            
+                                        </div>
+
+                                        </div>
+                                    </div>
+
+
+                                    <div className="row">
+                                        <div className="col-md-6 mb-4">
+
+                                        <div className="form-outline">
+                                            <label className="form-label" htmlFor="password1">Password</label>
+                                            <input type="password" 
+                                            className="form-control form-control-sm" 
+                                            placeholder="Password" 
+                                            id="password1" 
                                             value={registrationForm.values.password1}
-                                            onChange={registrationForm.handleChange}
-                                        />
-                                    </InputGroup>
-                                </FormGroup>
-                                <FormGroup>
-                                    <InputGroup className="input-group-alternative">
-                                    <InputGroupAddon addonType="prepend">
-                                        <InputGroupText>
-                                        Confirm Password
-                                        </InputGroupText>
-                                    </InputGroupAddon>
-                                        <Input
-                                            placeholder="Confirm Password"
-                                            id="password2"
-                                            type="password" 
+                                            onChange={registrationForm.handleChange}/>
+                                            
+                                        </div>
+
+                                        </div>
+                                        <div className="col-md-6 mb-4">
+
+                                        <div className="form-outline">
+                                            <label className="form-label" htmlFor="password2">Confirm Password</label>
+                                            <input type="password" 
+                                            className="form-control form-control-sm" 
+                                            placeholder="Confirm Password" 
+                                            id="password2" 
                                             value={registrationForm.values.password2}
-                                            onChange={registrationForm.handleChange}
-                                        />
-                                    </InputGroup>
-                                </FormGroup>
-                                <FormGroup>
-                                    <InputGroup className="input-group-alternative">
-                                    <InputGroupAddon addonType="prepend">
-                                        <InputGroupText>
-                                        First Name
-                                        </InputGroupText>
-                                    </InputGroupAddon>
-                                        <Input
-                                            placeholder="Confirm Password"
-                                            id="first_name"
-                                            type="text" 
-                                            value={registrationForm.values.first_name}
-                                            onChange={registrationForm.handleChange}
-                                        />
-                                    </InputGroup>
-                                </FormGroup>
-                                <FormGroup>
-                                    <InputGroup className="input-group-alternative">
-                                    <InputGroupAddon addonType="prepend">
-                                        <InputGroupText>
-                                        Last Name
-                                        </InputGroupText>
-                                    </InputGroupAddon>
-                                        <Input
-                                            placeholder="Last Name"
-                                            id="last_name"
-                                            type="text" 
-                                            value={registrationForm.values.last_name}
-                                            onChange={registrationForm.handleChange}
-                                        />
-                                    </InputGroup>
-                                </FormGroup>
-                                <FormGroup>
-                                    <InputGroup className="input-group-alternative">
-                                    <InputGroupAddon addonType="prepend">
-                                        <InputGroupText>
-                                        Role
-                                        </InputGroupText>
-                                    </InputGroupAddon>
-                                        <Input
-                                            id="role"
+                                            onChange={registrationForm.handleChange}/>
+                                            
+                                        </div>
+
+                                        </div>
+                                    </div>
+
+
+                                    <div className="row">
+                                      <div className="col-12">
+                                        <label class="form-label select-label">Choose Role</label>
+                                          <select className="select form-control" id="role"
                                             type="number"
                                             value={registrationForm.values.role}
-                                            onChange={registrationForm.handleChange}>
-                                            <option value="1">
-                                                Resident
-                                            </option>
-                                            <option value="2">
-                                                Donor
-                                            </option>
-                                            <option value="3">
-                                                Barangay
-                                            </option>
-                                            
-                                        </Input>
-                                    </InputGroup>
-                                </FormGroup>
+                                            onChange={registrationForm.handleChange} >
+                                            <option value="0" disabled>Choose option</option>
+                                            <option value="1">Resident</option>
+                                            <option value="2">Donor</option>
+                                            <option value="3">Barangay</option>
+                                          </select>
+                                      </div>
+                                    </div>
 
-                                <div className="text-center">
-                                    <Button className="my-4" color="primary" type="submit">Sign in</Button>
-                                </div>
-                            </Form>
+                                    <div className="mt-4 pt-2">
+                                      <button className="btn btn-primary  gradient-custom" type="submit">Register</button>
+                                    </div>
+                                </Form>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+          </div>
         </section>
+
+
+        
+        // <section className="vh-50 ">
+        //     <div className="container h-50">
+        //         <div className="row d-flex justify-content-center align-items-center h-50">
+        //             <div className="col-xl-9">
+        //                 <div className="card">
+        //                     <div className="card-body">
+        //                         <Form onSubmit={registrationForm.handleSubmit}>
+        //                             <div className="row align-items-center pt-1 pb-1">
+        //                                 <div className="col-md-3 ps-5">
+
+        //                                     <h6 className="mb-0">Username</h6>
+
+        //                                 </div>
+        //                                 <div className="col-md-9 pe-5">
+        //                                     <input type="text" 
+        //                                     className="form-control form-control-sm" 
+        //                                     placeholder="Username" 
+        //                                     id="username" 
+        //                                     value={registrationForm.values.username}
+        //                                     onChange={registrationForm.handleChange}/>
+        //                                 </div>
+        //                             </div>
+
+        //                             <hr className="mx-n3" />
+
+        //                             <div className="row align-items-center pt-1 pb-1">
+        //                                 <div className="col-md-3 ps-5">
+
+        //                                     <h6 className="mb-0">Email Address</h6>
+
+        //                                 </div>
+        //                                 <div className="col-md-9 pe-5">
+
+        //                                     <input type="email" 
+        //                                     className="form-control form-control-sm" 
+        //                                     placeholder="Email" 
+        //                                     id="email" 
+        //                                     value={registrationForm.values.email}
+        //                                     onChange={registrationForm.handleChange}/>
+        //                                 </div>
+        //                             </div>
+
+        //                             <hr className="mx-n3" />
+
+        //                             <div className="row align-items-center pt-1 pb-1">
+        //                                 <div className="col-md-3 ps-5">
+
+        //                                     <h6 className="mb-0">Password</h6>
+
+        //                                 </div>
+        //                                 <div className="col-md-9 pe-5">
+
+        //                                     <input type="password" 
+        //                                     className="form-control form-control-sm" 
+        //                                     placeholder="Password" 
+        //                                     id="password1" 
+        //                                     value={registrationForm.values.password1}
+        //                                     onChange={registrationForm.handleChange}/>
+        //                                 </div>
+        //                             </div>
+
+        //                             <hr className="mx-n3" />
+
+        //                             <div className="row align-items-center pt-1 pb-1">
+        //                                 <div className="col-md-3 ps-5">
+
+        //                                     <h6 className="mb-0">Confirm Password</h6>
+
+        //                                 </div>
+        //                                 <div className="col-md-9 pe-5">
+
+        //                                     <input type="password" 
+        //                                     className="form-control form-control-sm" 
+        //                                     placeholder="Confirm Password" 
+        //                                     id="password2" 
+        //                                     value={registrationForm.values.password2}
+        //                                     onChange={registrationForm.handleChange}/>
+        //                                 </div>
+        //                             </div>
+
+        //                             <hr className="mx-n3" />
+
+        //                             <div className="row align-items-center pt-1 pb-1">
+        //                                 <div className="col-md-3 ps-5">
+
+        //                                     <h6 className="mb-0">First Name</h6>
+
+        //                                 </div>
+        //                                 <div className="col-md-9 pe-5">
+
+        //                                     <input type="text" 
+        //                                     className="form-control form-control-sm" 
+        //                                     placeholder="First Name" 
+        //                                     id="first_name" 
+        //                                     value={registrationForm.values.first_name}
+        //                                     onChange={registrationForm.handleChange}/>
+        //                                 </div>
+        //                             </div>
+
+        //                             <hr className="mx-n3" />
+
+        //                             <div className="row align-items-center pt-1 pb-1">
+        //                                 <div className="col-md-3 ps-5">
+
+        //                                     <h6 className="mb-0">Last Name</h6>
+
+        //                                 </div>
+        //                                 <div className="col-md-9 pe-5">
+
+        //                                     <input type="text" 
+        //                                     className="form-control form-control-sm" 
+        //                                     placeholder="Last Name" 
+        //                                     id="last_name" 
+        //                                     value={registrationForm.values.last_name}
+        //                                     onChange={registrationForm.handleChange}/>
+        //                                 </div>
+        //                             </div>
+
+        //                             <hr className="mx-n3" />
+
+        //                             <div className="row align-items-center pt-1 pb-1">
+        //                                 <div className="col-md-3 ps-5">
+
+        //                                     <h6 className="mb-0">Role</h6>
+
+        //                                 </div>
+        //                                 <div className="col-md-9 pe-5">
+
+        //                                     <input id="role"
+        //                                     type="number"
+        //                                     value={registrationForm.values.role}
+        //                                     onChange={registrationForm.handleChange}/>
+        //                                     <option value="1">
+        //                                         Resident
+        //                                     </option>
+        //                                     <option value="2">
+        //                                         Donor
+        //                                     </option>
+        //                                     <option value="3">
+        //                                         Barangay
+        //                                     </option>
+        //                                 </div>
+        //                             </div>
+
+        //                             <hr className="mx-n3" />
+
+
+                                
+
+        //                         <div className="text-center">
+        //                             <Button className="my-4" color="primary" type="submit">Sign in</Button>
+        //                         </div>
+        //                     </Form>
+        //                     </div>
+        //                 </div>
+        //             </div>
+        //         </div>
+        //     </div>
+        // </section>
 
 
     )
