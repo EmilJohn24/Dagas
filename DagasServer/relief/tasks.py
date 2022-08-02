@@ -58,10 +58,10 @@ def print_or_solution(data, manager, routing, solution):
         while not routing.IsEnd(index):
             node_index = manager.IndexToNode(index)
             # plan_output += ' {0} Load('.format(node_index)
-            # if node_index not in data['starts']:
-            #     for i in range(len(data['demand_types'])):
-            # plan_output += str(data[data['demand_types'][i]][node_index]) + ','
-            # route_loads[i] += data[data['demand_types'][i]][node_index]
+            if node_index not in data['starts']:
+                for i in range(len(data['demand_types'])):
+                    # plan_output += str(data[data['demand_types'][i]][node_index]) + ','
+                    route_loads[i] += data[data['demand_types'][i]][node_index]
             # plan_output += ') ->'
 
             previous_index = index
