@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/purplegradientbackground"
     tools:context=".CreateTransactionFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -69,9 +69,9 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:autofillHints="@Search"
+        android:background="@drawable/createtransactionsearch"
         android:drawableLeft="@drawable/ic_search_foreground"
         android:hint="Search"
-        android:background="@drawable/createtransactionsearch"
         android:inputType="text"
         android:selectAllOnFocus="true"
         app:layout_constraintBottom_toTopOf="@+id/transactionSupplyRecycler"
