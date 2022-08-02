@@ -80,7 +80,7 @@ def print_or_solution(data, manager, routing, solution):
         # print(plan_output)
         total_distance += route_distance
         total_loads = [a + b for a, b in zip(total_loads, route_loads)]
-    print('Total distance of all routes: {}m'.format(total_distance))
+    print('Total distance of all routes: {}km'.format(total_distance / 1000))
     print('Total load of all routes: {}'.format(total_loads))
 
 
@@ -218,6 +218,7 @@ def algo_or(data, algo_data_init=None, item_type=None):
         )
     # Perform algorithm
     # Setting first solution heuristic.
+    initial_solution = None
     if algo_data_init:
         initial_solution = routing.ReadAssignmentFromRoutes(algo_data_init['routes'], True)
         if initial_solution is not None:
@@ -235,8 +236,10 @@ def algo_or(data, algo_data_init=None, item_type=None):
     # Print solution on console.
     if solution:
         print_or_solution(data, manager, routing, solution)
-    # Print Solution
 
+    solution_from_init = routing.SolveFromAssignmentWithParameters(initial_solution, search_parameters)
+    if solution_from_init:
+        print_or_solution(data, manager, routing, solution_from_init)
     return solution
 
 
