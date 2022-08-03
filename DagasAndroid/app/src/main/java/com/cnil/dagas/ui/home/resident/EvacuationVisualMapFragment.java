@@ -72,7 +72,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
         }
 
 
-        ArrayList<JSONObject> getCenters() {
+        public ArrayList<JSONObject> getCenters() {
             return centers;
         }
 

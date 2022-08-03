@@ -107,8 +107,29 @@ public class DagasJSONServer {
     }
 
     public static JSONArray connectJSONArray(Request request) throws Exception {
-        return new JSONArray(connectJSON(request));
-    }
+        final JSONArray[] jsonArray = new JSONArray[1];
+        final Response[] connectionResponse = new Response[1];
+        final Exception[] connectionException = new Exception[1];
+        Thread connectorThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    connectionResponse[0] = DagasJSONServer.connect(request);
+                    jsonArray[0] = new JSONArray(Objects.requireNonNull(
+                            connectionResponse[0].body()).string());
+                } catch (JSONException | IOException e) {
+                    e.printStackTrace();
+                    connectionException[0] = e;
+                }
+            }
+        });
+        connectorThread.start();
+        connectorThread.join();
+        if (connectionResponse[0].isSuccessful()) {
+            return jsonArray[0];
+        } else{
+            throw connectionException[0];
+        }    }
 
     public static Response connect(Request request) throws IOException{
         return client.newCall(request).execute();

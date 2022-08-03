@@ -52,6 +52,10 @@
             android:id="@+id/nav_suggestions"
             android:icon="@mipmap/ic_waterlogo_foreground"
             android:title="Suggestions"/>
+        <item
+            android:id="@+id/nav_res_qr"
+            android:icon="@drawable/ic_add"
+            android:title="Resident QR Code" />
 
 
     </group>

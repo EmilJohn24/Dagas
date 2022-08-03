@@ -392,6 +392,9 @@ class ItemRequestViewSet(viewsets.ModelViewSet):
 
 class TransactionStubViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionStubSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
+    filterset_fields = ['request__evacuation_center__name', ]
+    search_fields = ['request__evacuation_center__name']
 
     def get_queryset(self):
         if self.request.user.role == User.BARANGAY:
