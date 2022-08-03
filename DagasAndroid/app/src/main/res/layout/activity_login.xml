@@ -11,21 +11,9 @@
     android:id="@+id/loginContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/purplegradientbackground"
     tools:context=".ui.login.LoginActivity">
 
-    <ImageView
-        android:id="@+id/background"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:clipToPadding="false"
-        android:scaleType="centerCrop"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent=".35"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0"
-        app:srcCompat="@mipmap/ic_gradientbg_foreground" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
@@ -49,13 +37,13 @@
         android:enabled="false"
         android:text="@string/action_sign_in"
         android:textAllCaps="true"
+        android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/password"
-        app:layout_constraintVertical_bias="0.163"
-        android:textSize="16sp"
-        android:textStyle="bold"/>
+        app:layout_constraintVertical_bias="0.163" />
 
     <EditText
         android:id="@+id/username"
@@ -71,56 +59,56 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logo" />
 
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:autofillHints="@string/prompt_password"
-            android:hint="@string/prompt_password"
-            android:drawableLeft="@drawable/ic_loginpassword_foreground"
-            android:imeActionLabel="@string/action_sign_in_short"
-            android:imeOptions="actionDone"
-            android:inputType="textPassword"
-            android:selectAllOnFocus="true"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/username" />
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:autofillHints="@string/prompt_password"
+        android:drawableLeft="@drawable/ic_loginpassword_foreground"
+        android:hint="@string/prompt_password"
+        android:imeActionLabel="@string/action_sign_in_short"
+        android:imeOptions="actionDone"
+        android:inputType="textPassword"
+        android:selectAllOnFocus="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/username" />
 
-        <ProgressBar
-            android:id="@+id/loading"
-            android:layout_width="105dp"
-            android:layout_height="145dp"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@+id/registerRedirectButton"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/username" />
+    <ProgressBar
+        android:id="@+id/loading"
+        android:layout_width="105dp"
+        android:layout_height="145dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/registerRedirectButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/username" />
 
 
-        <!--    <CheckBox-->
-        <!--        android:id="@+id/checkBox"-->
-        <!--        android:layout_width="wrap_content"-->
-        <!--        android:layout_height="wrap_content"-->
-        <!--        android:layout_marginStart="24dp"-->
-        <!--        android:layout_marginTop="60dp"-->
-        <!--        android:text="Stay signed in"-->
-        <!--        app:layout_constraintStart_toStartOf="parent"-->
-        <!--        app:layout_constraintTop_toBottomOf="@+id/login" />-->
+    <!--    <CheckBox-->
+    <!--        android:id="@+id/checkBox"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginStart="24dp"-->
+    <!--        android:layout_marginTop="60dp"-->
+    <!--        android:text="Stay signed in"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toBottomOf="@+id/login" />-->
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Forgot Password?"
-            android:textColor="@color/blue"
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Forgot Password?"
+        android:textColor="@color/blue"
 
-            app:layout_constraintBottom_toTopOf="@+id/registerRedirectButton"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/login"
-            app:layout_constraintVertical_bias="0.285" />
+        app:layout_constraintBottom_toTopOf="@+id/registerRedirectButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/login"
+        app:layout_constraintVertical_bias="0.285" />
 
     <Button
         android:id="@+id/registerRedirectButton"
