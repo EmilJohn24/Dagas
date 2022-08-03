@@ -286,12 +286,12 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 
 class TransactionStubSerializer(serializers.ModelSerializer):
-    transaction = TransactionSerializer(many=False, read_only=True, )
+    request = BarangayRequestSerializer(many=False, read_only=True, )
 
     class Meta:
         model = TransactionStub
-        fields = ('id', 'qr_code', 'transaction', 'received',)
-        read_only_fields = ('qr_code', 'transaction',)
+        fields = ('id', 'qr_code', 'request', 'received',)
+        read_only_fields = ('qr_code', 'request',)
 
 
 class FulfillmentSerializer(serializers.ModelSerializer):

@@ -251,10 +251,19 @@ class Transaction(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     qr_code = models.ImageField(upload_to='transaction_QRs', blank=True, null=True)
     donor = models.ForeignKey(to=DonorProfile, on_delete=models.CASCADE)
+    created_on = models.DateTimeField(default=datetime.now, null=True, blank=True)
     barangay_request = models.ForeignKey(to="BarangayRequest", on_delete=models.CASCADE)
     received = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, null=True,
                                                 blank=True)  # 1 = received, 0 = not received
     received_date = models.DateTimeField(null=True)
+
+    # Constants
+    EXPIRATION_TIME_HRS = 24
+
+    def is_expired(self):
+        timespan = datetime.today() - self.created_on
+        timespan_hrs = timespan.seconds / 60 / 60
+        return timespan_hrs >= self.EXPIRATION_TIME_HRS
 
     def __str__(self):
         return str(self.barangay_request) + " " + str(self.id)
@@ -358,10 +367,18 @@ class VictimRequest(models.Model):
 class TransactionStub(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     qr_code = models.ImageField(upload_to='resident_stub_QRs', blank=True, null=True)
-    transaction = models.ForeignKey(to=Transaction, on_delete=models.CASCADE)
+    request = models.ForeignKey(to=BarangayRequest, on_delete=models.CASCADE, blank=True, null=True)
     resident = models.ForeignKey(to=ResidentProfile, on_delete=models.CASCADE)
     received = models.BooleanField(default=False)
     created_on = models.DateTimeField(default=datetime.now, blank=True, null=True)
+
+    # Constants
+    EXPIRATION_TIME_HRS = 24
+
+    def is_expired(self):
+        timespan = datetime.today() - self.created_on
+        timespan_hrs = timespan.seconds / 60 / 60
+        return timespan_hrs >= self.EXPIRATION_TIME_HRS
 
     def save(self, *args, **kwargs):
         if self._state.adding:
@@ -372,6 +389,21 @@ class TransactionStub(models.Model):
             self.qr_code = qr_code_file
 
         super(TransactionStub, self).save(*args, **kwargs)
+
+
+@receiver(post_save, sender=BarangayRequest)
+def generate_transaction_stubs(sender, instance, created, **kwargs):
+    # TODO: Consider doing this in a Celery task
+    if created:
+        barangay = instance.barangay
+        resident_profiles = ResidentProfile.objects.filter(barangay=barangay)
+
+        for resident_profile in resident_profiles:
+            TransactionStub.objects.create(request=instance, resident=resident_profile)
+            notif_verb = "New Request Created"
+            notif_message = "Your barangay has filed a new request"
+            notify.send(sender=barangay.user, recipient=resident_profile.user, target=instance,
+                        verb=notif_verb, description=notif_message)
 
 
 # Algorithm-related models

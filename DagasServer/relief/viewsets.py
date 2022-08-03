@@ -150,9 +150,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
                                 transaction.barangay_request.evacuation_center.name + 'has arrived'
                 notify.send(sender=user, recipient=resident_users, target=transaction,
                             verb=notif_verb, description=notif_message)
-                # TODO: Consider doing this in a Celery task
-                for resident_profile in resident_profiles:
-                    TransactionStub.objects.create(transaction=transaction, resident=resident_profile)
+
             elif transaction.received == Transaction.PACKAGING:
                 raise ValidationError(detail="Order still being packaged")
             elif transaction.received == Transaction.RECEIVED:
