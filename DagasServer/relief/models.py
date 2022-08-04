@@ -373,10 +373,11 @@ class TransactionStub(models.Model):
     created_on = models.DateTimeField(default=datetime.now, blank=True, null=True)
 
     # Constants
-    EXPIRATION_TIME_HRS = 24
+    EXPIRATION_TIME_HRS = 48
 
     def is_expired(self):
-        timespan = datetime.today() - self.created_on
+        # Fix based on: https://stackoverflow.com/questions/796008/cant-subtract-offset-naive-and-offset-aware-datetimes/25662061#25662061
+        timespan = datetime.now(timezone.utc) - self.created_on
         timespan_hrs = timespan.seconds / 60 / 60
         return timespan_hrs >= self.EXPIRATION_TIME_HRS
 

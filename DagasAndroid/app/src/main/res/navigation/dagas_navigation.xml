@@ -19,6 +19,9 @@
         <action
             android:id="@+id/action_nav_qr_scanner_to_nav_transaction_receipt"
             app:destination="@id/nav_transaction_receipt" />
+        <action
+            android:id="@+id/action_nav_qr_scanner_to_residentQrScannedFragment"
+            app:destination="@id/nav_resident_qr_scanned" />
     </fragment>
     <fragment
         android:id="@+id/nav_barangay_request"
@@ -97,4 +100,16 @@
         android:name="com.cnil.dagas.ResidentQRFragment"
         android:label="resident_qr"
         tools:layout="@layout/resident_qr" />
+    <fragment
+        android:id="@+id/nav_resident_qr_scanned"
+        android:name="com.cnil.dagas.ResidentQrScannedFragment"
+        android:label="fragment_successfully_scanned"
+        tools:layout="@layout/fragment_successfully_scanned" >
+        <argument
+            android:name="STUB_ID"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_nav_resident_qr_scanned_to_nav_qr_scanner"
+            app:destination="@id/nav_qr_scanner" />
+    </fragment>
 </navigation>

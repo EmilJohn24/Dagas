@@ -287,11 +287,13 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 class TransactionStubSerializer(serializers.ModelSerializer):
     request = BarangayRequestSerializer(many=False, read_only=True, )
-
+    resident = ResidentSerializer(many=False, read_only=True, )
+    user = UserSerializer(source='resident.user', many=False, read_only=True,)
+    is_expired = serializers.BooleanField(read_only=True)
     class Meta:
         model = TransactionStub
-        fields = ('id', 'qr_code', 'request', 'received',)
-        read_only_fields = ('qr_code', 'request',)
+        fields = ('id', 'qr_code', 'request', 'received', 'resident', 'user', 'is_expired',)
+        read_only_fields = ('qr_code', 'request', 'resident', 'user', 'is_expired',)
 
 
 class FulfillmentSerializer(serializers.ModelSerializer):

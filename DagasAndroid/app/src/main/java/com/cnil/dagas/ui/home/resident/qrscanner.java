@@ -18,7 +18,6 @@ import com.budiyev.android.codescanner.CodeScannerView;
 import com.budiyev.android.codescanner.DecodeCallback;
 import com.cnil.dagas.R;
 import com.cnil.dagas.databinding.QrScannerBinding;
-import com.cnil.dagas.http.DagasJSONServer;
 import com.cnil.dagas.http.OkHttpSingleton;
 import com.google.zxing.Result;
 
@@ -104,16 +103,13 @@ public class qrscanner extends Fragment {
                                 // TODO: Transaction stub stuff
                                 // TODO: Get the stub info to verify if it is an actual QR
                                 String qrCode = result.getText().substring(1); // Take actual UUID component
-                                String receivedUrl = DagasJSONServer
-                                        .createDetailUrl("/relief/api/stubs/", qrCode)
-                                                + "mark_as_received/";
-                                try {
-                                    DagasJSONServer.put(receivedUrl, new JSONObject());
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                } finally{
-                                    // TODO: Transfer to success fragment
-                                }
+                                Bundle bundle = new Bundle();
+                                bundle.putString("STUB_ID", qrCode);
+                                Toast.makeText(activity, qrCode, Toast.LENGTH_SHORT).show();
+                                Navigation.findNavController(root)
+                                        .navigate(R.id.action_nav_qr_scanner_to_residentQrScannedFragment,
+                                                    bundle);
+//
 
 
                             } else {

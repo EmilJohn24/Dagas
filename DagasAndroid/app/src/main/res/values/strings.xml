@@ -31,4 +31,6 @@
     <string name="search">Search...</string>
     <string name="search_button_text">Search</string>
     <string name="disaster_text">Disaster</string>
+    <string name="qrClaimed">This QR has already been claimed</string>
+    <string name="qrExpired">This QR has already expired</string>
 </resources>
