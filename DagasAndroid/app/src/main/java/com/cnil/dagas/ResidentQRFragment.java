@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -38,6 +39,7 @@ public class ResidentQRFragment extends Fragment {
         ImageView qrCodeImageView = binding.residentQrCodeImageView;
 
         Spinner evacuationCenterSelector = binding.evacuationCenterSelector;
+        RatingBar ratingBar = binding.ratingBar;
         EvacuationVisualMapFragment.GrabEvacsThread thread = new EvacuationVisualMapFragment.GrabEvacsThread();
         thread.start();
         try {
@@ -87,6 +89,23 @@ public class ResidentQRFragment extends Fragment {
             }
         });
 
+        ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            @Override
+            public void onRatingChanged(RatingBar ratingBar, float v, boolean b) {
+                int rating = (int) v;
+                JSONObject ratingObject = new JSONObject();
+                try {
+                    ratingObject.put("value", rating);
+                } catch (JSONException e) {
+                    Log.e(TAG, e.getMessage());
+                }
+                try {
+                    DagasJSONServer.put("/relief/api/ratings/rate/", ratingObject);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+        });
         return binding.getRoot();
     }
 }
