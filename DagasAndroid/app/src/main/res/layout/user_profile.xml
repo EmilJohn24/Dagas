@@ -127,5 +127,27 @@
         app:layout_constraintTop_toBottomOf="@+id/email"
         app:layout_constraintVertical_bias="0.019" />
 
+    <Button
+        android:id="@+id/select_profile_picture"
+        android:layout_width="194dp"
+        android:layout_height="63dp"
+        android:layout_marginTop="40dp"
+        android:text="Take Profile Photo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/role" />
+
+    <Button
+        android:id="@+id/upload_profle_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:enabled="false"
+        android:text="Upload"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/select_profile_picture" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -74,7 +74,8 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email',
                   'role', 'profile_picture', 'current_disaster',)
-        read_only_fields = ('profile_picture', 'current_disaster',)
+        read_only_fields = ('current_disaster',)
+        #read_only_fields = ('profile_picture', 'current_disaster',)
 
 
 class UserLocationSerializer(serializers.ModelSerializer):
