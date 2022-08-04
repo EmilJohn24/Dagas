@@ -8,7 +8,7 @@ from rest_framework.reverse import reverse
 
 from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \
     ItemType, ItemRequest, BarangayRequest, EvacuationDetails, Transaction, TransactionImage, EvacuationCenter, \
-    TransactionOrder, UserLocation, Fulfillment, RouteNode, RouteSuggestion, Disaster, TransactionStub
+    TransactionOrder, UserLocation, Fulfillment, RouteNode, RouteSuggestion, Disaster, TransactionStub, Rating
 
 
 class ItemTypeSerializer(serializers.ModelSerializer):
@@ -288,12 +288,24 @@ class TransactionSerializer(serializers.ModelSerializer):
 class TransactionStubSerializer(serializers.ModelSerializer):
     request = BarangayRequestSerializer(many=False, read_only=True, )
     resident = ResidentSerializer(many=False, read_only=True, )
-    user = UserSerializer(source='resident.user', many=False, read_only=True,)
+    user = UserSerializer(source='resident.user', many=False, read_only=True, )
     is_expired = serializers.BooleanField(read_only=True)
+
     class Meta:
         model = TransactionStub
         fields = ('id', 'qr_code', 'request', 'received', 'resident', 'user', 'is_expired',)
         read_only_fields = ('qr_code', 'request', 'resident', 'user', 'is_expired',)
+
+
+class RatingOnlySerializer(serializers.Serializer):
+    value = serializers.IntegerField()
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = ('id', 'resident', 'barangay', 'disaster', 'value',)
+        read_only_fields = ('resident', 'barangay', 'disaster',)
 
 
 class FulfillmentSerializer(serializers.ModelSerializer):

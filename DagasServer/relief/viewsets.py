@@ -10,12 +10,13 @@ from rest_framework.exceptions import ParseError, ValidationError
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
     BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder, UserLocation, \
-    RouteSuggestion, RouteNode, Fulfillment, Disaster, TransactionStub
+    RouteSuggestion, RouteNode, Fulfillment, Disaster, TransactionStub, Rating
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
     ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
     DonationSerializer, EvacuationCenterSerializer, TransactionOrderSerializer, UserLocationSerializer, \
-    RouteSuggestionSerializer, NotificationSerializer, DisasterSerializer, TransactionStubSerializer
+    RouteSuggestionSerializer, NotificationSerializer, DisasterSerializer, TransactionStubSerializer, RatingSerializer, \
+    RatingOnlySerializer
 
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
@@ -388,6 +389,38 @@ class ItemRequestViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(date_added=datetime.now())
+
+
+class RatingViewSet(viewsets.ModelViewSet):
+    queryset = Rating.objects.all()
+    serializer_class = RatingSerializer
+
+    @action(methods=['patch', 'put'], detail=False, name='Rate Barangay in Current Disaster')
+    def rate(self, request, pk=None):
+        serializer = RatingOnlySerializer(data=request.data)
+        user = request.user
+        if user.role != User.RESIDENT:
+            return Response({'error': 'Only residents can rate'}, status=status.HTTP_400_BAD_REQUEST)
+        if serializer.is_valid():
+            value = serializer.validated_data['value']
+            user_barangay: BarangayProfile = user.resident_profile.barangay
+            current_disaster = user_barangay.current_disaster
+            rating = Rating.objects \
+                .filter(resident__user=user) \
+                .filter(disaster=current_disaster) \
+                .filter(barangay=user_barangay)
+            if rating:
+                rating = rating[0]
+                rating.value = value
+                rating.save()
+                return Response(data=RatingSerializer(rating).data, status=status.HTTP_200_OK)
+            else:
+                rating = Rating.objects.create(
+                    resident=user.resident_profile,
+                    disaster=current_disaster,
+                    barangay=user.resident_profile.barangay,
+                )
+                return Response(data=RatingSerializer(rating).data, status=status.HTTP_201_CREATED)
 
 
 class TransactionStubViewSet(viewsets.ModelViewSet):

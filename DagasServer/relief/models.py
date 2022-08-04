@@ -7,6 +7,7 @@ import qrcode
 from django.contrib.auth.models import AbstractUser
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth import get_user_model
 
@@ -405,6 +406,15 @@ def generate_transaction_stubs(sender, instance, created, **kwargs):
             notif_message = "Your barangay has filed a new request"
             notify.send(sender=barangay.user, recipient=resident_profile.user, target=instance,
                         verb=notif_verb, description=notif_message)
+
+
+class Rating(models.Model):
+    resident = models.ForeignKey(to=ResidentProfile, on_delete=models.CASCADE,
+                                 related_name='ratings')
+    barangay = models.ForeignKey(to=BarangayProfile, on_delete=models.CASCADE,
+                                 related_name='ratings')
+    disaster = models.ForeignKey(to=Disaster, on_delete=models.CASCADE, related_name='ratings')
+    value = models.IntegerField(default=5, validators=[MinValueValidator(1), MaxValueValidator(5)])
 
 
 # Algorithm-related models
