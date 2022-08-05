@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -210,6 +211,13 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
             @Override
             public void removeRespond(ViewSupplyAdapter.ViewSupply supply) {
             }
+            @Override
+            public void loadPicture(ViewSupplyAdapter.ViewSupply supply) {
+                if (supply.hasPictureUrl()){
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(supply.getPictureUrl()));
+                    startActivity(browserIntent);
+                }
+            }
         };
 
         RetrieveTransactionInfo thread = new RetrieveTransactionInfo(transactionURL);
@@ -239,8 +247,12 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
                     Integer id = supplyInfo.getInt("id");
                     String type = supplyInfo.getString("type_str");
                     String supplyUrl = DagasJSONServer.createDetailUrl("/relief/api/supplies/", id);
+                    String supplyPictureUrl = supplyInfo.optString("picture");
                     int availablePax = supplyInfo.getInt("available_pax");
                     ViewSupplyAdapter.ViewSupply supply = new ViewSupplyAdapter.ViewSupply(name, type, availablePax, supplyUrl, id);
+                    if (!supplyPictureUrl.equals("")){
+                        supply.setPictureUrl(supplyPictureUrl);
+                    }
                     supply.setPaxTransacted(transactionOrderInfo.optInt("pax"));
                     adapter.add(supply);
                 }

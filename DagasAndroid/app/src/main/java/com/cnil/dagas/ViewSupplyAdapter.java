@@ -20,6 +20,7 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
     public interface ViewSupplyCallback {
         void respond(int position, ViewSupply supply, int amount);
         void removeRespond(ViewSupply supply);
+        void loadPicture(ViewSupply supply);
     }
 
     public static class ViewSupply{
@@ -29,6 +30,7 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
         private final int available;
         private int paxTransacted;
         private boolean isTransacted;
+        private String pictureUrl;
 
 
 
@@ -68,6 +70,16 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
 
         public boolean isTransacted() {
             return isTransacted;
+        }
+        public boolean hasPictureUrl(){
+            return pictureUrl != null;
+        }
+        public String getPictureUrl() {
+            return pictureUrl;
+        }
+
+        public void setPictureUrl(String pictureUrl) {
+            this.pictureUrl = pictureUrl;
         }
     }
     public static class TransactionOrder{
@@ -134,6 +146,14 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
                 }
             }
         });
+        Button viewPictureButton = supplyCard.findViewById(R.id.viewPictureButton);
+        viewPictureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                callback.loadPicture(supply);
+            }
+        });
+
         if (!supply.isTransacted())
             availableAmountTextView.setText(String.format("%d left", supply.getAvailablePax()));
         else {

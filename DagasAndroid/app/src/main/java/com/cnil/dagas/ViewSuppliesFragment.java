@@ -1,17 +1,17 @@
 package com.cnil.dagas;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.cnil.dagas.databinding.FragmentCreateTransactionBinding;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.cnil.dagas.databinding.FragmentViewSuppliesBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
 
@@ -87,10 +87,14 @@ public class ViewSuppliesFragment extends Fragment {
                     JSONObject availablePaxJSON = new JSONObject(availablePaxResponse.body().string());
                     int available = availablePaxJSON.getInt("available");
                 */
-                adapter.add(new ViewSupplyAdapter.ViewSupply(
+                String supplyPictureUrl = requestJSONObject.optString("picture");
+                ViewSupplyAdapter.ViewSupply supply = new ViewSupplyAdapter.ViewSupply(
                         itemName, itemTypeName,
-                        available, String.format(SUPPLY_URL, itemID), itemID)
-                );
+                        available, String.format(SUPPLY_URL, itemID), itemID);
+                if (supplyPictureUrl != ""){
+                    supply.setPictureUrl(supplyPictureUrl);
+                }
+                adapter.add(supply);
             }
 
             //TODO: Check for errors
@@ -126,6 +130,14 @@ public class ViewSuppliesFragment extends Fragment {
 
             @Override
             public void removeRespond(ViewSupplyAdapter.ViewSupply supply) {
+            }
+
+            @Override
+            public void loadPicture(ViewSupplyAdapter.ViewSupply supply) {
+                if (supply.hasPictureUrl()){
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(supply.getPictureUrl()));
+                    startActivity(browserIntent);
+                }
             }
         };
 

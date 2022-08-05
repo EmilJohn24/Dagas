@@ -44,6 +44,10 @@ public class DagasJSONServer {
         return connectJSON(request);
     }
 
+    public static String createUrlFromBase(String relativeUrl){
+        return client.getBaseUrl() + relativeUrl;
+    }
+
     public static void put(String baseURL, JSONObject body) throws Exception {
         RequestBody requestBody = RequestBody.create(body.toString(), JSON);
         Request request = client.builderFromBaseUrl(baseURL)

@@ -365,7 +365,7 @@ class SupplyViewSet(viewsets.ModelViewSet):
     def current_supplies(self, request, pk=None):
         user_donor = DonorProfile.objects.get(user=request.user)
         supplies = Supply.objects.filter(donation__donor=user_donor)
-        serializer = SupplySerializer(supplies, many=True)
+        serializer = SupplySerializer(supplies, many=True, context={'request': request})
         return Response(serializer.data)
 
     @action(methods=['get'], detail=True, name='Available pax')
