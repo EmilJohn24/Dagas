@@ -1,5 +1,6 @@
 package com.cnil.dagas;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +27,13 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
         private final String name;
         private final String type;
         private final int available;
+        private int paxTransacted;
+        private boolean isTransacted;
+
+
+
         public ViewSupply(String name, String type, int available, String supplyURL, int supplyID) {
+            this.isTransacted = false;
             this.name = name;
             this.type = type;
             this.available = available;
@@ -48,6 +55,19 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
 
         public int getSupplyId() {
             return supplyId;
+        }
+
+        public int getPaxTransacted() {
+            return paxTransacted;
+        }
+
+        public void setPaxTransacted(int paxTransacted) {
+            this.isTransacted = true;
+            this.paxTransacted = paxTransacted;
+        }
+
+        public boolean isTransacted() {
+            return isTransacted;
         }
     }
     public static class TransactionOrder{
@@ -87,6 +107,7 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
         return new ViewSupplyAdapter.ViewHolder(view);
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         //setup
@@ -97,13 +118,15 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
         ViewSupply supply = supplies.get(position);
         transactionSupplyName.setText(supply.getName());
         typeTextView.setText(supply.getType());
-        availableAmountTextView.setText(String.format("%d left", supply.getAvailablePax()));
+
+
+
         Button deleteButton = supplyCard.findViewById(R.id.supplyDeleteButton);
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                supplies.remove(position);
-                notifyItemRemoved(position);
+                supplies.remove(holder.getBindingAdapterPosition());
+                notifyItemRemoved(holder.getBindingAdapterPosition());
                 try {
                     DagasJSONServer.delete("/relief/api/supplies/", supply.getSupplyId());
                 } catch (Exception e) {
@@ -111,6 +134,13 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
                 }
             }
         });
+        if (!supply.isTransacted())
+            availableAmountTextView.setText(String.format("%d left", supply.getAvailablePax()));
+        else {
+            availableAmountTextView.setText(String.format("Pax: %d", supply.getPaxTransacted()));
+            deleteButton.setEnabled(false);
+            deleteButton.setVisibility(Button.INVISIBLE);
+        }
 
     }
 

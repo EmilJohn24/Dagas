@@ -233,16 +233,16 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
             JSONArray transactionSupplyOrders = thread.getTransactionJSON().optJSONArray("transaction_orders");
             if (transactionSupplyOrders != null) {
                 for (int i = 0; i != transactionSupplyOrders.length(); i++){
-
-                    JSONObject supplyInfo = transactionSupplyOrders
-                                                .getJSONObject(i)
-                                                .getJSONObject("supply_info");
+                    JSONObject transactionOrderInfo = transactionSupplyOrders.getJSONObject(i);
+                    JSONObject supplyInfo = transactionOrderInfo.getJSONObject("supply_info");
                     String name = supplyInfo.getString("name");
                     Integer id = supplyInfo.getInt("id");
                     String type = supplyInfo.getString("type_str");
                     String supplyUrl = DagasJSONServer.createDetailUrl("/relief/api/supplies/", id);
                     int availablePax = supplyInfo.getInt("available_pax");
-                    adapter.add(new ViewSupplyAdapter.ViewSupply(name, type, availablePax, supplyUrl, id));
+                    ViewSupplyAdapter.ViewSupply supply = new ViewSupplyAdapter.ViewSupply(name, type, availablePax, supplyUrl, id);
+                    supply.setPaxTransacted(transactionOrderInfo.optInt("pax"));
+                    adapter.add(supply);
                 }
             }
         } catch (JSONException e) {
