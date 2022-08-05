@@ -221,7 +221,7 @@ class TransactionOrderSerializer(serializers.ModelSerializer):
         donor_transactions = Transaction.objects.filter(donor=current_donor)
         item_pax = data['pax']
         item_supply: Supply = data['supply']
-        transaction = data['transaction']
+        current_transaction = data['transaction']
         item_type = item_supply.type
 
         # Get all transactions with that supply
@@ -229,8 +229,8 @@ class TransactionOrderSerializer(serializers.ModelSerializer):
         if supply_transactions is not None:
             if item_pax > item_supply.calculate_available_pax():
                 # Delete transaction
-                TransactionOrder.objects.filter(transaction=transaction).delete()
-                transaction.delete()
+                TransactionOrder.objects.filter(transaction=current_transaction).delete()
+                current_transaction.delete()
                 raise serializers.ValidationError({
                     "pax": item_supply.name + " has insufficient pax. Deleting transaction..."},
                         code=status.HTTP_400_BAD_REQUEST)
