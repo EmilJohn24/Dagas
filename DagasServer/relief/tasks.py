@@ -633,5 +633,5 @@ def algorithm():
     data = generate_data_model_from_db()
     # print(data['distance_matrix'])
     results, manipulated_data = algo_main(data)
-    routes_to_db(data, results)
+    # routes_to_db(data, results)
     return

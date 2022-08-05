@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.db.models import Sum
 from notifications.models import Notification
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_auth.registration.serializers import RegisterSerializer
 # from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework.reverse import reverse
@@ -221,14 +221,19 @@ class TransactionOrderSerializer(serializers.ModelSerializer):
         donor_transactions = Transaction.objects.filter(donor=current_donor)
         item_pax = data['pax']
         item_supply: Supply = data['supply']
+        transaction = data['transaction']
         item_type = item_supply.type
 
         # Get all transactions with that supply
         supply_transactions = TransactionOrder.objects.filter(supply=item_supply)
         if supply_transactions is not None:
             if item_pax > item_supply.calculate_available_pax():
+                # Delete transaction
+                TransactionOrder.objects.filter(transaction=transaction).delete()
+                transaction.delete()
                 raise serializers.ValidationError({
-                    "pax": item_supply.name + " has insufficient pax."}, )
+                    "pax": item_supply.name + " has insufficient pax. Deleting transaction..."},
+                        code=status.HTTP_400_BAD_REQUEST)
 
         type_supplies = supplies.filter(type=item_type)
         all_orders = TransactionOrder.objects.filter(transaction__in=donor_transactions)
