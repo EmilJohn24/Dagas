@@ -37,4 +37,5 @@
     <string name="email_text">\"Email: \"</string>
     <string name="role_text">\"Role: \"</string>
     <string name="delete_text">Delete</string>
+    <string name="invalid_text">Invalid</string>
 </resources>

@@ -35,6 +35,7 @@ public class ResidentQrScannedFragment extends Fragment {
         ConstraintLayout scanHeader = binding.scanHeader;
         ImageView checkImageView = binding.checkImageView;
         TextView successTextView = binding.successText;
+        TextView successMessageTextView = binding.successMessage;
         TextView residentNameTextView = binding.residentName;
         ImageView profilePictureImageView = binding.profilePictureQrImageView;
         TextView barangayLocationTextView = binding.barangayLocation;
@@ -78,10 +79,16 @@ public class ResidentQrScannedFragment extends Fragment {
             });
             if (isReceived){
                 //TODO: Set scanHeader and checkImageView to error counterparts
-                successTextView.setText(R.string.qrClaimed);
+                successMessageTextView.setText(R.string.qrClaimed);
+                successTextView.setText(R.string.invalid_text);
+                checkImageView.setImageResource(R.drawable.ic_invalid_logo);
+                scanHeader.setBackgroundResource(R.drawable.redbg);
                 approveButton.setEnabled(false);
             } else if (isExpired){
-                successTextView.setText(R.string.qrExpired);
+                successMessageTextView.setText(R.string.qrExpired);
+                successTextView.setText(R.string.invalid_text);
+                checkImageView.setImageResource(R.drawable.ic_invalid_logo);
+                scanHeader.setBackgroundResource(R.drawable.redbg);
                 approveButton.setEnabled(false);
             }
         } catch (Exception e) {
