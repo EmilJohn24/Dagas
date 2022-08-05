@@ -33,4 +33,7 @@
     <string name="disaster_text">Disaster</string>
     <string name="qrClaimed">This QR has already been claimed</string>
     <string name="qrExpired">This QR has already expired</string>
+    <string name="full_name">\"Full Name: \"</string>
+    <string name="email_text">\"Email: \"</string>
+    <string name="role_text">\"Role: \"</string>
 </resources>

@@ -61,19 +61,20 @@ public class UserProfileFragment extends Fragment {
         } catch (InterruptedException e) {
             Log.e(TAG, e.getMessage());
         }
-        String roleVerbose = null;
+        int role = 0;
+        String roleVerbose = "";
         try {
-             roleVerbose = currentUserThread.getUser().getString("role");
-             if(roleVerbose.equals("1")){
+            role = currentUserThread.getUser().getInt("role");
+             if(role == 1){
                  roleVerbose = "Resident";
              }
-             else if(roleVerbose.equals("2")){
+             else if(role == 2){
                  roleVerbose = "Donor";
              }
-             else if(roleVerbose.equals("3")){
+             else if(role == 3){
                  roleVerbose = "Barangay";
              }
-             else if(roleVerbose.equals("4")){
+             else if(role == 4){
                  roleVerbose = "Admin";
              }
              else{
@@ -85,9 +86,9 @@ public class UserProfileFragment extends Fragment {
 
         try {
             String baseUrl = OkHttpSingleton.getInstance().getBaseUrl();
-            fullNameTxt.setText("Full Name: " + currentUserThread.getUser().getString("last_name") + ", " + currentUserThread.getUser().getString("first_name"));
-            emailTxt.setText("Email: " + currentUserThread.getUser().getString("email"));
-            roleTxt.setText("Role: " + roleVerbose);
+            fullNameTxt.setText(String.format("%s, %s", currentUserThread.getUser().optString("last_name"), currentUserThread.getUser().optString("first_name")));
+            emailTxt.setText(currentUserThread.getUser().getString("email"));
+            roleTxt.setText(roleVerbose);
             Picasso.with(this.getContext()).load(baseUrl + currentUserThread
                     .getUser().getString("profile_picture"))
                     .into(profilePictureImageView);
