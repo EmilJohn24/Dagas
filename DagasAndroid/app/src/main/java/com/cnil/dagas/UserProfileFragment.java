@@ -2,7 +2,6 @@ package com.cnil.dagas;
 
 import static androidx.core.content.FileProvider.getUriForFile;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -14,22 +13,18 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.content.Intent;
-import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 
-import com.cnil.dagas.data.ImageAssistor;
 import com.cnil.dagas.data.CurrentUserThread;
-import com.cnil.dagas.data.ResidentRegisterActivity;
+import com.cnil.dagas.data.ImageAssistor;
 import com.cnil.dagas.databinding.UserProfileBinding;
 import com.cnil.dagas.http.DagasJSONServer;
 import com.cnil.dagas.http.OkHttpSingleton;
-import com.cnil.dagas.ui.login.LoginActivity;
+import com.cnil.dagas.ui.home.HomeActivity;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -58,7 +53,6 @@ public class UserProfileFragment extends Fragment {
         TextView roleTxt = root.findViewById(R.id.role);
         Button selectProfilePic = root.findViewById(R.id.select_profile_picture);
         Button uploadProfilePic = root.findViewById(R.id.upload_profle_pic);
-
         //Load current user data
         CurrentUserThread currentUserThread = new CurrentUserThread();
         currentUserThread.start();
@@ -121,12 +115,13 @@ public class UserProfileFragment extends Fragment {
 //                        idImageView.setImageBitmap(idBitMap);
                     }
                 });
+        final Uri[] photoURI = {null};
         selectProfilePic.setOnClickListener(view -> {
             // Continue only if the File was successfully created
-            Uri photoURI = getUriForFile(UserProfileFragment.this.requireContext(),
+             photoURI[0] = getUriForFile(UserProfileFragment.this.requireContext(),
                     "com.example.android.fileprovider",
                     finalPhotoFile[0]);
-            mGetContent.launch(photoURI);
+            mGetContent.launch(photoURI[0]);
             uploadProfilePic.setEnabled(true);
         });
         uploadProfilePic.setOnClickListener(new View.OnClickListener() {
@@ -136,6 +131,9 @@ public class UserProfileFragment extends Fragment {
                     if (finalPhotoFile[0].exists())
                         DagasJSONServer.uploadWithPut(
                                 "/relief/api/users/upload_profile_picture/", finalPhotoFile[0]);
+                        HomeActivity homeActivity = (HomeActivity) getActivity();
+                        if (homeActivity != null)
+                            homeActivity.updateProfilePicture(photoURI[0]);
 
                 } catch (JSONException | InterruptedException e) {
                     Log.e(TAG, e.getMessage());

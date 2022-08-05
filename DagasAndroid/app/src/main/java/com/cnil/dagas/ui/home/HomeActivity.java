@@ -2,6 +2,7 @@ package com.cnil.dagas.ui.home;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -47,7 +48,12 @@ public class HomeActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityHomeBinding binding;
     private final String TAG = HomeActivity.class.getName();
-
+    public void updateProfilePicture(Uri imagePath){
+        NavigationView navigationView = binding.navView;
+        ImageView profilePictureImageView = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.profilePictureImageView);
+        profilePictureImageView.setImageURI(imagePath);
+        //        profilePictureImageView.setImage
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
