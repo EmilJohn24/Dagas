@@ -208,7 +208,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
                                                         transaction=created_transaction, )
                         remaining_fulfillment_pax = 0
                     else:
-                        Transaction.objects.create(pax=available_pax, supply=supply, transaction=created_transaction, )
+                        TransactionOrder.objects.create(pax=available_pax, supply=supply, transaction=created_transaction, )
                         remaining_fulfillment_pax = remaining_fulfillment_pax - available_pax
 
         # serializer = EvacuationCenterSerializer(barangay_request.evacuation_center)

@@ -7,14 +7,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cnil.dagas.http.DagasJSONServer;
 import com.cnil.dagas.http.OkHttpSingleton;
 import com.cnil.dagas.placeholder.Suggestion;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -279,6 +282,22 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
             }
             recyclerView.setAdapter(new SuggestionNodeRecyclerViewAdapter(Suggestion.ITEMS));
         }
+
+        Button acceptSuggestionButton = view.findViewById(R.id.acceptSuggestionsButton);
+        acceptSuggestionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View buttonView) {
+                // /relief/api/transactions/transactions_from_suggestion/
+                try {
+                    DagasJSONServer.post("/relief/api/transactions/transactions_from_suggestion/", new JSONObject());
+                    //action_nav_suggestions_to_nav_transactions
+                    Navigation.findNavController(view)
+                            .navigate(R.id.action_nav_suggestions_to_nav_transactions);
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+        });
         return view;
     }
 }

@@ -38,4 +38,5 @@
     <string name="role_text">\"Role: \"</string>
     <string name="delete_text">Delete</string>
     <string name="invalid_text">Invalid</string>
+    <string name="accept_text">Accept</string>
 </resources>

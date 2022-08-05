@@ -17,7 +17,6 @@
         tools:context=".SuggestionNodeFragment"
         tools:layout_editor_absoluteX="16dp"
         tools:listitem="@layout/card_suggestion_node" />
-
     <com.google.android.gms.maps.MapView
         android:id="@+id/suggestionMapView"
         android:layout_width="wrap_content"
@@ -25,4 +24,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/list" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/acceptSuggestionsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:text="@string/accept_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/suggestionMapView" />
 </androidx.constraintlayout.widget.ConstraintLayout>
