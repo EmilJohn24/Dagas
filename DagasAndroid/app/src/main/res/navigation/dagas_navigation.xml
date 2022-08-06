@@ -36,7 +36,15 @@
         android:id="@+id/nav_donor_add_supply"
         android:name="com.cnil.dagas.DonorAddSupply"
         android:label="fragment_donor_add_supply"
-        tools:layout="@layout/fragment_donor_add_supply" />
+        tools:layout="@layout/fragment_donor_add_supply" >
+        <action
+            android:id="@+id/action_nav_donor_add_supply_to_nav_view_supplies"
+            app:destination="@id/nav_view_supplies" />
+        <argument
+            android:name="SUPPLY_INFO"
+            app:argType="com.cnil.dagas.ViewSupplyAdapter$ViewSupply"
+            app:nullable="true" />
+    </fragment>
     <fragment
         android:id="@+id/nav_view_requests"
         android:name="com.cnil.dagas.RequestsFragment"
@@ -70,7 +78,12 @@
         android:id="@+id/nav_view_supplies"
         android:name="com.cnil.dagas.ViewSuppliesFragment"
         android:label="fragment_view_supplies"
-        tools:layout="@layout/fragment_view_supplies" />
+        tools:layout="@layout/fragment_view_supplies" >
+        <action
+            android:id="@+id/action_nav_view_supplies_to_nav_donor_add_supply"
+            app:destination="@id/nav_donor_add_supply"
+            app:popUpToInclusive="true" />
+    </fragment>
     <fragment
         android:id="@+id/nav_upload_id"
         android:name="com.cnil.dagas.UploadIdFragment"

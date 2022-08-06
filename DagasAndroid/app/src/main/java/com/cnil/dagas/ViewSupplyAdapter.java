@@ -1,6 +1,9 @@
 package com.cnil.dagas;
 
 import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cnil.dagas.http.DagasJSONServer;
@@ -23,7 +27,7 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
         void loadPicture(ViewSupply supply);
     }
 
-    public static class ViewSupply{
+    public static class ViewSupply implements Parcelable {
         private final int supplyId;
         private final String name;
         private final String type;
@@ -41,6 +45,28 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
             this.available = available;
             this.supplyId = supplyID;
         }
+
+        protected ViewSupply(Parcel in) {
+            supplyId = in.readInt();
+            name = in.readString();
+            type = in.readString();
+            available = in.readInt();
+            paxTransacted = in.readInt();
+            isTransacted = in.readByte() != 0;
+            pictureUrl = in.readString();
+        }
+
+        public static final Creator<ViewSupply> CREATOR = new Creator<ViewSupply>() {
+            @Override
+            public ViewSupply createFromParcel(Parcel in) {
+                return new ViewSupply(in);
+            }
+
+            @Override
+            public ViewSupply[] newArray(int size) {
+                return new ViewSupply[size];
+            }
+        };
 
         public String getName() {
             return name;
@@ -80,6 +106,22 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
 
         public void setPictureUrl(String pictureUrl) {
             this.pictureUrl = pictureUrl;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeInt(supplyId);
+            parcel.writeString(name);
+            parcel.writeString(type);
+            parcel.writeInt(available);
+            parcel.writeInt(paxTransacted);
+            parcel.writeByte((byte) (isTransacted?1:0));
+            parcel.writeString(pictureUrl);
         }
     }
     public static class TransactionOrder{
@@ -154,12 +196,27 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
             }
         });
 
+        Button editSupplyButton = supplyCard.findViewById(R.id.editSupplyButton);
+        editSupplyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //action_nav_view_supplies_to_nav_donor_add_supply
+                Bundle bundle = new Bundle();
+                bundle.putParcelable("SUPPLY_INFO", supply);
+//                bundle.("TRANSACTION_URL", transaction_url);
+//                bundle.putInt("REQUEST_ID", barangayRequest.getId());
+                Navigation.findNavController(view).navigate(R.id.action_nav_view_supplies_to_nav_donor_add_supply, bundle);
+            }
+        });
+
         if (!supply.isTransacted())
             availableAmountTextView.setText(String.format("%d left", supply.getAvailablePax()));
         else {
             availableAmountTextView.setText(String.format("Pax: %d", supply.getPaxTransacted()));
             deleteButton.setEnabled(false);
+            editSupplyButton.setEnabled(false);
             deleteButton.setVisibility(Button.INVISIBLE);
+            editSupplyButton.setVisibility(Button.INVISIBLE);
         }
 
     }

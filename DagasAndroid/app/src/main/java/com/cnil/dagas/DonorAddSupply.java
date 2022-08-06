@@ -20,6 +20,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import com.cnil.dagas.data.ImageAssistor;
 import com.cnil.dagas.databinding.FragmentDonorAddSupplyBinding;
@@ -178,7 +179,11 @@ public class DonorAddSupply extends Fragment {
         // Inflate the layout for this fragment
         binding = FragmentDonorAddSupplyBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+        ViewSupplyAdapter.ViewSupply supplyData = null;
+        if (getArguments() != null) {
+            supplyData = getArguments().getParcelable("SUPPLY_INFO");
 
+        }
 
         //Load spinner content
         Spinner spinnerType = root.findViewById(R.id.spinnerType);
@@ -196,6 +201,22 @@ public class DonorAddSupply extends Fragment {
         EditText supplyName = root.findViewById(R.id.supplyName);
         EditText editNumberQuantity = root.findViewById(R.id.editNumberQuantity);
         EditText editNumberPax = root.findViewById(R.id.editNumberPax);
+        int editDonationId = -1;
+        JSONObject supplyLiveData = null;
+        if (supplyData != null){
+            try {
+                supplyLiveData = DagasJSONServer.getDetail("/relief/api/supplies/", supplyData.getSupplyId());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            supplyName.setText(supplyData.getName());
+            if (supplyLiveData != null) {
+                editNumberQuantity.setText(String.valueOf(supplyLiveData.optInt("quantity")));
+                editNumberPax.setText(String.valueOf(supplyLiveData.optInt("pax")));
+                editDonationId = supplyLiveData.optInt("donation");
+            }
+            spinnerType.setSelection(thread.getTypes().indexOf(supplyData.getType()));
+        }
 
         // Upload image button
         Button takeSupplyPictureButton = root.findViewById(R.id.takeSupplyPictureButton);
@@ -230,27 +251,46 @@ public class DonorAddSupply extends Fragment {
         // Add supply button
         Button supplySubmitButton = root.findViewById(R.id.supplySubmitButton);
 
+        ViewSupplyAdapter.ViewSupply finalSupplyData = supplyData;
+        int finalEditDonationId = editDonationId;
         supplySubmitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
+                    //action_nav_donor_add_supply_to_nav_view_supplies
                     //TODO: Check for blanks
-                    SupplyAddThread supplyThread = new SupplyAddThread(thread.getDonationID(),
-                            supplyName.getText().toString(),
-                            Integer.parseInt(editNumberQuantity.getText().toString()),
-                            Integer.parseInt(editNumberPax.getText().toString()), spinnerType.getSelectedItemPosition());
-                    supplyThread.start();
-                    supplyThread.join();
-                    Toast.makeText(DonorAddSupply.this.getContext(),"Added " + supplyThread.getResponseSupplyName() + "!",
-                            Toast.LENGTH_SHORT).show();
+                    if (finalSupplyData == null) {
+                        SupplyAddThread supplyThread = new SupplyAddThread(thread.getDonationID(),
+                                supplyName.getText().toString(),
+                                Integer.parseInt(editNumberQuantity.getText().toString()),
+                                Integer.parseInt(editNumberPax.getText().toString()), spinnerType.getSelectedItemPosition());
+                        supplyThread.start();
+                        supplyThread.join();
+                        Toast.makeText(DonorAddSupply.this.getContext(),"Added " + supplyThread.getResponseSupplyName() + "!",
+                                Toast.LENGTH_SHORT).show();
+                        if (finalPhotoFile[0].exists())
+                            DagasJSONServer.uploadWithPut(DagasJSONServer.createDetailUrl(
+                                    "/relief/api/supplies/",
+                                    supplyThread.getResponseSupplyId()) + "upload_picture/", finalPhotoFile[0]);
+                    } else{
+                        // if editing supply
+                        JSONObject supplyEdit = new JSONObject();
+                        supplyEdit.put("name", supplyName.getText().toString());
+                        supplyEdit.put("quantity", Integer.parseInt(editNumberQuantity.getText().toString()));
+                        supplyEdit.put("pax", Integer.parseInt(editNumberPax.getText().toString()));
+                        supplyEdit.put("type", spinnerType.getSelectedItemPosition() + 1);
+                        supplyEdit.put("donation", finalEditDonationId);
+                        DagasJSONServer.putDetail("/relief/api/supplies/", finalSupplyData.getSupplyId(), supplyEdit);
+                        //action_nav_donor_add_supply_to_nav_view_supplies
+                        Navigation.findNavController(view).navigate(R.id.action_nav_donor_add_supply_to_nav_view_supplies);
+
+                    }
+
                     supplyName.getText().clear();
                     editNumberPax.getText().clear();
                     editNumberQuantity.getText().clear();
                     spinnerType.setSelection(0);
-                    if (finalPhotoFile[0].exists())
-                        DagasJSONServer.uploadWithPut(DagasJSONServer.createDetailUrl(
-                                "/relief/api/supplies/",
-                                supplyThread.getResponseSupplyId()) + "upload_picture/", finalPhotoFile[0]);
+
                 } catch (JSONException | InterruptedException e) {
                     Log.e(TAG, e.getMessage());
                 } catch (Exception e) {

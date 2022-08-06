@@ -20,6 +20,14 @@ public class DagasJSONServer {
     public static String createDetailUrl(String relativeUrl, Object id){
         return relativeUrl + id.toString() + "/";
     }
+    public static JSONObject get(String relativeUrl) throws Exception {
+        //TODO: Consider adding params
+        Request request = client.builderFromBaseUrl(relativeUrl)
+                .get()
+                .build();
+        return connectJSON(request);
+    }
+
     public static JSONObject getDetail(String relativeUrl, Object id) throws Exception {
         //TODO: Consider adding params
         String detailUrl = createDetailUrl(relativeUrl, id);
@@ -47,7 +55,14 @@ public class DagasJSONServer {
     public static String createUrlFromBase(String relativeUrl){
         return client.getBaseUrl() + relativeUrl;
     }
-
+    public static void putDetail(String baseURL, Object id, JSONObject body) throws Exception {
+        String detailUrl = createDetailUrl(baseURL, id);
+        RequestBody requestBody = RequestBody.create(body.toString(), JSON);
+        Request request = client.builderFromBaseUrl(detailUrl)
+                .put(requestBody)
+                .build();
+        connectJSON(request);
+    }
     public static void put(String baseURL, JSONObject body) throws Exception {
         RequestBody requestBody = RequestBody.create(body.toString(), JSON);
         Request request = client.builderFromBaseUrl(baseURL)
