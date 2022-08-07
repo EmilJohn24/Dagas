@@ -23,7 +23,6 @@ import Registration from './components/Registration';
 import "bootstrap/dist/css/bootstrap.min.css";
 // Bootstrap Bundle JS
 import "bootstrap/dist/js/bootstrap.bundle.min";
-import axios from "axios";
 
 
 import { useState, useEffect, useMemo } from "react";
@@ -76,7 +75,7 @@ import brandDark from "assets/images/logo-ct-dark.png";
 //     </Router>
 //   );
 // }
-axios.defaults.withCredentials = true
+
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
@@ -204,7 +203,7 @@ export default function App() {
           <Sidenav
             color={sidenavColor}
             brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandDark : brandWhite}
-            brandName="Material Dashboard PRO"
+            brandName="Dagas"
             routes={routes}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
@@ -216,7 +215,7 @@ export default function App() {
       {layout === "vr" && <Configurator />}
       <Routes>
         {getRoutes(routes)}
-        <Route path="*" element={<Navigate to="/dashboards/analytics" />} />
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </ThemeProvider>
   );

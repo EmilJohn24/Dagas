@@ -1,3 +1,4 @@
+import axiosConfig from '../axiosConfig';
 function ListRequests(props){
 
     const [requests, setRequests] = useState([]);
@@ -9,7 +10,7 @@ function ListRequests(props){
             url += "?search=" + query;
         }
         console.log("HTTP GET on Requests...");
-        axios
+        axiosConfig
           .get(url)
           .then((result) => {
             setRequests(result.data);
@@ -49,7 +50,7 @@ function AddRequest(props){
             }
         */
        // This might go on a Formik onSubmit prop
-       axios
+       axiosConfig
             .post('/relief/api/item-request/', JSON.stringify(item_request_json), {
                 "headers": {'Content-Type': 'application/json'},
                 "credentials": "include",
@@ -60,7 +61,7 @@ function AddRequest(props){
     const postRequest = (evacuation_center_id) => {
         console.log(values);
         const request_body = {"evacuation_center": evacuation_center_id};
-        axios
+        axiosConfig
             .post('/relief/api/requests/', JSON.stringify(request_body), {
                 "headers": {'Content-Type': 'application/json'},
                 "credentials": "include",

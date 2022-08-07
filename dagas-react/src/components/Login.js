@@ -16,6 +16,7 @@ import { useFormik, Formik, Field, Form, ErrorMessage } from 'formik';
 import { useNavigate } from "react-router-dom";
 import packageJson from '../../package.json';
 import * as Yup from 'yup';
+import axiosConfig from '../axiosConfig';
 
 // Formik Tutorial: https://formik.org/docs/tutorial
 // Useful: https://stackoverflow.com/questions/68905266/how-to-use-react-navigation-usenavigation-hook-in-a-class-component <3
@@ -38,22 +39,18 @@ class Login extends React.Component {
                         .required('Password is required'),
                 })}
                 onSubmit={async (values) => {
-                    console.log(values);
-                    const data = await fetch('/api/rest-authlogin/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(values)
-                    });
-                    //   const {result} = await data.json();
-                    if (data.status == 200) {
-                        alert('success!');
-                        navigation('/evacuation_centers')
-                    }
-                    else {
-                        alert('login unsuccessful! Try again');
-                    }
+                    console.log(JSON.stringify(values));
+                    const data = await axiosConfig
+                            .post('/api/rest-authlogin/', 
+                                JSON.stringify(values))
+                            .then((result) => {
+                                alert("Login successful");
+                                navigation('/');
+                            })
+                            .catch(
+                                (error) => {alert(error);}
+                            ); 
+                   
                     //   return result;                     
                 } }
                 // onSubmit={fields => {
@@ -87,7 +84,7 @@ class Login extends React.Component {
                                                                 <ErrorMessage name="password" component="div" className="invalid-feedback" />
                                                             </div>
 
-                                                            <div class="text-center pt-1 mb-5 pb-1 font-group">
+                                                            <div className="text-center pt-1 mb-5 pb-1 font-group">
                                                                 <button className="btn btn-primary btn-block fa-lg gradient-custom mb-3" type="submit">Login</button>
                                                                 <a className="text-muted" href="#!">Forgot password?</a>
                                                             </div>

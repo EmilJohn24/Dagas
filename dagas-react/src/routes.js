@@ -75,14 +75,27 @@ import Icon from "@mui/material/Icon";
 // Images
 import profilePicture from "assets/images/team-3.jpg";
 import Registration from "components/Registration";
-
+import {getCurrentUser} from "components/Utility"
+const currentUser = getCurrentUser();
+if (!currentUser){
+  currentUser = {
+    first_name: "AAA",
+    last_name: "AAA"
+  } 
+}
+// currentUser = {
+//   first_name: "AAA",
+//   last_name: "AAA"
+// }
+// const currentUser = null;
 const routes = [
   {
     type: "collapse",
     name: "Login",
     key: "login",
     route: "/login",
-    component: <Login/>
+    component: <Login/>,
+    noCollapse: true
 
   },
   {
@@ -90,13 +103,14 @@ const routes = [
     name: "Registration",
     key: "register",
     route: "/register",
-    component: <Registration/>
+    component: <Registration/>,
+    noCollapse: true
   },
   {
     type: "collapse",
-    name: "Brooklyn Alice",
+    name: currentUser.first_name + " " + currentUser.last_name,
     key: "brooklyn-alice",
-    icon: <MDAvatar src={profilePicture} alt="Brooklyn Alice" size="sm" />,
+    icon: <MDAvatar src={currentUser.profile_picture} alt="Brooklyn Alice" size="sm" />,
     collapse: [
       {
         name: "My Profile",

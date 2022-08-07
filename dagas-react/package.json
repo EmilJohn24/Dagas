@@ -2,7 +2,7 @@
   "name": "dagas-react",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://192.168.100.2cd :8000",
+  "proxy": "http://192.168.100.2:8000",
   "dependencies": {
     "@coreui/react": "^4.3.0",
     "@googlemaps/react-wrapper": "^1.1.35",
