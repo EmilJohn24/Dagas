@@ -65,7 +65,7 @@ import SignInIllustration from "layouts/authentication/sign-in/illustration";
 import SignUpCover from "layouts/authentication/sign-up/cover";
 import ResetCover from "layouts/authentication/reset-password/cover";
 import Login from './components/Login';
-
+import TransactionList from "layouts/transactions/transaction-list";
 // Material Dashboard 2 PRO React components
 import MDAvatar from "components/MDAvatar";
 
@@ -76,17 +76,17 @@ import Icon from "@mui/material/Icon";
 import profilePicture from "assets/images/team-3.jpg";
 import Registration from "components/Registration";
 import {getCurrentUser} from "components/Utility"
-const currentUser = getCurrentUser();
+// const currentUser = getCurrentUser();
 if (!currentUser){
   currentUser = {
     first_name: "AAA",
     last_name: "AAA"
   } 
 }
-// currentUser = {
-//   first_name: "AAA",
-//   last_name: "AAA"
-// }
+var currentUser = {
+  first_name: "AAA",
+  last_name: "AAA"
+}
 // const currentUser = null;
 const routes = [
   {
@@ -105,6 +105,19 @@ const routes = [
     route: "/register",
     component: <Registration/>,
     noCollapse: true
+  },
+  {
+    type: "collapse",
+    name: "Transactions",
+    key: "transactions",
+    collapse: [
+      {
+        name: "Transaction List",
+        key: "transaction-list",
+        route: "/transactions",
+        component: <TransactionList />,
+      }
+    ],
   },
   {
     type: "collapse",
