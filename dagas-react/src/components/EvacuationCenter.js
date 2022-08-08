@@ -1,7 +1,7 @@
 import '../App.css';
 import { Component } from 'react';
 import React from 'react';
-import axios from "axios";
+import axiosConfig from "../axiosConfig";
 import { GoogleMap, LoadScript, Marker, useGoogleMap } from '@react-google-maps/api';
 //Based on: https://react-google-maps-api-docs.netlify.app
 //Properties
@@ -31,7 +31,7 @@ class EvacuationCenter extends Component{
   };
   refreshEvacuationCenters = () => {
     console.log("Requesting for evacuation centers...");
-    axios
+    axiosConfig
       .get("/relief/api/evacuation-center/")
       .then((result) => this.setState({evacuationCenters: result.data}))
       .catch((error) => console.log(error));

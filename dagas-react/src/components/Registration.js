@@ -1,7 +1,7 @@
 import '../App.css';
 import './Registration.css';
 import { Component, useState } from 'react';
-import axios from "axios";
+import axiosConfig from "../axiosConfig";
 import { useFormik, Formik } from 'formik';
 import * as Yup from 'yup';
 // import {
@@ -70,8 +70,8 @@ function Registration(props){
             var result;
             var baseSite = packageJson.proxy;
             console.log(baseSite);
-            axios
-                .post(baseSite + '/api/rest-auth/registration', JSON.stringify(values), {
+            axiosConfig
+                .post('/api/rest-auth/registration', JSON.stringify(values), {
                     "headers": {'Content-Type': 'application/json'}
                 })
                 .then((res) => {result = res.data})

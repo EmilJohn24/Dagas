@@ -1,7 +1,7 @@
 import '../App.css';
 import { Component, useState, useEffect } from 'react';
 import React from 'react';
-import axios from "axios";
+import axiosConfig from "../axiosConfig";
 import { useGoogleMap } from '@react-google-maps/api';
 import { wait } from '@testing-library/user-event/dist/utils';
 

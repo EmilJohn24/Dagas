@@ -29,6 +29,8 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'], name='Get Current User',
             permission_classes=[IsProfileUserOrReadOnly])
     def current_user(self, request, pk=None):
+        if request.user.is_anonymous:
+            return Response({"error": "Not logged in"}, 403)
         user_serializer = UserSerializer(request.user)
         return Response(user_serializer.data)
 
