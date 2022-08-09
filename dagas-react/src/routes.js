@@ -64,8 +64,12 @@ import SignInCover from "layouts/authentication/sign-in/cover";
 import SignInIllustration from "layouts/authentication/sign-in/illustration";
 import SignUpCover from "layouts/authentication/sign-up/cover";
 import ResetCover from "layouts/authentication/reset-password/cover";
+
+//Dagas Imports
 import Login from './components/Login';
 import TransactionList from "layouts/transactions/transaction-list";
+import SupplyList from "layouts/supply/supply-list";
+
 // Material Dashboard 2 PRO React components
 import MDAvatar from "components/MDAvatar";
 
@@ -116,6 +120,19 @@ const routes = [
         key: "transaction-list",
         route: "/transactions",
         component: <TransactionList />,
+      }
+    ],
+  },
+  {
+    type: "collapse",
+    name: "Supplies",
+    key: "supplies",
+    collapse: [
+      {
+        name: "Supply List",
+        key: "supply-list",
+        route: "/supplies",
+        component: <SupplyList />,
       }
     ],
   },

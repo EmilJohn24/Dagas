@@ -33,6 +33,8 @@ import CustomerCell from "./components/CustomerCell";
 import axiosConfig from "axiosConfig";
 import LRU from 'lru-cache';
 import {configure} from 'axios-hooks';
+import useAxios from 'axios-hooks';
+
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
@@ -43,7 +45,6 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
-import useAxios from 'axios-hooks';
 
 function TransactionList() {
   const [menu, setMenu] = useState(null);
@@ -72,10 +73,7 @@ function TransactionList() {
     </Menu>
   );
   
-  const cache = new LRU({max: 10})
-  configure({axiosConfig, cache});
 
-  //Guide: https://www.npmjs.com/package/axios-hooks#manual-requests
   // const listTransactions =  () => {
   //   var url = "/relief/api/transactions/"
   //   // if (query !== "" && query){
@@ -152,6 +150,9 @@ function TransactionList() {
   
     };
 
+    //Guide: https://www.npmjs.com/package/axios-hooks#manual-requests
+    const cache = new LRU({max: 10})
+    configure({axiosConfig, cache});
     const [{data, loading, error}, refetch] = useAxios("/relief/api/transactions/");
 
     if (loading) return;
