@@ -1,24 +1,19 @@
 // General purpose functions
 
-import axios from "axios";
+import axiosConfig from "../axiosConfig";
 
-const getItemTypes = () => {
+export const getItemTypes = () => {
     const url = "/relief/api/item-type/"
     console.log("HTTP GET on Item Type...");
-    return axios
+    return axiosConfig
       .get(url)
       .then(result => result.data)
       .catch((error) => console.log(error));
   }
 
-  const getCurrentUser = () => {
+  export const getCurrentUser = async () => {
     const url = "/relief/api/users/current_user/";
     console.log("HTTP GET on current user");
-    return axios
-        .get(url, {
-            "credentials": "include",
-            "withCredentials": true
-        })
-        .then(result => result.data)
-        .catch((error) => console.log(error));
+    const data = axiosConfig.get(url).then((result) => {return result});
+    return data;
   }

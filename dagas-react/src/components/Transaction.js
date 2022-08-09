@@ -1,4 +1,4 @@
-import axios from "axios";
+import axiosConfig from "../axiosConfig";
 import { getItemType } from Utility;
 
 function ListTransactions(props){
@@ -46,7 +46,7 @@ function getUntransactedItems(props){
   for (var i = 0; i < getItemType.length; i++) {
     console.log(getItemType[i]);
     var url = props.getRequestUrl + "not_in_transaction/?type=" + getItemType[i]
-    axios
+    axiosConfig
         .get(url)
         .then((result) => {
           untransactedAmount[i] = result;
@@ -63,7 +63,7 @@ function retriveGeoLocationofDonor(props){
   const [donorLng, setLng] = useState(0);
 
   var url = props.getRequestUrl + "/relief/api/users/" + props.donorUserId + "/get_most_recent_location/" 
-  axios
+  axiosConfig
       .get(url)
       .then((result) => {
         setLat(parseFloat(result.geolocation.split(",")[0]));
