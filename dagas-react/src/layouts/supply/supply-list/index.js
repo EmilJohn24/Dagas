@@ -33,12 +33,13 @@ import ProductInfo from "./components/ProductInfo";
 import DefaultCell from "./components/DefaultCell";
 import ProductCell from "./components/ProductCell"
 
-//AXIOS
+//AXIOS and navigation
 import axiosConfig from "axiosConfig";
 import LRU from 'lru-cache';
 import {configure} from 'axios-hooks';
 import useAxios from 'axios-hooks';
 import logo from 'logo.svg';
+import { Navigate } from "react-router-dom";
 function ProductPage() {
 
   const dataTableData = {
@@ -101,7 +102,7 @@ function ProductPage() {
   const [{data, loading, error}, refetch] = useAxios("/relief/api/supplies/current_supplies/");
 
   if (loading) return;
-  
+  if (error) return <Navigate to="/login"/>
   dataTableData["rows"] = data;
   console.log(dataTableData);
   return (

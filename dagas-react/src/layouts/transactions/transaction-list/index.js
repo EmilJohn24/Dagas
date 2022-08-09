@@ -34,6 +34,7 @@ import axiosConfig from "axiosConfig";
 import LRU from 'lru-cache';
 import {configure} from 'axios-hooks';
 import useAxios from 'axios-hooks';
+import { Navigate } from "react-router-dom";
 
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
@@ -156,7 +157,8 @@ function TransactionList() {
     const [{data, loading, error}, refetch] = useAxios("/relief/api/transactions/");
 
     if (loading) return;
-    
+    if (error) return <Navigate to="/login"/>
+
     dataTableData["rows"] = data;
     console.log(dataTableData);
   const renderDataTable = (
