@@ -1,3 +1,4 @@
+from time import time
 import uuid
 from datetime import datetime
 from io import StringIO
@@ -262,9 +263,13 @@ class Transaction(models.Model):
     EXPIRATION_TIME_HRS = 24
 
     def is_expired(self):
-        timespan = datetime.today() - self.created_on
+        timespan = datetime.now(timezone.utc) - self.created_on
         timespan_hrs = timespan.seconds / 60 / 60
-        return timespan_hrs >= self.EXPIRATION_TIME_HRS
+        # If the transaction has already been received, it clearly cannot be expired
+        if self.received == Transaction.RECEIVED:
+            return False
+        else:
+            return timespan_hrs >= self.EXPIRATION_TIME_HRS
 
     def __str__(self):
         return str(self.barangay_request) + " " + str(self.id)
@@ -276,12 +281,18 @@ class Transaction(models.Model):
             img = qrcode.make(str(self.id))
             img.save(qr_code_file)
             self.qr_code = qr_code_file
-
+        
         super(Transaction, self).save(*args, **kwargs)
 
 
 def transaction_img_path(instance, filename):
     return 'transactions/id_{0}/{1}'.format(instance.transaction.id, filename)
+
+@receiver(post_save, sender=Transaction)
+def update_received_date(sender, instance, created, **kwargs):
+    if instance.received == Transaction.RECEIVED and instance.received is None:
+        instance.received_date = timezone.now(timezone.utc)
+    instance.save()
 
 
 class TransactionImage(models.Model):
@@ -294,6 +305,7 @@ class BarangayRequest(models.Model):
     evacuation_center = models.ForeignKey(null=True, to=EvacuationCenter, on_delete=models.CASCADE)
     details = models.ForeignKey(null=True, to=EvacuationDetails,
                                 on_delete=models.CASCADE)  # contains both the barangay and the evac center
+    # TODO: Add check
     expected_date = models.DateTimeField(null=True, default=datetime.now)
 
     # TODO: Add field for date created
@@ -333,7 +345,7 @@ class BarangayRequest(models.Model):
         :return: true if the current date precedes the expected date of the request,
                 returns false otherwise
         """
-        return timezone.now() <= self.expected_date
+        return datetime.now(timezone.utc)  <= self.expected_date
         # now = timezone.now()
         # return now - datetime.timedelta(days=1) <= self.pub_date <= now
         # return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
