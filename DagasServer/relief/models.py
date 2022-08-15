@@ -199,13 +199,18 @@ def supply_image_path(instance, filename):
 # TODO: Add some kind of type to Supply (e.g. Food, Water)
 class Supply(models.Model):
     name = models.CharField(max_length=250)
-    type = models.ForeignKey(ItemType, on_delete=models.CASCADE, related_name='type')
+    type = models.ForeignKey(ItemType, on_delete=models.CASCADE, related_name='supplies')
     quantity = models.IntegerField()
     pax = models.IntegerField()
-    donation = models.ForeignKey(Donation, on_delete=models.CASCADE, related_name='supplies')
+    donation = models.ForeignKey(Donation, on_delete=models.CASCADE, related_name='supplies', null=True, blank=True,)
     transaction = models.ForeignKey(to="Transaction", on_delete=models.CASCADE, related_name='transaction_supply',
                                     null=True)
     picture = models.ImageField(null=True, blank=True, upload_to=supply_image_path)
+    donor = models.ForeignKey(to="DonorProfile", on_delete=models.CASCADE, 
+                        related_name='donor_supplies', null=True, blank=True,)
+    datetime_added = models.DateTimeField('Date added', null=True, default=datetime.now,)
+
+
 
     # Not in transaction
     def calculate_available_pax(self):
