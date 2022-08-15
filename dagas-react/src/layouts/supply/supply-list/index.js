@@ -16,22 +16,32 @@ Coded by www.creative-tim.com
 // @mui material components
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
+import Autocomplete from "@mui/material/Autocomplete";
+
 
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 import MDProgress from "components/MDProgress";
+import MDInput from "components/MDInput";
+import MDButton from "components/MDButton";
+
 // Material Dashboard 2 PRO React examples
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
-
 // ProductPage page components
 import ProductImages from "./components/ProductImages";
 import ProductInfo from "./components/ProductInfo";
 import DefaultCell from "./components/DefaultCell";
 import ProductCell from "./components/ProductCell"
+import FormField from "./components/FormField";
+
+//React
+import { useEffect, useState } from "react";
+import { Formik, useFormik } from "formik";
+import * as Yup from 'yup';
 
 //AXIOS and navigation
 import axiosConfig from "axiosConfig";
@@ -40,8 +50,159 @@ import {configure} from 'axios-hooks';
 import useAxios from 'axios-hooks';
 import logo from 'logo.svg';
 import { Navigate } from "react-router-dom";
-function ProductPage() {
+import { Icon } from "@mui/material";
+function SupplyList() {
 
+  const [supplyForm, setSupplyForm] = useState(() => {
+    return "Loading...";
+  });
+
+  const cache = new LRU({max: 10})
+  configure({axiosConfig, cache});
+  const [{data, loading, error}, refetch] = useAxios("/relief/api/supplies/current_supplies/");
+    // Loading item types
+  const [{data: typeArray, loading: typeLoading, error: typeError}, refetchTypes] = useAxios("/relief/api/item-type/");
+  const [{data: postSupply, loading: postLoading, error: postError}, executeSupplyPost] = useAxios({
+        url: "/relief/api/supplies/",
+        method: "POST"
+  }, {  manual: true  });
+
+  const [deleteSupplyId, setDeleteSupplyId] = useState("");
+  const [isDeleting, setDeleting] = useState(false);
+  const [{data: deleteSupply, loading: deleteLoading, error: deleteError}, executeSupplyDelete] = useAxios({
+    url: `/relief/api/supplies/${deleteSupplyId}`,
+    method: "DELETE"
+  }, {manual: true})
+
+
+  //Deleting effect
+  useEffect(() => {
+    async function deleteSupplyFunc(){
+      if (isDeleting) {
+        await executeSupplyDelete();
+        await refetch();
+      }
+  }
+  deleteSupplyFunc();
+    
+  }, [isDeleting]);
+
+  // Supply type insertion effect
+  useEffect(() =>{
+    if (typeError) setSupplyForm("Something went wrong...");
+    else if (!typeLoading && typeArray) {
+      console.log(typeArray);
+      const typeNames = typeArray.map(type => type.name);
+      console.log(typeNames);
+      const SupplyFormWrapped = (
+        <Formik
+                initialValues={{
+                    name: '',
+                    type: '',
+                    pax: ''
+
+                }}
+                validationSchema={Yup.object().shape({
+                    name: Yup.string()
+                        .required('Supply name is required'),
+                    type: Yup.string()
+                        .required('This value is required'),
+                    pax: Yup
+                        .number()
+                        .min(1, 'Should have a pax of one or more')
+                })}
+                onSubmit={async (values, {setSubmitting}) => {
+                    // var requestValues = {...values}; //copy the data to preprocess
+                    console.log(values);
+                    var requestValues = {};
+                    requestValues["name"] = values.name;
+                    requestValues["pax"] = values.pax;
+                    requestValues["quantity"] = values.pax;
+                    requestValues["type"] = typeArray.filter(item => item.name == values.type)[0].id;
+                    console.log(JSON.stringify(requestValues));
+
+                    executeSupplyPost({
+                      data: requestValues
+                    });
+
+                    //Refetch supplies
+                    refetch();
+                    setSubmitting(false);
+                   
+                    //   return result;                     
+                } }
+                // onSubmit={fields => {
+                //     alert('SUCCESS!! :-)\n\n' + JSON.stringify(fields, null, 4));
+                //     history.push('/home');
+                // }}
+                >
+                {
+                formik => (
+                  <MDBox py={3}>
+                      <Card sx={{ overflow: "visible" }}>
+                        <MDBox p={3}>
+                          <MDTypography variant="h5">Add New Supply</MDTypography>
+                          <MDBox mt={3}>
+                            <Grid container spacing={3}>
+                              <Grid item xs={12} sm={6}>
+                                <FormField id="name" type="text" label="Name" {...formik.getFieldProps('name')} />
+                              </Grid>
+                              <Grid item xs={12} sm={6}>
+                                <FormField type="number" name="number" label="Quantity/Pax" {...formik.getFieldProps('pax')}/>
+                              </Grid>
+                            </Grid>
+                          </MDBox>
+                        <MDBox mt={2}>
+                          <Grid container spacing={3}>
+                          
+                            <Grid item xs={12} sm={6}>
+                              <MDBox mb={3}>
+                                <MDBox mb={2} display="inline-block">
+                                  <MDTypography
+                                    component="label"
+                                    variant="button"
+                                    fontWeight="regular"
+                                    color="text"
+                                    textTransform="capitalize"
+                                  >
+                                    Category
+                                  </MDTypography>
+                                </MDBox>
+                                <Autocomplete
+                                  name="type"
+                                  id="type"
+                                  options={typeNames}
+                                  onChange={(event, value) => {
+                                    console.log(`Changing to ${value}...`)
+                                    formik.setFieldValue('type', value);
+                                  }}
+                                  renderInput={(params) => <MDInput {...params} onChange={formik.handleChange} variant="standard" />
+                                  }
+                                />
+                                  <MDButton variant="gradient" color="light" type="submit" onClick={formik.handleSubmit}>
+                                  Submit
+                                </MDButton>
+                              </MDBox>
+                            </Grid>
+                          </Grid>
+                        </MDBox>
+                      </MDBox>
+                      </Card>
+                  </MDBox>
+                        )}
+                </Formik>
+          )
+
+      setSupplyForm(SupplyFormWrapped);
+    }
+}, [typeLoading, typeError, typeArray]);
+  
+  console.log(`Loading type array: ${typeArray}`);
+  if (loading || deleteLoading) return;
+  if (error) return <Navigate to="/login"/>;
+
+
+  // Rendering proper
   const dataTableData = {
     columns: [
       {   
@@ -50,7 +211,6 @@ function ProductPage() {
         width: "50%", 
         
         Cell: ({row}) => {
-          console.log(row.values.picture);
           if (!row.values.picture) return <ProductCell image={logo} name={row.original.name} />;
           else return <ProductCell image={row.values.picture} name={row.original.name} />;
         }
@@ -80,34 +240,36 @@ function ProductPage() {
       },
       
       { Header: "id", accessor: "id", align: "center" },
+      {
+        Header: "actions", 
+        align: "center",
+        Cell: ({row}) => {
+          return (
+            <DefaultCell>
+
+              <MDButton onClick={(event) => {
+                setDeleteSupplyId(row.values.id);
+                setDeleting(true);
+              }}>
+                <Icon fontSize="small">delete</Icon>
+              </MDButton>
+              <Icon fontSize="small">edit</Icon>
+            </DefaultCell>
+          )
+        }
+      }
     ],
   
-    // rows: [
-    //   {
-    //     product: <ProductCell image={blackChair} name="Christopher Knight Home" />,
-    //     price: <DefaultCell>$89.53</DefaultCell>,
-    //     review: <ReviewCell rating={4.5} />,
-    //     availability: (
-    //       <MDBox width="8rem">
-    //         <MDProgress variant="gradient" value={80} color="success" />
-    //       </MDBox>
-    //     ),
-    //     id: <DefaultCell>230019</DefaultCell>,
-    //   },
-  
   };
-
-  const cache = new LRU({max: 10})
-  configure({axiosConfig, cache});
-  const [{data, loading, error}, refetch] = useAxios("/relief/api/supplies/current_supplies/");
-
-  if (loading) return;
-  if (error) return <Navigate to="/login"/>
   dataTableData["rows"] = data;
-  console.log(dataTableData);
+  
+
   return (
     <DashboardLayout>
       <DashboardNavbar />
+      {supplyForm}
+
+      {/* Supply Table */}
       <MDBox py={3}>
         <Card sx={{ overflow: "visible" }}>
           <MDBox p={3}>
@@ -129,7 +291,7 @@ function ProductPage() {
             <MDBox mt={8} mb={2}>
               <MDBox mb={1} ml={2}>
                 <MDTypography variant="h5" fontWeight="medium">
-                  Other Products
+                  Supplies
                 </MDTypography>
               </MDBox>
               <DataTable
@@ -147,4 +309,4 @@ function ProductPage() {
   );
 }
 
-export default ProductPage;
+export default SupplyList;
