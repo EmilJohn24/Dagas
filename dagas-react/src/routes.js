@@ -71,6 +71,7 @@ import TransactionList from "layouts/transactions/transaction-list";
 import SupplyList from "layouts/supply/supply-list";
 import BarangayRequest from "components/BarangayRequest"
 import AcceptRequest from "components/AcceptRequest";
+import RequestList from "layouts/barangay/request-list"
 
 // Material Dashboard 2 PRO React components
 import MDAvatar from "components/MDAvatar";
@@ -151,6 +152,19 @@ const routes = [
         key: "supply-list",
         route: "/supplies",
         component: <SupplyList />,
+      }
+    ],
+  },
+  {
+    type: "collapse",
+    name: "Barangay",
+    key: "barangay",
+    collapse: [
+      {
+        name: "Request List",
+        key: "request-list",
+        route: "/requests",
+        component: <RequestList />,
       }
     ],
   },

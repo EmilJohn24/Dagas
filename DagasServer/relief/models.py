@@ -286,18 +286,20 @@ class Transaction(models.Model):
             img = qrcode.make(str(self.id))
             img.save(qr_code_file)
             self.qr_code = qr_code_file
-        
+        if self.received == Transaction.RECEIVED and self.received is None:
+            self.received_date = timezone.now(timezone.utc)
         super(Transaction, self).save(*args, **kwargs)
 
 
 def transaction_img_path(instance, filename):
     return 'transactions/id_{0}/{1}'.format(instance.transaction.id, filename)
 
-@receiver(post_save, sender=Transaction)
-def update_received_date(sender, instance, created, **kwargs):
-    if instance.received == Transaction.RECEIVED and instance.received is None:
-        instance.received_date = timezone.now(timezone.utc)
-    instance.save()
+# @receiver(post_save, sender=Transaction)
+# def update_received_date(sender, instance, created, **kwargs):
+#     # post_save.disconnect(update_received_date, )
+#     if instance.received == Transaction.RECEIVED and instance.received is None:
+#         instance.received_date = timezone.now(timezone.utc)
+#     instance.save()
 
 
 class TransactionImage(models.Model):
