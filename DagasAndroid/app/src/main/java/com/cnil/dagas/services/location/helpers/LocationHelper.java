@@ -8,8 +8,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 
 public class LocationHelper {
-    private final int REFRESH_TIME = 5000;
-    private final int REFRESH_DISTANCE = 0; //meters
+    private final int REFRESH_TIME = 50000;
+    private final int REFRESH_DISTANCE = 3; //meters
     @SuppressLint("MissingPermission")
     public void listenToUserLocation(Context cxt, CustomLocationListener customListener){
         LocationManager locationManager = (LocationManager) cxt.getSystemService(Context.LOCATION_SERVICE);

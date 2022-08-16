@@ -28,6 +28,8 @@ import com.cnil.dagas.data.DisasterListThread;
 import com.cnil.dagas.data.DisasterUpdateThread;
 import com.cnil.dagas.databinding.ActivityHomeBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
+import com.cnil.dagas.services.location.LocationService;
+import com.cnil.dagas.services.notifications.DagasNotificationService;
 import com.cnil.dagas.ui.login.LoginActivity;
 import com.google.android.material.navigation.NavigationView;
 import com.squareup.picasso.Picasso;
@@ -69,8 +71,8 @@ public class HomeActivity extends AppCompatActivity {
 //                        .setAction("Action", null).show();
 //            }
 //        });
-//        startService(new Intent(this, LocationService.class));
-//        startService(new Intent(this, DagasNotificationService.class));
+        startService(new Intent(this, LocationService.class));
+        startService(new Intent(this, DagasNotificationService.class));
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         TextView nameTxt = (TextView) navigationView.getHeaderView(0).findViewById(R.id.nameTxt);
