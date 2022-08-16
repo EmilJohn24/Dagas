@@ -110,26 +110,6 @@ export default function App() {
       setOnMouseEnter(true);
     }
   };
-<<<<<<< HEAD
-  
-  //runs when class tag is called elsewhere
-  render(){
-    return (
-        <div className='App flex flex-col min-h-screen overflow-hidden'>
-          <BrowserRouter>
-            <UserTest/>
-            <Routes>
-              <Route path="/login" element={<Login/>}/>
-              <Route path="/register" element={<Registration/>}/>
-              <Route path="/user_test" element={<UserTest/>}/>
-              <Route path="/evacuation_centers" element={<InternalEvacuationCenter/>} />
-            </Routes>
-          </BrowserRouter>
-        </div>
-    );
-  }
-=======
->>>>>>> 8359c571e788c3c8a6fdbc6820dd07aa533673c8
 
   // Close sidenav when mouse leave mini sidenav
   const handleOnMouseLeave = () => {

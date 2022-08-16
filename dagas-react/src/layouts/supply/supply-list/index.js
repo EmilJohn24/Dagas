@@ -262,7 +262,7 @@ function SupplyList() {
   
   };
   dataTableData["rows"] = data;
-  
+  console.log(data);
 
   return (
     <DashboardLayout>
