@@ -20,11 +20,23 @@ class ItemTypeSerializer(serializers.ModelSerializer):
 class SupplySerializer(serializers.ModelSerializer):
     available_pax = serializers.IntegerField(source='calculate_available_pax', read_only=True, )
     type_str = serializers.StringRelatedField(source='type', read_only=True, )
+    datetime_added = serializers.DateTimeField(
+        required=False,
+    )
+    donor = serializers.HyperlinkedRelatedField(
+        required=False,
+        view_name='relief:donor_details',
+        read_only=False,
+        queryset=DonorProfile.objects.all(),
+    )
+    donation = serializers.PrimaryKeyRelatedField(many=False, required=False,
+                                queryset=Donation.objects.all())
 
     class Meta:
         model = Supply
-        fields = ('id', 'name', 'type', 'type_str', 'quantity', 'pax', 'donation', 'available_pax', 'picture',)
-        read_only = ('available_pax', 'type_str',)
+        fields = ('id', 'name', 'type', 'type_str', 'quantity', 'pax', 
+                    'donation', 'available_pax', 'picture', 'donor', 'datetime_added')
+        read_only = ('available_pax', 'type_str')
 
 
 class DonationSerializer(serializers.ModelSerializer):

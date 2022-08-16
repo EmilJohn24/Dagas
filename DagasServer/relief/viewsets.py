@@ -1,5 +1,6 @@
 from django.db.models import Sum, QuerySet
 from django.utils.datetime_safe import datetime
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from notifications.signals import notify
 from notifications.models import Notification
@@ -351,6 +352,10 @@ class EvacuationCenterViewSet(viewsets.ModelViewSet):
 class SupplyViewSet(viewsets.ModelViewSet):
     queryset = Supply.objects.all()
     serializer_class = SupplySerializer
+    def perform_create(self, serializer):
+        serializer.save(datetime_added=datetime.now(timezone.utc),
+                        donor=DonorProfile.objects.get(user=self.request.user),
+                    )
 
     @action(detail=True, methods=['put', 'patch'], name='Upload Picture')
     def upload_picture(self, request, pk=None):
@@ -366,7 +371,8 @@ class SupplyViewSet(viewsets.ModelViewSet):
             permission_classes=[IsProfileUserOrReadOnly])
     def current_supplies(self, request, pk=None):
         user_donor = DonorProfile.objects.get(user=request.user)
-        supplies = Supply.objects.filter(donation__donor=user_donor)
+        # Preparation for Donation deprecation
+        supplies = Supply.objects.filter(donation__donor=user_donor) | Supply.objects.filter(donor=user_donor)
         serializer = SupplySerializer(supplies, many=True, context={'request': request})
         return Response(serializer.data)
 
@@ -390,7 +396,7 @@ class ItemRequestViewSet(viewsets.ModelViewSet):
     serializer_class = ItemRequestSerializer
 
     def perform_create(self, serializer):
-        serializer.save(date_added=datetime.now())
+        serializer.save(date_added=datetime.now(timezone.utc))
 
 
 class RatingViewSet(viewsets.ModelViewSet):

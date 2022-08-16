@@ -1,19 +1,11 @@
 import '../App.css';
-
-
 import './Login.css';
-
 import Carousel from 'react-bootstrap/Carousel';
-
 import logo from './logo.png'
-
-
-
-
-
 import React from 'react';
 import { useFormik, Formik, Field, Form, ErrorMessage } from 'formik';
 import { useNavigate } from "react-router-dom";
+import { isLoggedIn, setAuthTokens, clearAuthTokens, getAccessToken, getRefreshToken } from 'axios-jwt'
 import packageJson from '../../package.json';
 import * as Yup from 'yup';
 import axiosConfig from '../axiosConfig';
@@ -44,6 +36,10 @@ class Login extends React.Component {
                             .post('/api/rest-authlogin/', 
                                 JSON.stringify(values))
                             .then((result) => {
+                                setAuthTokens({
+                                    accessToken: result.data.access_token,
+                                    refreshToken: result.data.refresh_token
+                                })
                                 alert("Login successful");
                                 navigation('/');
                             })

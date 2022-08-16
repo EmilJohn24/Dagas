@@ -69,6 +69,7 @@ import ResetCover from "layouts/authentication/reset-password/cover";
 import Login from './components/Login';
 import TransactionList from "layouts/transactions/transaction-list";
 import SupplyList from "layouts/supply/supply-list";
+import BarangayRequest from "components/BarangayRequest"
 
 // Material Dashboard 2 PRO React components
 import MDAvatar from "components/MDAvatar";
@@ -108,6 +109,14 @@ const routes = [
     key: "register",
     route: "/register",
     component: <Registration/>,
+    noCollapse: true
+  },
+  {
+    type: "collapse",
+    name: "Barangay Request",
+    key: "barangay-request",
+    route: "/request",
+    component: <BarangayRequest/>,
     noCollapse: true
   },
   {

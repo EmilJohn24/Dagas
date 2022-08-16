@@ -3061,6 +3061,13 @@ axios-hooks@^3.1.4:
     dequal "2.0.2"
     lru-cache "6.0.0"
 
+axios-jwt@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/axios-jwt/-/axios-jwt-1.8.0.tgz#60ab33773a50e502f489cdeb7cfc164b9853ac7a"
+  integrity sha512-AwZNaze8zcKN7sbj2E+CS/HjXcD4GwmfARo1UHuiV9WNb4mLSOMzjpSb3Iu3MdBx+zAx8peYilGY2KGHYHxSIw==
+  dependencies:
+    jwt-decode "^3.1.2"
+
 axios@^0.21.1:
   version "0.21.4"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.4.tgz#c67b90dc0568e5c1cf2b0b858c43ba28e2eda575"
