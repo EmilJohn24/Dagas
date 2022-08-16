@@ -1,5 +1,4 @@
 from time import time
-from turtle import update
 import uuid
 from datetime import datetime
 from io import StringIO
