@@ -65,7 +65,7 @@ class DonationSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     current_disaster = serializers.SerializerMethodField(method_name='get_current_disaster')
-
+    
     def get_current_disaster(self, user):
         if user.role == User.BARANGAY:
             barangay: BarangayProfile = user.barangay_profile
@@ -81,12 +81,21 @@ class UserSerializer(serializers.ModelSerializer):
                 return None
         else:
             return None
-
+    role_verbose = serializers.SerializerMethodField(method_name='get_role_verbose')
+    def get_role_verbose(self, user):
+        if user.role == User.RESIDENT:
+            return "Resident"
+        if user.role == User.BARANGAY:
+            return "Barangay"
+        if user.role == User.DONOR:
+            return "Donor"
+        else:
+            return None
     class Meta:
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email',
-                  'role', 'profile_picture', 'current_disaster',)
-        read_only_fields = ('profile_picture', 'current_disaster',)
+                  'role', 'profile_picture', 'current_disaster', 'role_verbose',)
+        read_only_fields = ('profile_picture', 'current_disaster', 'role_verbose',)
 
 
 class UserLocationSerializer(serializers.ModelSerializer):
@@ -175,10 +184,10 @@ class EvacuationDetailsSerializer(serializers.ModelSerializer):
 
 class ItemRequestSerializer(serializers.ModelSerializer):
     date_added = serializers.DateTimeField(required=False)
-
+    type_str = serializers.StringRelatedField(source='type')
     class Meta:
         model = ItemRequest
-        fields = ('id', 'type', 'pax', 'date_added', 'barangay_request')
+        fields = ('id', 'type', 'type_str', 'pax', 'date_added', 'barangay_request')
 
 
 # TODO: Include EvacuationDetails
@@ -293,12 +302,13 @@ class TransactionSerializer(serializers.ModelSerializer):
     barangay_name = serializers.StringRelatedField(source='barangay_request.barangay', many=False, read_only=True, )
     evac_center_name = serializers.StringRelatedField(source='barangay_request.evacuation_center',
                                                       many=False, read_only=True, )
-
+    
+   
     class Meta:
         model = Transaction
         fields = ('id', 'donor', 'donor_name', 'donor_info', 'barangay_name', 'evac_center_name',
                   'transaction_image', 'qr_code', 'transaction_orders',
-                  'barangay_request', 'received', 'received_date')
+                  'barangay_request', 'received', 'received_date', 'status_string')
         read_only_fields = ('qr_code', 'received', 'donor', 'donor_info')
 
 

@@ -266,7 +266,15 @@ class Transaction(models.Model):
 
     # Constants
     EXPIRATION_TIME_HRS = 24
-
+    def status_string(self):
+        if self.is_expired():
+            return "Expired"
+        if self.received == Transaction.PACKAGING:
+            return "Packaging"
+        if self.received == Transaction.INCOMING:
+            return "Incoming"
+        if self.received == Transaction.RECEIVED:
+            return "Received"
     def is_expired(self):
         timespan = datetime.now(timezone.utc) - self.created_on
         timespan_hrs = timespan.seconds / 60 / 60
