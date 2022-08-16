@@ -18,9 +18,12 @@ axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 
 
 //Token Refresh Function
-const requestRefresh = (refresh) => {
-    return axios.post(`/api/token/refresh/`, { refresh })
-      .then(response => resolve(response.data.access_token))
+const requestRefresh = async (refresh) => {
+    const response = await axios.post(`/api/token/refresh/`, { refresh })
+      .then(response => response.data.access);
+    console.log(response);
+    return response;
+
 };
 
 // Apply interceptor
