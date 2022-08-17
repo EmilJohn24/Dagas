@@ -38,9 +38,23 @@ import breakpoints from "assets/theme/base/breakpoints";
 import burceMars from "assets/images/bruce-mars.jpg";
 import backgroundImage from "assets/images/bg-profile.jpeg";
 
+//AXIOS
+import axiosConfig from "axiosConfig";
+import LRU from 'lru-cache';
+import {configure} from 'axios-hooks';
+import useAxios from 'axios-hooks';
+import { Navigate } from "react-router-dom";
+import { FormControl } from "@mui/material";
+
 function Header({ children }) {
   const [tabsOrientation, setTabsOrientation] = useState("horizontal");
   const [tabValue, setTabValue] = useState(0);
+
+  const cache = new LRU({max: 10})
+  configure({axiosConfig, cache});
+  const [{data, loading, error}, refetch] = useAxios("/relief/api/users/current_user/");
+  
+
 
   useEffect(() => {
     // A function that sets the orientation state of the tabs.
@@ -63,6 +77,20 @@ function Header({ children }) {
   }, [tabsOrientation]);
 
   const handleSetTabValue = (event, newValue) => setTabValue(newValue);
+  if (loading) return;
+  if (error) return <Navigate to="/login"/>
+
+  //Profile Picture
+  var profileRender = "";
+  if (!loading && data.profile_picture){
+    console.log(`Re-rending profile picture with URL ${data.profile_picture} `);
+    profileRender = (
+      <img src={data.profile_picture} />
+    );
+  } else{
+    console.log(`Failure, unable to render profile picture for ${data.username}`);
+  }
+
 
   return (
     <MDBox position="relative" mb={5}>
@@ -94,15 +122,15 @@ function Header({ children }) {
       >
         <Grid container spacing={3} alignItems="center">
           <Grid item>
-            <MDAvatar src={burceMars} alt="profile-image" size="xl" shadow="sm" />
+            <MDAvatar src={data.profile_picture} alt="profile-image" size="xl" shadow="sm" />
           </Grid>
           <Grid item>
             <MDBox height="100%" mt={0.5} lineHeight={1}>
               <MDTypography variant="h5" fontWeight="medium">
-                Richard Davis
+                {data.first_name + " " + data.last_name}
               </MDTypography>
               <MDTypography variant="button" color="text" fontWeight="regular">
-                CEO / Co-Founder
+                {data.role_verbose}
               </MDTypography>
             </MDBox>
           </Grid>

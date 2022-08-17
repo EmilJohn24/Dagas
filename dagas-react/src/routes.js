@@ -69,7 +69,7 @@ import ResetCover from "layouts/authentication/reset-password/cover";
 import Login from './components/Login';
 import TransactionList from "layouts/transactions/transaction-list";
 import SupplyList from "layouts/supply/supply-list";
-import BarangayRequest from "components/BarangayRequest"
+import BarangayRequest from "layouts/barangay/request"
 import RequestList from "layouts/barangay/request-list"
 
 // Material Dashboard 2 PRO React components
@@ -219,8 +219,8 @@ const routes = [
         collapse: [
           {
             name: "Profile Overview",
-            key: "profile-overview",
-            route: "/pages/profile/profile-overview",
+            key: "profile",
+            route: "/pages/profile/profile",
             component: <ProfileOverview />,
           },
           {
