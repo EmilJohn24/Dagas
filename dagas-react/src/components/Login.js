@@ -41,7 +41,7 @@ class Login extends React.Component {
                                     refreshToken: result.data.refresh_token
                                 })
                                 alert("Login successful");
-                                navigation('/');
+                                navigation('/pages/profile/profile-overview');
                             })
                             .catch(
                                 (error) => {alert(error);}

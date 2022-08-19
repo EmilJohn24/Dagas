@@ -46,13 +46,16 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
+import TransactionDetail from "../transaction-detail";
+import { func } from "prop-types";
+import { areArraysEqual } from "@mui/base";
 
 function TransactionList() {
   const [menu, setMenu] = useState(null);
-
+  
   const openMenu = (event) => setMenu(event.currentTarget);
   const closeMenu = () => setMenu(null);
-
+  
   const renderMenu = (
     <Menu
       anchorEl={menu}
@@ -73,7 +76,16 @@ function TransactionList() {
       </MenuItem>
     </Menu>
   );
+  const [transactionDetailId, setTransactionDetailId]  = useState(null);
+  const [isDetail, setDetail] = useState(() => false);
   
+
+
+  const openDetail = (id) => {
+    console.log(id);
+      setDetail(true);
+      setTransactionDetailId(id);
+  }
 
   // const listTransactions =  () => {
   //   var url = "/relief/api/transactions/"
@@ -87,7 +99,17 @@ function TransactionList() {
   // }
    var dataTableData = {
       columns: [
-        { Header: "id", accessor: "id", Cell: ({ value }) => <IdCell id={value} /> },
+        { Header: "id", 
+          accessor: "id", 
+          Cell: ({ value }) => {
+            return ( 
+              <MDButton onClick={(event) => {
+                  openDetail(value); }}>
+                  <IdCell id={value}/>
+              </MDButton>
+              )
+            } 
+        },
         {
           Header: "date",
           accessor: "date",
@@ -155,16 +177,27 @@ function TransactionList() {
     const cache = new LRU({max: 10})
     configure({axiosConfig, cache});
     const [{data, loading, error}, refetch] = useAxios("/relief/api/transactions/");
-
+    
     if (loading) return;
     if (error) return <Navigate to="/login"/>
-
+    
     dataTableData["rows"] = data;
     console.log(dataTableData);
-  const renderDataTable = (
-    <DataTable table={dataTableData} entriesPerPage={false} canSearch />
-  )
+    
+    var renderData = null;
 
+    if (isDetail){
+      const detailData = data.filter(item => item.id == transactionDetailId)[0];
+      renderData = (
+        <TransactionDetail details={detailData} />
+      )
+    } else{
+      renderData = (
+        <DataTable table={dataTableData} entriesPerPage={false} canSearch />
+      );
+    }
+  
+  
   return (
     <DashboardLayout>
       <DashboardNavbar />
@@ -188,7 +221,7 @@ function TransactionList() {
           </MDBox>
         </MDBox>
         <Card>
-          {renderDataTable}
+          {renderData}
         </Card>
       </MDBox>
       <Footer />

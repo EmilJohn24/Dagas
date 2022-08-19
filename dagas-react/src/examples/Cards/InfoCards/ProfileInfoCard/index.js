@@ -87,7 +87,7 @@ function ProfileInfoCard({ title, description, info, social, action, shadow }) {
   return (
     <Card sx={{ height: "100%", boxShadow: !shadow && "none" }}>
       <MDBox display="flex" justifyContent="space-between" alignItems="center" pt={2} px={2}>
-        <MDTypography variant="h6" fontWeight="medium" textTransform="capitalize">
+        <MDTypography variant="h5" fontWeight="medium" textTransform="capitalize">
           {title}
         </MDTypography>
         <MDTypography component={Link} to={action.route} variant="body2" color="secondary">
@@ -98,7 +98,7 @@ function ProfileInfoCard({ title, description, info, social, action, shadow }) {
       </MDBox>
       <MDBox p={2}>
         <MDBox mb={2} lineHeight={1}>
-          <MDTypography variant="button" color="text" fontWeight="light">
+          <MDTypography variant="body2" color="text" fontWeight="light">
             {description}
           </MDTypography>
         </MDBox>

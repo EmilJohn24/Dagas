@@ -74,12 +74,19 @@ function SupplyList() {
     method: "DELETE"
   }, {manual: true})
 
+  const [editSupplyId, setEditSupplyId] = useState(() => "");
+  const [isEditing, setEditing] = useState(() => false);
+  const [{data: editSupply, loading: editLoading, error: editError}, executeSupplyEdit] = useAxios({
+    url: `/relief/api/supplies/${editSupplyId}/`,
+    method: "PATCH"
+  }, {manual: true})
 
+ 
   //Deleting effect
   useEffect(() => {
     async function deleteSupplyFunc(){
       if (isDeleting) {
-        await executeSupplyDelete();
+        await executeSupplyEdit();
         await refetch();
       }
   }
@@ -89,19 +96,36 @@ function SupplyList() {
 
   // Supply type insertion effect
   useEffect(() =>{
+    console.log(`Re-rendering form with edit state ${isEditing}...`);
     if (typeError) setSupplyForm("Something went wrong...");
     else if (!typeLoading && typeArray) {
       console.log(typeArray);
       const typeNames = typeArray.map(type => type.name);
       console.log(typeNames);
-      const SupplyFormWrapped = (
-        <Formik
-                initialValues={{
-                    name: '',
-                    type: '',
-                    pax: ''
+      var initVals = {
+        name: '',
+        type: typeNames[0],
+        pax: ''
 
-                }}
+    };
+    let formHeader = (
+      <MDTypography variant="h5">Add New Supply</MDTypography>
+    );
+      if (isEditing) {
+        const supplyData = data.filter(supply => supply.id == editSupplyId)[0];
+        initVals.name = supplyData.name;
+        initVals.type = supplyData.type_str;
+        initVals.pax = supplyData.pax;
+        
+        console.log(initVals);
+        formHeader = (
+          <MDTypography variant="h5">Editing {supplyData.name}</MDTypography>
+        );
+      } 
+      const SupplyFormWrapped = ( 
+        <Formik
+                enableReinitialize={true}
+                initialValues={initVals}
                 validationSchema={Yup.object().shape({
                     name: Yup.string()
                         .required('Supply name is required'),
@@ -120,10 +144,16 @@ function SupplyList() {
                     requestValues["quantity"] = values.pax;
                     requestValues["type"] = typeArray.filter(item => item.name == values.type)[0].id;
                     console.log(JSON.stringify(requestValues));
-
-                    executeSupplyPost({
-                      data: requestValues
-                    });
+                    if (isEditing){
+                        await executeSupplyEdit({
+                          data: requestValues
+                        });
+                        setEditing(false);
+                    } else{
+                        executeSupplyPost({
+                          data: requestValues
+                        });
+                    }
 
                     //Refetch supplies
                     refetch();
@@ -141,7 +171,7 @@ function SupplyList() {
                   <MDBox py={3}>
                       <Card sx={{ overflow: "visible" }}>
                         <MDBox p={3}>
-                          <MDTypography variant="h5">Add New Supply</MDTypography>
+                          {formHeader}
                           <MDBox mt={3}>
                             <Grid container spacing={3}>
                               <Grid item xs={12} sm={6}>
@@ -176,7 +206,14 @@ function SupplyList() {
                                     console.log(`Changing to ${value}...`)
                                     formik.setFieldValue('type', value);
                                   }}
-                                  renderInput={(params) => <MDInput {...params} onChange={formik.handleChange} variant="standard" />
+                                  renderInput={(params) => {
+                                      return (
+                                        <MDBox>
+                                          <Icon size="xl">{params.value}</Icon>
+                                          <MDInput {...params} onChange={formik.handleChange} variant="standard" />
+                                        </MDBox>
+                                      );
+                                    }
                                   }
                                 />
                                   <MDButton variant="gradient" color="light" type="submit" onClick={formik.handleSubmit}>
@@ -194,8 +231,9 @@ function SupplyList() {
           )
 
       setSupplyForm(SupplyFormWrapped);
+      
     }
-}, [typeLoading, typeError, typeArray]);
+}, [typeLoading, typeError, typeArray, isEditing, editSupplyId]);
   
   console.log(`Loading type array: ${typeArray}`);
   if (loading || deleteLoading) return;
@@ -251,9 +289,14 @@ function SupplyList() {
                 setDeleteSupplyId(row.values.id);
                 setDeleting(true);
               }}>
-                <Icon fontSize="small">delete</Icon>
+                  <Icon fontSize="small">delete</Icon>
               </MDButton>
-              <Icon fontSize="small">edit</Icon>
+              <MDButton onClick={(event) => {
+                setEditSupplyId(row.values.id);
+                setEditing(true);
+              }}>
+                  <Icon fontSize="small">edit</Icon>
+              </MDButton>
             </DefaultCell>
           )
         }
@@ -264,13 +307,8 @@ function SupplyList() {
   dataTableData["rows"] = data;
   
 
-  return (
-    <DashboardLayout>
-      <DashboardNavbar />
-      {supplyForm}
-
-      {/* Supply Table */}
-      <MDBox py={3}>
+  const supplyDataTableRender = (
+<MDBox py={3}>
         <Card sx={{ overflow: "visible" }}>
           <MDBox p={3}>
             {/* <MDBox mb={3}>
@@ -304,6 +342,15 @@ function SupplyList() {
           </MDBox>
         </Card>
       </MDBox>
+  )
+
+  return (
+    <DashboardLayout>
+      <DashboardNavbar />
+      {supplyForm}
+
+      {/* Supply Table */}
+      {isEditing? "" : supplyDataTableRender}
       <Footer />
     </DashboardLayout>
   );
