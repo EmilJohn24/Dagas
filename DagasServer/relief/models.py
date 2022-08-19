@@ -258,6 +258,8 @@ class Transaction(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     qr_code = models.ImageField(upload_to='transaction_QRs', blank=True, null=True)
     donor = models.ForeignKey(to=DonorProfile, on_delete=models.CASCADE)
+    # TODO: Use auto_add_now and remove at serializer level
+    # Link: https://stackoverflow.com/questions/3429878/automatic-creation-date-for-django-model-form-objects
     created_on = models.DateTimeField(default=datetime.now, null=True, blank=True)
     barangay_request = models.ForeignKey(to="BarangayRequest", on_delete=models.CASCADE)
     received = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, null=True,
@@ -372,6 +374,8 @@ class ItemRequest(models.Model):
     barangay directly since victim_request is nullable
     """
     barangay_request = models.ForeignKey(to=BarangayRequest, on_delete=models.CASCADE, related_name='item_request')
+    # TODO: Change to auto_now_add and remove automation in serialization
+    # Link: https://stackoverflow.com/questions/3429878/automatic-creation-date-for-django-model-form-objects
     date_added = models.DateTimeField()
     type = models.ForeignKey(ItemType, on_delete=models.CASCADE, )
     pax = models.IntegerField()
@@ -398,6 +402,8 @@ class TransactionStub(models.Model):
     request = models.ForeignKey(to=BarangayRequest, on_delete=models.CASCADE, blank=True, null=True)
     resident = models.ForeignKey(to=ResidentProfile, on_delete=models.CASCADE)
     received = models.BooleanField(default=False)
+    # TODO: Change to auto_now_add and remove automation in serialization
+    # Link: https://stackoverflow.com/questions/3429878/automatic-creation-date-for-django-model-form-objects
     created_on = models.DateTimeField(default=datetime.now, blank=True, null=True)
 
     # Constants

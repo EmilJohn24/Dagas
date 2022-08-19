@@ -5,7 +5,8 @@ from rest_framework import serializers, status
 from rest_auth.registration.serializers import RegisterSerializer
 # from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework.reverse import reverse
-
+from django.utils.datetime_safe import datetime
+from django.utils import timezone
 from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \
     ItemType, ItemRequest, BarangayRequest, EvacuationDetails, Transaction, TransactionImage, EvacuationCenter, \
     TransactionOrder, UserLocation, Fulfillment, RouteNode, RouteSuggestion, Disaster, TransactionStub, Rating
@@ -74,7 +75,8 @@ class UserSerializer(serializers.ModelSerializer):
             donor: DonorProfile = user.donor_profile
             return DisasterSerializer(donor.current_disaster).data
         elif user.role == User.RESIDENT:
-            resident_barangay = ResidentProfile.objects.get(user=user).barangay
+            resident = ResidentProfile.objects.get(user=user)
+            resident_barangay = resident.barangay
             if resident_barangay is not None:
                 return DisasterSerializer(resident_barangay.current_disaster).data
             else:
@@ -183,11 +185,12 @@ class EvacuationDetailsSerializer(serializers.ModelSerializer):
 
 
 class ItemRequestSerializer(serializers.ModelSerializer):
-    date_added = serializers.DateTimeField(required=False)
+    date_added = serializers.DateTimeField(required=False, default=datetime.now(timezone.utc))
     type_str = serializers.StringRelatedField(source='type')
     class Meta:
         model = ItemRequest
         fields = ('id', 'type', 'type_str', 'pax', 'date_added', 'barangay_request')
+
 
 
 # TODO: Include EvacuationDetails
@@ -434,11 +437,12 @@ class GenericNotificationRelatedField(serializers.RelatedField):
             # serializer = TransactionSerializer(value, )
             # Serializer by-pass
             return {'transaction_id': value.id}
-        if isinstance(value, BarangayProfile):
+        elif isinstance(value, BarangayProfile):
             serializer = BarangaySerializer(value)
-        if isinstance(value, Disaster):
+        elif isinstance(value, Disaster):
             serializer = DisasterSerializer(value)
-
+        else:
+            return {}
         return serializer.data
 
 
