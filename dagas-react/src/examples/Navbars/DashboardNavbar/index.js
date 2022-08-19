@@ -55,12 +55,29 @@ import {
   setOpenConfigurator,
 } from "context";
 
+
+//AXIOS
+import axiosConfig from "axiosConfig";
+import LRU from 'lru-cache';
+import {configure} from 'axios-hooks';
+import useAxios from 'axios-hooks';
+import { Navigate } from "react-router-dom";
+
+
 function DashboardNavbar({ absolute, light, isMini }) {
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useMaterialUIController();
   const { miniSidenav, transparentNavbar, fixedNavbar, openConfigurator, darkMode } = controller;
   const [openMenu, setOpenMenu] = useState(false);
   const route = useLocation().pathname.split("/").slice(1);
+
+  //Guide: https://www.npmjs.com/package/axios-hooks#manual-requests
+  const cache = new LRU({max: 10})
+  configure({axiosConfig, cache});
+  const [{data: notificationData, 
+          loading: notificationLoading, 
+          error: notificationError}, refetch] = useAxios("/relief/api/notifications/");
+
 
   useEffect(() => {
     // Setting the navbar type
@@ -93,6 +110,12 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const handleOpenMenu = (event) => setOpenMenu(event.currentTarget);
   const handleCloseMenu = () => setOpenMenu(false);
 
+  var notificationRender = "";
+  if (!notificationLoading){
+      notificationRender = notificationData.map((notif) => {
+        return <NotificationItem icon={<Icon>email</Icon>} title={notif.description}/>
+      })
+  }
   // Render the notifications menu
   const renderMenu = () => (
     <Menu
@@ -106,9 +129,10 @@ function DashboardNavbar({ absolute, light, isMini }) {
       onClose={handleCloseMenu}
       sx={{ mt: 2 }}
     >
-      <NotificationItem icon={<Icon>email</Icon>} title="Check new messages" />
+      {notificationRender}
+      {/* <NotificationItem icon={<Icon>email</Icon>} title="Check new messages" />
       <NotificationItem icon={<Icon>podcasts</Icon>} title="Manage Podcast sessions" />
-      <NotificationItem icon={<Icon>shopping_cart</Icon>} title="Payment successfully completed" />
+      <NotificationItem icon={<Icon>shopping_cart</Icon>} title="Payment successfully completed" /> */}
     </Menu>
   );
 
