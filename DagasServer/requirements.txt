@@ -25,3 +25,7 @@ django-filter
 django-notifications-hq
 djangorestframework_jwt
 ortools
+pygad
+geatpy
+matplotlib
+pymoo
