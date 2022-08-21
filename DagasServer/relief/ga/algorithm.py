@@ -1,13 +1,14 @@
 import copy
 import sys
 from itertools import islice
+from multiprocessing.pool import ThreadPool
 from random import random
 
 import numpy as np
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.core.duplicate import NoDuplicateElimination
 from pymoo.core.mutation import Mutation
-from pymoo.core.problem import Problem, ElementwiseProblem
+from pymoo.core.problem import Problem, ElementwiseProblem, StarmapParallelization
 from pymoo.core.sampling import Sampling
 from pymoo.operators.crossover.pntx import TwoPointCrossover
 from pymoo.optimize import minimize
@@ -101,7 +102,7 @@ def chromosome_to_routes(chromosome):
                         chosen_donor = donor_index
                         chosen_position = 0
                 else:
-                    index, cheapest_distance  = cheapest_insertion(donor_route, donor_index, gene)
+                    index, cheapest_distance = cheapest_insertion(donor_route, donor_index, gene)
                     if cheapest_distance < min_add_distance:
                         min_add_distance = cheapest_distance
                         chosen_donor = donor_index
@@ -170,7 +171,7 @@ class SwapMutation(Mutation):
         for i in range(len(X)):
             r = np.random.random()
 
-            # Swap two numbers
+            # Swap two numbers (20% of the time)
             if r < 0.2:
                 num_count = len(X[i])
                 x1, x2 = np.random.randint(low=0, high=num_count, size=2)
@@ -187,6 +188,11 @@ class PermutationSequenceSampling(Sampling):
         return np.array(samples)
 
 
+class DagasProblemParalellizedWrapper(ElementwiseProblem):
+    def _evaluate(self, x, out, *args, **kwargs):
+        out['F'] = np.array(fitness_func(x))
+
+
 class DagasProblemWrapper(Problem):
     def _evaluate(self, X, out, *args, **kwargs):
         results = []
@@ -195,19 +201,26 @@ class DagasProblemWrapper(Problem):
         out['F'] = np.array(results)
 
 
-def run_algo(data):
+def run_ga_algo(data):
     global metadata
     metadata = data
+    # Parallelization Configuration
+    n_threads = 20
+    pool = ThreadPool(n_threads)
+    runner = StarmapParallelization(pool.starmap)
     lower_bound = np.zeros(data['num_requests'])
     upper_bound = np.full(data['num_requests'], data['num_requests'] - 1)
-    problem = DagasProblemWrapper(n_var=data['num_requests'], n_obj=2, xl=lower_bound, xu=upper_bound, )
+
+    problem = DagasProblemParalellizedWrapper(n_var=data['num_requests'], n_obj=2,
+                                              xl=lower_bound, xu=upper_bound,
+                                              elementwise_runner=runner)
     algorithm = NSGA2(pop_size=100,
                       sampling=PermutationSequenceSampling(),
                       crossover=TwoPointCrossover(),
                       mutation=SwapMutation(),
                       eliminate_duplicates=NoDuplicateElimination()
                       )
-    terminating_condition = get_termination('n_gen', 100,)
+    terminating_condition = get_termination('n_gen', 100, )
     res = minimize(
         problem=problem,
         algorithm=algorithm,
@@ -217,3 +230,4 @@ def run_algo(data):
     )
 
     print(res.F)
+    return res
