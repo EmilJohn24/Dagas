@@ -107,6 +107,40 @@ function Overview() {
     console.log(`Failure, unable to render QR for ${evacCenter}`);
   }
 
+  const residentQRRender = (
+    <Grid direction="column" item xs={12} md={5} xl={5} sx={{ display: "flex" }}>
+                <Grid item ml={1} xs={12} md={12} xl={12} mb={2} sx={{ display: "flex" }}>
+                  <MDTypography variant="h6" fontWeight="medium">
+                      Resident QR
+                  </MDTypography> 
+                </Grid>
+                  <Grid item ml={1} xs={12} md={6} xl={6} sx={{ display: "flex" }}>
+                    <Grid item xs={12} md={6} xl={6} sx={{ display: "flex" }}>
+                      <FormControl fullWidth>
+                        <InputLabel id="evacuationCenterSelectLabel">Evacuation Center</InputLabel>
+                          <Select
+                            style={{paddingTop: 10, paddingBottom: 10}}
+                            labelId="evacuationCenterSelectLabel"
+                            id="evacuationCenterSelect"
+                            value={evacCenter}
+                            label="Evacuation Center"
+                            onChange={handleChange}
+                          >
+                              {evacNames}
+                          </Select> 
+                        </FormControl>
+                      </Grid>
+                    </Grid>
+                    <Grid item xs={12} md={12} xl={12} sx={{ display: "flex" }}>
+                      {qrRender}
+                   </Grid>
+                  <br/>
+                  
+              <Divider orientation="vertical" sx={{ mx: 0 }} />
+
+            </Grid>
+  )
+
   console.log(data);
   return (
     <DashboardLayout>
@@ -152,38 +186,7 @@ function Overview() {
               />
               <Divider orientation="vertical" sx={{ mx: 0 }} />
             </Grid>
-            <Grid direction="column" item xs={12} md={5} xl={5} sx={{ display: "flex" }}>
-              
-                <Grid item ml={1} xs={12} md={12} xl={12} mb={2} sx={{ display: "flex" }}>
-                  <MDTypography variant="h6" fontWeight="medium">
-                      Resident QR
-                  </MDTypography> 
-                </Grid>
-                  <Grid item ml={1} xs={12} md={6} xl={6} sx={{ display: "flex" }}>
-                    <Grid item xs={12} md={6} xl={6} sx={{ display: "flex" }}>
-                      <FormControl fullWidth>
-                        <InputLabel id="evacuationCenterSelectLabel">Evacuation Center</InputLabel>
-                          <Select
-                            style={{paddingTop: 10, paddingBottom: 10}}
-                            labelId="evacuationCenterSelectLabel"
-                            id="evacuationCenterSelect"
-                            value={evacCenter}
-                            label="Evacuation Center"
-                            onChange={handleChange}
-                          >
-                              {evacNames}
-                          </Select> 
-                        </FormControl>
-                      </Grid>
-                    </Grid>
-                    <Grid item xs={12} md={12} xl={12} sx={{ display: "flex" }}>
-                      {qrRender}
-                   </Grid>
-                  <br/>
-                  
-              <Divider orientation="vertical" sx={{ mx: 0 }} />
-
-            </Grid>
+            {(data.role_verbose=="Resident")? residentQRRender: ""}
             {/* <Grid item xs={12} xl={6}>
               <ProfilesList title="conversations" profiles={profilesListData} shadow={false} />
             </Grid> */}
