@@ -105,6 +105,7 @@ public class HomeActivity extends AppCompatActivity {
                 navigationView.getMenu().findItem(R.id.nav_view_supplies).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_donor_add_supply).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_suggestions).setVisible(false);
+                navigationView.getMenu().findItem(R.id.nav_calamity_tip_fragment).setVisible(false);
             }
             else if(roleVerbose.equals("2")){
                 roleVerbose = "Donor";
@@ -118,7 +119,6 @@ public class HomeActivity extends AppCompatActivity {
                 navigationView.getMenu().findItem(R.id.nav_barangay_request).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_upload_id).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_res_qr).setVisible(false);
-
             }
             else if(roleVerbose.equals("3")){
                 roleVerbose = "Barangay";
@@ -133,6 +133,8 @@ public class HomeActivity extends AppCompatActivity {
                 navigationView.getMenu().findItem(R.id.nav_upload_id).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_suggestions).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_res_qr).setVisible(false);
+                navigationView.getMenu().findItem(R.id.nav_calamity_tip_fragment).setVisible(false);
+
             }
             else if(roleVerbose.equals("4")){
                 roleVerbose = "Admin";
