@@ -6,7 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <variable name="stepNumber" type="java.lang.String"/>
+        <variable name="stepNumber" type="java.lang.Integer"/>
         <variable name="stepDescription" type="java.lang.String"/>
     </data>
 
@@ -30,7 +30,7 @@
             android:id="@+id/stepDescriptionText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Step @{stepNumber}: @{stepDescription}"
+            android:text='@{"Go to step " + stepNumber + ": " + stepDescription}'
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
