@@ -21,7 +21,7 @@ import com.synnapps.carouselview.ImageClickListener;
 import com.synnapps.carouselview.ImageListener;
 import com.synnapps.carouselview.ViewListener;
 
-public class calamityTipFragment extends Fragment {
+public class CalamityTipFragment extends Fragment {
     CarouselView carouselView;
     FragmentCalamityTipBinding binding;
     int[] sampleImages = {R.drawable.tip1, R.drawable.tip2, R.drawable.tip3, R.drawable.tip4,};

@@ -7,12 +7,15 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cnil.dagas.databinding.FragmentViewSuppliesBinding;
+import com.cnil.dagas.databinding.NextPreviousBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
 
 import org.json.JSONArray;
@@ -121,6 +124,10 @@ public class ViewSuppliesFragment extends Fragment {
         binding = FragmentViewSuppliesBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
         RecyclerView supplyRecycler = root.findViewById(R.id.viewSupplyListRecycler);
+        NextPreviousBinding navigatorBar = binding.navigatorBar;
+        navigatorBar.nextButton.setOnClickListener(view -> {
+            Navigation.findNavController(view).navigate(R.id.action_nav_view_supplies_to_nav_suggestions);
+        });
 
         ViewSupplyAdapter.ViewSupplyCallback callback = new ViewSupplyAdapter.ViewSupplyCallback() {
             @Override
