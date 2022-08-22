@@ -14,6 +14,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Tooltip from "@mui/material/Tooltip";
 
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
@@ -190,7 +191,9 @@ function BarangayRequest() {
                           </MDTypography>
                         </Grid>
                         <Grid xs={6} pl={5} pr={5} pt={1}>
-                          <TextField id="foodAmount" label="Amount" fullWidth color="secondary" type='number' {...formik.getFieldProps('food')}/>
+                          <Tooltip title="help me God">
+                            <TextField id="foodAmount" label="Amount" fullWidth color="secondary" type='number' {...formik.getFieldProps('food')}/>
+                          </Tooltip>
                         </Grid>
                         <Grid xs={2} container justifyContent="center"  style={{paddingTop: 15 }}>
                           {/* <img src="../assets/images/drake.jpg" alt="Italian Trulli"  width="50%" height="50%"/> */}
@@ -202,7 +205,9 @@ function BarangayRequest() {
                           </MDTypography>
                         </Grid>
                         <Grid xs={6} pl={5} pr={5} pt={1}>
-                          <TextField id="waterAmount" label="Amount" fullWidth color="secondary" type='number'  {...formik.getFieldProps('water')}/>
+                          <Tooltip title="help me God">
+                            <TextField id="waterAmount" label="Amount" fullWidth color="secondary" type='number'  {...formik.getFieldProps('water')}/>
+                          </Tooltip> 
                         </Grid>
                         <Grid xs={2} container justifyContent="center"  style={{paddingTop: 15 }}>
                           {/* <img src="../assets/images/drake.jpg" alt="Italian Trulli"  width="50%" height="50%"/> */}
@@ -214,7 +219,9 @@ function BarangayRequest() {
                           </MDTypography>
                         </Grid>
                         <Grid xs={6} pl={5} pr={5} pt={1}>
-                          <TextField id="clothesAmount" label="Amount" fullWidth color="secondary" type='number'  {...formik.getFieldProps('clothes')}/>
+                          <Tooltip title="help me God">
+                           <TextField id="clothesAmount" label="Amount" fullWidth color="secondary" type='number'  {...formik.getFieldProps('clothes')}/>
+                          </Tooltip>
                         </Grid>
                         <Grid xs={12} container justifyContent="center" pl={15} pr={15} pt={2} pb={2}>
                           <FormControl fullWidth>
