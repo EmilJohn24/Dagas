@@ -32,6 +32,7 @@ import { ListItemSecondaryAction } from "@mui/material";
 
 
 
+
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
@@ -67,14 +68,43 @@ function AcceptRequest() {
 
   const cache = new LRU({max: 10})
   configure({axiosConfig, cache});
-  const [{data, loading, error}, refetch] = useAxios("/relief/api/requests/311/");
+  const [{data, loading, error}, refetch] = useAxios("/relief/api/requests/330/");
   const [{data: dataS, loading: loadingS, error: errorS}, refetchS] = useAxios("/relief/api/supplies/current_supplies/");
+  const [supplyList, setSupplyList] = useState({});
+  console.log("Re-render triggered...");
+
   if (loading || loadingS) return;
   if (error || errorS) return <Navigate to="/login"/>;
 
 
   const supplyDataTable = {
     columns:[
+      // {
+      //   Header: "Choose",
+      //   accessor: "type",
+      //   Cell: ({row}) => {
+      //     return(
+            
+      //       <Checkbox checked={supplyList.includes(row.values.id)} onChange={(event) => {
+      //         if(event.target.checked){
+      //           console.log(supplyList)
+      //           setSupplyList(prev => [...prev, row.values.id]);
+      //         }
+      //         else{
+      //             setSupplyList((prev) => {
+      //               const index = prev.indexOf(row.values.id);
+      //               if(index > -1) prev.splice(index,1);
+      //               return prev;
+      //             }
+
+      //           )
+      //         }
+
+      //       }
+      //     }/>
+      //     )
+      //   }
+      // },
       {
         Header: "Items",
         accessor: "name",
@@ -85,6 +115,54 @@ function AcceptRequest() {
                 {value}
               </MDTypography>
               </DefaultCell>
+          )
+        }
+      },
+      {
+        Header: "Type",
+        accessor: "type_str",
+        Cell: ({value}) => {
+          return(
+            <DefaultCell>
+              <MDTypography variant="h5" fontWeight="medium">
+                {value}
+              </MDTypography>
+            </DefaultCell>
+          )
+        }
+      },
+      {
+        Header: "Available",
+        accessor: "available_pax",
+        Cell: ({value}) => {
+          return(
+            <DefaultCell>
+              <MDTypography variant="h5" fontWeight="medium">
+                {value}
+              </MDTypography>
+            </DefaultCell>
+          )
+        }
+      },
+      {
+        Header: "Donation",
+        accessor: "id",
+        Cell: ({value}) => {
+          const supply_id = value
+          return(
+           
+              <TextField type="number" value={supplyList[supply_id]} id={value} onChange={(event) => {
+                  const current_value = parseInt(event.target.value);
+                  if (current_value > 0){
+                    supplyList[supply_id] = current_value;
+                    console.log(supplyList);
+                    setSupplyList(supplyList);                
+                  } else if (current_value <= 0 || event.target.value == "") {
+                    delete supplyList[supply_id];
+                    setSupplyList(supplyList);
+                  }
+              }} 
+              label="Amount" fullWidth color="secondary"/> 
           )
         }
       }
@@ -123,7 +201,6 @@ function AcceptRequest() {
             
         }
       }
-      
 
     ],
   
