@@ -284,6 +284,8 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
         }
 
         Button acceptSuggestionButton = view.findViewById(R.id.acceptSuggestionsButton);
+        View navigatorBarView = view.findViewById(R.id.navigator_bar);
+        Button manualRequestButton = navigatorBarView.findViewById(R.id.nextButton);
         acceptSuggestionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View buttonView) {
@@ -296,6 +298,13 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
                 }
+            }
+        });
+
+        manualRequestButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Navigation.findNavController(view).navigate(R.id.action_nav_suggestions_to_nav_view_requests);
             }
         });
         return view;

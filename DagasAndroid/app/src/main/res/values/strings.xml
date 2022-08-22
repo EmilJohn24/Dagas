@@ -39,4 +39,7 @@
     <string name="delete_text">Delete</string>
     <string name="invalid_text">Invalid</string>
     <string name="accept_text">Accept</string>
+    <string name="view_supply_text">View Supplies</string>
+    <string name="manual_request_text">Don\'t like our suggestion? Try manual request search</string>
+    <string name="suggestion_text">View a suitable recipient for your supplies</string>
 </resources>

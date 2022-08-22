@@ -135,4 +135,16 @@
             android:id="@+id/action_nav_resident_qr_scanned_to_nav_qr_scanner"
             app:destination="@id/nav_qr_scanner" />
     </fragment>
+    <fragment
+        android:id="@+id/nav_calamity_tip_fragment"
+        android:name="com.cnil.dagas.CalamityTipFragment"
+        android:label="fragment_calamity_tip"
+        tools:layout="@layout/fragment_calamity_tip" >
+        <action
+            android:id="@+id/action_nav_calamity_tip_fragment_to_nav_donor_add_supply"
+            app:destination="@id/nav_donor_add_supply" />
+        <action
+            android:id="@+id/action_nav_calamity_tip_fragment_to_nav_home"
+            app:destination="@id/nav_home" />
+    </fragment>
 </navigation>
