@@ -83,6 +83,9 @@
             android:id="@+id/action_nav_view_supplies_to_nav_donor_add_supply"
             app:destination="@id/nav_donor_add_supply"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_nav_view_supplies_to_nav_suggestions"
+            app:destination="@id/nav_suggestions" />
     </fragment>
     <fragment
         android:id="@+id/nav_upload_id"
@@ -111,6 +114,9 @@
         <action
             android:id="@+id/action_nav_suggestions_to_nav_transactions"
             app:destination="@id/nav_transactions" />
+        <action
+            android:id="@+id/action_nav_suggestions_to_nav_view_requests"
+            app:destination="@id/nav_view_requests" />
     </fragment>
     <fragment
         android:id="@+id/nav_res_qr"
