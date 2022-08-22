@@ -68,9 +68,17 @@ function RequestList() {
             );
           } 
         },
-        
+        {
+          Header: "action", 
+          align: "center",
+          width: "20%",
+          Cell: ({row}) => {
+            return (
+              <MDButton variant="gradient" color="info">Accept</MDButton>
+            )
+          }
+        },
       ],
-  
     };
 
     //Guide: https://www.npmjs.com/package/axios-hooks#manual-requests

@@ -17,6 +17,7 @@ from django.http import HttpRequest
 from django.utils.datetime_safe import datetime
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 
+from relief.ga.algorithm import run_ga_algo
 from relief.models import DonorProfile, BarangayRequest, User, ItemType, Supply, ResidentProfile, Donation, \
     UserLocation, ItemRequest, Transaction, TransactionOrder, EvacuationCenter, BarangayProfile, Fulfillment, RouteNode, \
     RouteSuggestion
@@ -611,21 +612,28 @@ def routes_to_db(input_data, algo_data):
                 )
 
 
-def algo_test():
+def algo_test(model):
     # print("Generating dataset...")
     # generate_data(donor_count=40, evacuation_center_count=40,
     #               min_demand=100, max_demand=1000,
     #               min_supply=100, max_supply=1000)
-    print("Generating data model...")
+    print("Generating data model from database...")
     data = generate_data_model_from_db()
     # print("Calculating custom algorithm...")
     # results, manipulated_data = algo_main(data)
-    print("Calculating one-supply type problem for custom algorithm...")
-    algo_data, _ = algo_v1(data, item_type_index=1)
+    res = None
+    if model == "standard":
+        res, _ = algo_main(data)
+    elif model == "google-or":
+        print("Calculating one-supply type problem for custom algorithm...")
+        algo_data, _ = algo_v1(data, item_type_index=1)
 
-    print("Calculating using Google OR algorithm...")
-    algo_or(data, algo_data_init=algo_data, item_type=1)
-    return
+        print("Calculating using Google OR algorithm...")
+        res = algo_or(data, algo_data_init=algo_data, item_type=1)
+    elif model == "ga":
+        print("Running the genetic algorithm model...")
+        res = run_ga_algo(data)
+    return res
 
 
 @shared_task
