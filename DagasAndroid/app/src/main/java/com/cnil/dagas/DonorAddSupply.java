@@ -24,6 +24,7 @@ import androidx.navigation.Navigation;
 
 import com.cnil.dagas.data.ImageAssistor;
 import com.cnil.dagas.databinding.FragmentDonorAddSupplyBinding;
+import com.cnil.dagas.databinding.NextPreviousBinding;
 import com.cnil.dagas.http.DagasJSONServer;
 import com.cnil.dagas.http.OkHttpSingleton;
 
@@ -184,7 +185,11 @@ public class DonorAddSupply extends Fragment {
             supplyData = getArguments().getParcelable("SUPPLY_INFO");
 
         }
-
+        //Next button
+        NextPreviousBinding navigatorBar = binding.navigatorBar;
+        navigatorBar.nextButton.setOnClickListener(view -> {
+            Navigation.findNavController(view).navigate(R.id.action_nav_donor_add_supply_to_nav_view_supplies);
+        });
         //Load spinner content
         Spinner spinnerType = root.findViewById(R.id.spinnerType);
         DonorAddThread thread = new DonorAddThread();

@@ -17,6 +17,7 @@ Coded by www.creative-tim.com
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 
 
 // Material Dashboard 2 PRO React components
@@ -185,9 +186,9 @@ function SupplyList() {
                         <MDBox mt={2}>
                           <Grid container spacing={3}>
                           
-                            <Grid item xs={12} sm={6}>
+                            <Grid item xs={6} sm={6}>
                               <MDBox mb={3}>
-                                <MDBox mb={2} display="inline-block">
+                                <MDBox mb={1} display="inline-block">
                                   <MDTypography
                                     component="label"
                                     variant="button"
@@ -205,6 +206,9 @@ function SupplyList() {
                                   onChange={(event, value) => {
                                     console.log(`Changing to ${value}...`)
                                     formik.setFieldValue('type', value);
+                                    if(value == 'Food') document.getElementById("itemTypeDescription").value = "Fill me";
+                                    if(value == 'Water') document.getElementById("itemTypeDescription").value = "Fill me up";
+                                    if(value == 'Clothes') document.getElementById("itemTypeDescription").value = "Fill me up!";
                                   }}
                                   renderInput={(params) => {
                                       return (
@@ -220,6 +224,33 @@ function SupplyList() {
                                   Submit
                                 </MDButton>
                               </MDBox>
+                            </Grid>
+                            <Grid item xs={6} sm={6}>
+                              <MDBox mb={3}>
+                                <MDBox mb={2}>
+                                  <MDTypography
+                                    component="label"
+                                    variant="button"
+                                    fontWeight="regular"
+                                    color="text"
+                                    textTransform="capitalize"
+                                  >
+                                    Description
+                                  </MDTypography>
+                                </MDBox>
+                                <MDBox>
+                                  <TextField 
+                                    type='text' 
+                                    defaultValue='lord help me'
+                                    id='itemTypeDescription'
+                                    fullWidth
+                                    // variant='outlined'
+                                    inputProps={
+                                      { readOnly: true, }
+                                    }
+                                    />
+                                </MDBox>
+                              </MDBox> 
                             </Grid>
                           </Grid>
                         </MDBox>
@@ -305,7 +336,7 @@ function SupplyList() {
   
   };
   dataTableData["rows"] = data;
-  
+  console.log(data);
 
   const supplyDataTableRender = (
 <MDBox py={3}>

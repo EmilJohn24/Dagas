@@ -69,6 +69,7 @@ import ResetCover from "layouts/authentication/reset-password/cover";
 import Login from './components/Login';
 import TransactionList from "layouts/transactions/transaction-list";
 import SupplyList from "layouts/supply/supply-list";
+import AcceptRequest from "layouts/request/accept-request";
 import BarangayRequest from "layouts/barangay/request"
 import RequestList from "layouts/barangay/request-list"
 
@@ -119,6 +120,19 @@ const routes = [
     route: "/request",
     component: <BarangayRequest/>,
     noCollapse: true
+  },
+  {
+    type: "collapse",
+    name: "Request",
+    key: "request",
+    collapse:[
+      {
+        name: "Accept Request",
+        key: "accept-request",
+        route: "/AcceptRequest",
+        component: <AcceptRequest/>,
+      }
+    ],
   },
   {
     type: "collapse",
