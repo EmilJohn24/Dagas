@@ -29,3 +29,4 @@ pygad
 geatpy
 matplotlib
 pymoo
+django-extensions
