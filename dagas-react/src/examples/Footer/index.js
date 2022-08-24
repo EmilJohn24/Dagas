@@ -51,7 +51,7 @@ function Footer({ company, links }) {
       alignItems="center"
       px={1.5}
     >
-      <MDBox
+      {/* <MDBox
         display="flex"
         justifyContent="center"
         alignItems="center"
@@ -73,7 +73,7 @@ function Footer({ company, links }) {
           </MDTypography>
         </Link>
         for a better web.
-      </MDBox>
+      </MDBox> */}
       <MDBox
         component="ul"
         sx={({ breakpoints }) => ({
@@ -101,10 +101,10 @@ function Footer({ company, links }) {
 Footer.defaultProps = {
   company: { href: "https://www.creative-tim.com/", name: "Creative Tim" },
   links: [
-    { href: "https://www.creative-tim.com/", name: "Creative Tim" },
-    { href: "https://www.creative-tim.com/presentation", name: "About Us" },
-    { href: "https://www.creative-tim.com/blog", name: "Blog" },
-    { href: "https://www.creative-tim.com/license", name: "License" },
+    // { href: "https://www.creative-tim.com/", name: "Creative Tim" },
+    // { href: "https://www.creative-tim.com/presentation", name: "About Us" },
+    // { href: "https://www.creative-tim.com/blog", name: "Blog" },
+    // { href: "https://www.creative-tim.com/license", name: "License" },
   ],
 };
 
