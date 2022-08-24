@@ -46,9 +46,17 @@ import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
 import DataTable from "examples/Tables/DataTable";
+import AcceptRequest from "layouts/request/accept-request";
 
 function RequestList() {
-  
+     //Guide: https://www.npmjs.com/package/axios-hooks#manual-requests
+  const cache = new LRU({max: 10})
+  configure({axiosConfig, cache});
+  const [{data, loading, error}, refetch] = useAxios("/relief/api/requests/");
+  const [isAcceptingRequest, setAcceptingRequest] = useState(() => false);
+  const [requestId, setRequestId] = useState(() => null);
+  if (loading) return;
+  if (error) return <Navigate to="/login"/>
    var dataTableData = {
       columns: [
         {
@@ -71,29 +79,36 @@ function RequestList() {
         {
           Header: "action", 
           align: "center",
+          accessor: "id",
           width: "20%",
-          Cell: ({row}) => {
+          Cell: ({value}) => {
             return (
-              <MDButton variant="gradient" color="info">Accept</MDButton>
+              <MDButton onClick={
+                (event) => {
+                  console.log(`Setting request ID to: ${value}`);
+                  setRequestId(value);
+                  setAcceptingRequest(true);
+                }
+              } variant="gradient" color="info">Accept</MDButton>
             )
           }
         },
       ],
     };
 
-    //Guide: https://www.npmjs.com/package/axios-hooks#manual-requests
-    const cache = new LRU({max: 10})
-    configure({axiosConfig, cache});
-    const [{data, loading, error}, refetch] = useAxios("/relief/api/requests/");
-
-    if (loading) return;
-    if (error) return <Navigate to="/login"/>
+ 
 
     dataTableData["rows"] = data;
     console.log(dataTableData);
-  const renderDataTable = (
-    <DataTable table={dataTableData} entriesPerPage={false} canSearch />
-  )
+
+  var renderedData = null;
+  if (!isAcceptingRequest){
+    renderedData = (
+      <DataTable table={dataTableData} entriesPerPage={false} canSearch />
+    );
+  } else {
+    renderedData = <AcceptRequest requestId={requestId} />
+  }
 
   return (
     <DashboardLayout>
@@ -110,7 +125,7 @@ function RequestList() {
           </MDBox>
         </MDBox>
         <Card>
-          {renderDataTable}
+          {renderedData}
         </Card>
       </MDBox>
       <Footer />
