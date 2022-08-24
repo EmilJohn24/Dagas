@@ -15,6 +15,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.sessions.backends.db import SessionStore
 from django.http import HttpRequest
 from django.utils.datetime_safe import datetime
+from django.utils import timezone
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 
 from relief.ga.algorithm import run_ga_algo
@@ -485,7 +486,7 @@ def generate_data(donor_count=10, evacuation_center_count=10,
 
             request = BarangayRequest.objects.create(
                 evacuation_center=random_evacuation,
-                expected_date=datetime.now() + timedelta(days=1),
+                expected_date=datetime.now(timezone.utc) + timedelta(days=1),
                 barangay=barangay,
             )
             # Generate item request for each type
@@ -493,7 +494,7 @@ def generate_data(donor_count=10, evacuation_center_count=10,
                 random_pax = random.randrange(min_demand, max_demand)
                 ItemRequest.objects.create(
                     barangay_request=request,
-                    date_added=datetime.now(),
+                    date_added=datetime.now(timezone.utc),
                     pax=random_pax,
                     type=item_type,
                 )
@@ -516,11 +517,11 @@ def generate_data(donor_count=10, evacuation_center_count=10,
         UserLocation.objects.create(
             user=donor_user,
             geolocation=donor_point_str,
-            time=datetime.now(),
+            time=datetime.now(timezone.utc),
         )
         pseudo_donation = Donation.objects.create(
             donor=donor,
-            datetime_added=datetime.now(),
+            datetime_added=datetime.now(timezone.utc),
         )
 
         # Generate supplies

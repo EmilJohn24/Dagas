@@ -336,7 +336,7 @@ function SupplyList() {
   
   };
   dataTableData["rows"] = data;
-  
+  console.log(data);
 
   const supplyDataTableRender = (
 <MDBox py={3}>

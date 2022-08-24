@@ -260,7 +260,7 @@ class Transaction(models.Model):
     donor = models.ForeignKey(to=DonorProfile, on_delete=models.CASCADE)
     # TODO: Use auto_add_now and remove at serializer level
     # Link: https://stackoverflow.com/questions/3429878/automatic-creation-date-for-django-model-form-objects
-    created_on = models.DateTimeField(default=datetime.now, null=True, blank=True)
+    created_on = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     barangay_request = models.ForeignKey(to="BarangayRequest", on_delete=models.CASCADE)
     received = models.PositiveSmallIntegerField(choices=STATUS_CHOICES, null=True,
                                                 blank=True)  # 1 = received, 0 = not received
