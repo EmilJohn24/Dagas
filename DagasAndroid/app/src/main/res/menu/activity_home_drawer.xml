@@ -6,7 +6,7 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_home"
-            android:icon="@mipmap/ic_dagaslogo_round"
+            android:icon="@android:drawable/ic_menu_mapmode"
             android:title="Evacuation Maps" />
 <!--        <item-->
 <!--            android:id="@+id/nav_map"-->
@@ -14,35 +14,35 @@
 <!--            android:title="Evacuation Maps" />-->
         <item
             android:id="@+id/nav_qr_scanner"
-            android:icon="@drawable/ic_launcher_background"
+            android:icon="@drawable/ic_code_scanner_auto_focus_off"
             android:title="QR Scanner" />
 
         <item
             android:id="@+id/nav_barangay_request"
-            android:icon="@drawable/ic_launcher_background"
+            android:icon="?attr/actionModePasteDrawable"
             android:title="Barangay Request" />
 
         <item
             android:id="@+id/nav_donor_add_supply"
-            android:icon="@drawable/ic_launcher_background"
+            android:icon="@android:drawable/ic_menu_add"
             android:title="Add Donation" />
 
         <item
             android:id="@+id/nav_view_requests"
-            android:icon="@drawable/ic_launcher_background"
+            android:icon="@android:drawable/ic_menu_agenda"
             android:title="View Requests" />
         <item
             android:id="@+id/nav_view_supplies"
-            android:icon="@drawable/ic_launcher_background"
+            android:icon="@mipmap/ic_foodlogo_foreground"
             android:title="View Supplies" />
         <item
             android:id="@+id/nav_upload_id"
-            android:icon="@drawable/ic_launcher_background"
-            android:title="Verify Account"/>
+            android:icon="@android:drawable/ic_lock_idle_lock"
+            android:title="Verify Account" />
         <item
             android:id="@+id/nav_transactions"
-            android:icon="@drawable/ic_launcher_background"
-            android:title="View Previous Transactions"/>
+            android:icon="@android:drawable/ic_menu_view"
+            android:title="View Previous Transactions" />
         <item
             android:id="@+id/nav_user_profile"
             android:icon="@drawable/ic_loginusername_foreground"
@@ -50,16 +50,16 @@
 
         <item
             android:id="@+id/nav_suggestions"
-            android:icon="@mipmap/ic_waterlogo_foreground"
-            android:title="Suggestions"/>
+            android:icon="@drawable/ic_role_foreground"
+            android:title="Suggestions" />
         <item
             android:id="@+id/nav_res_qr"
-            android:icon="@drawable/ic_add"
+            android:icon="@android:drawable/ic_menu_my_calendar"
             android:title="Resident QR Code" />
         <!--nav_calamity_tip_fragment-->
         <item
             android:id="@+id/nav_calamity_tip_fragment"
-            android:icon="@drawable/ic_add"
+            android:icon="@android:drawable/ic_dialog_alert"
             android:title="Select Calamity" />
 
 
