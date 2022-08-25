@@ -72,6 +72,7 @@ import SupplyList from "layouts/supply/supply-list";
 import AcceptRequest from "layouts/request/accept-request";
 import BarangayRequest from "layouts/barangay/request"
 import RequestList from "layouts/barangay/request-list"
+import Calamities from "layouts/calamity/select-calamity"
 
 // Material Dashboard 2 PRO React components
 import MDAvatar from "components/MDAvatar";
@@ -111,6 +112,14 @@ const routes = [
     key: "register",
     route: "/register",
     component: <Registration/>,
+    noCollapse: true
+  },
+  {
+    type: "collapse",
+    name: "Calamity",
+    key: "calamity",
+    route: "/calamity",
+    component: <Calamities/>,
     noCollapse: true
   },
   {
