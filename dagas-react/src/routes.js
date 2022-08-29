@@ -83,6 +83,7 @@ import Icon from "@mui/material/Icon";
 import profilePicture from "assets/images/team-3.jpg";
 import Registration from "components/Registration";
 import {getCurrentUser} from "components/Utility"
+import EvacuationMap from "layouts/evacuation-map";
 // const currentUser = getCurrentUser();
 if (!currentUser){
   currentUser = {
@@ -119,6 +120,14 @@ const routes = [
     key: "barangay-request",
     route: "/request",
     component: <BarangayRequest/>,
+    noCollapse: true
+  },
+  {
+    type: "collapse",
+    name: "Evacuation Map",
+    key: "evacuation-map",
+    route: "/evacuationmap",
+    component: <EvacuationMap/>,
     noCollapse: true
   },
   {
