@@ -46,15 +46,12 @@ def chromosome_to_routes(chromosome):
     working_data = copy.deepcopy(metadata)
 
     def is_gene_complete(gene_index):
-        demand_remaining = 0
-        for type_index in range(len(working_data['item_types'])):
-            demand_remaining += working_data[working_data['demand_types'][type_index]][gene_index]
+        demand_remaining = np.sum(working_data['demand_matrix'][gene_index])
         return demand_remaining == 0
 
     def complete_supply_remaining(donor_ix):
         supply_remaining = 0
-        for type_index in range(len(working_data['item_types'])):
-            supply_remaining += working_data[working_data['supply_types'][type_index]][donor_ix]
+        supply_remaining = np.sum(working_data['supply_matrix'][donor_ix])
         return supply_remaining
 
     def is_donor_done(donor_ix):
@@ -63,16 +60,16 @@ def chromosome_to_routes(chromosome):
     def update_gene_demand(gene_index, donor_ix):
         """Update current supply and demand based on chosen pair"""
         for type_index in range(len(working_data['item_types'])):
-            current_supply = working_data[working_data['supply_types'][type_index]][donor_ix]
-            current_demand = working_data[working_data['demand_types'][type_index]][gene_index]
+            current_supply = working_data['supply_matrix'][donor_ix][type_index]
+            current_demand = working_data['demand_matrix'][gene_index][type_index]
             surplus = current_supply - current_demand
             if surplus >= 0:
-                working_data[working_data['demand_types'][type_index]][gene_index] = 0
-                working_data[working_data['supply_types'][type_index]][donor_ix] = surplus
+                working_data['demand_matrix'][gene_index][type_index] = 0
+                working_data['supply_matrix'][donor_ix][type_index] = surplus
 
             else:
-                working_data[working_data['demand_types'][type_index]][gene_index] = abs(surplus)
-                working_data[working_data['supply_types'][type_index]][donor_ix] = 0
+                working_data['demand_matrix'][gene_index][type_index] = abs(surplus)
+                working_data['supply_matrix'][donor_ix][type_index] = 0
 
     def supply_out():
         """Check if all donors are out of supplies"""
@@ -132,10 +129,7 @@ def fitness_func(solution):
 
     def get_total_weighted_demand(request_index):
         """This currently assumes all supply types are equally valuable"""
-        demand_remaining = 0
-        for type_index in range(len(metadata['item_types'])):
-            demand_remaining += metadata[metadata['demand_types'][type_index]][request_index]
-        return demand_remaining
+        return np.sum(metadata['demand_matrix'][request_index])
 
     routes, working_data = chromosome_to_routes(solution)
     demands = np.zeros(metadata['num_requests'])
@@ -156,13 +150,9 @@ def fitness_func(solution):
         total_distance += route_distance
 
     # Fitness 2: Unmet demand
-    unmet_demand = 0
-
-    for request_iy in range(metadata['num_requests']):
-        for type_iy in range(len(metadata['item_types'])):
-            # TODO: Consider adding weight per item type
-            unmet_demand += working_data[working_data['demand_types'][type_iy]][request_iy]
-    return total_distance, unmet_demand
+    unmet_demand = np.sum(working_data['demand_matrix'], axis=0)
+    unmet_demand_ratio = unmet_demand / np.sum(metadata['demand_matrix'], axis=0)
+    return total_distance, *unmet_demand_ratio
 
 
 class SwapMutation(Mutation):
@@ -211,7 +201,7 @@ def run_ga_algo(data):
     lower_bound = np.zeros(data['num_requests'])
     upper_bound = np.full(data['num_requests'], data['num_requests'] - 1)
 
-    problem = DagasProblemParalellizedWrapper(n_var=data['num_requests'], n_obj=2,
+    problem = DagasProblemParalellizedWrapper(n_var=data['num_requests'], n_obj=1 + len(data['item_types']),
                                               xl=lower_bound, xu=upper_bound,
                                               elementwise_runner=runner)
     algorithm = NSGA2(pop_size=100,
