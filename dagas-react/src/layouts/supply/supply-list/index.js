@@ -18,7 +18,10 @@ import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
 
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
@@ -80,8 +83,11 @@ function SupplyList() {
   const [{data: editSupply, loading: editLoading, error: editError}, executeSupplyEdit] = useAxios({
     url: `/relief/api/supplies/${editSupplyId}/`,
     method: "PATCH"
-  }, {manual: true})
+  }, {manual: true});
 
+
+  const [typeDescriptionRender, setTypeDescriptionRender] = useState(null);
+  
  
   //Deleting effect
   useEffect(() => {
@@ -206,9 +212,56 @@ function SupplyList() {
                                   onChange={(event, value) => {
                                     console.log(`Changing to ${value}...`)
                                     formik.setFieldValue('type', value);
-                                    if(value == 'Food') document.getElementById("itemTypeDescription").value = "Fill me";
-                                    if(value == 'Water') document.getElementById("itemTypeDescription").value = "Fill me up";
-                                    if(value == 'Clothes') document.getElementById("itemTypeDescription").value = "Fill me up!";
+                                    // <TextField 
+                                    // type='text' 
+                                    // defaultValue='lord help me'
+                                    // id='itemTypeDescription'
+                                    // fullWidth
+                                    // // variant='outlined'
+                                    // inputProps={
+                                    //   { readOnly: true, }
+                                    // }
+                                    // ></TextField>
+                                  //   <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
+                                  //   <ListItem>
+                                  //     <ListItemAvatar>
+                                  //     </ListItemAvatar>
+                                  //     <ListItemText primary="Photos" secondary="Jan 9, 2014" />
+                                  //   </ListItem>
+                                  //   <ListItem>
+                                  //     <ListItemAvatar>
+                                  //     </ListItemAvatar>
+                                  //     <ListItemText primary="Work" secondary="Jan 7, 2014" />
+                                  //   </ListItem>
+                                  //   <ListItem>
+                                  //     <ListItemAvatar>
+                                  //     </ListItemAvatar>
+                                  //     <ListItemText primary="Vacation" secondary="July 20, 2014" />
+                                  //   </ListItem>
+                                  // </List>
+                                    const supplyDescriptions = {
+                                      "Food": [
+                                        {primary: "Rice", secondary: "1-2 kilo/s"},
+                                        {primary: "Cup noodles", secondary: "2 cups"},
+                                        {primary: "Canned Goods (i.e. Sardines, Corned Beef, Meatloaf)", secondary: "2 cans"}
+                                      ],
+                                      "Water": [
+                                        {primary: "Bottled Water", secondary: "500mL - 1L"}
+                                      ],
+                                      "Clothes": [{primary: "Blanket", secondary: "Yung kasya tao please"}]
+                                    };
+                                    console.log(supplyDescriptions[value]);
+                                    const supplyDescriptionListRender = supplyDescriptions[value].map(({primary, secondary}) => (
+                                      <ListItem>
+                                        <ListItemText primary={primary} secondary={secondary}/>
+                                      </ListItem>
+                                    ));
+                                    setTypeDescriptionRender((
+                                      // <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
+                                        <List dense={true}>
+                                          {supplyDescriptionListRender}
+                                      </List>
+                                    ));
                                   }}
                                   renderInput={(params) => {
                                       return (
@@ -235,11 +288,12 @@ function SupplyList() {
                                     color="text"
                                     textTransform="capitalize"
                                   >
-                                    Description
+                                    Add at least:
                                   </MDTypography>
                                 </MDBox>
                                 <MDBox>
-                                  <TextField 
+                                    {typeDescriptionRender}
+                                  {/* <TextField 
                                     type='text' 
                                     defaultValue='lord help me'
                                     id='itemTypeDescription'
@@ -248,7 +302,8 @@ function SupplyList() {
                                     inputProps={
                                       { readOnly: true, }
                                     }
-                                    />
+                                    >
+                                  </TextField> */}
                                 </MDBox>
                               </MDBox> 
                             </Grid>
@@ -264,7 +319,7 @@ function SupplyList() {
       setSupplyForm(SupplyFormWrapped);
       
     }
-}, [typeLoading, typeError, typeArray, isEditing, editSupplyId]);
+}, [typeLoading, typeError, typeArray, isEditing, editSupplyId, typeDescriptionRender]);
   
   console.log(`Loading type array: ${typeArray}`);
   if (loading || deleteLoading) return;

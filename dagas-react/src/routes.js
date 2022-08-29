@@ -72,6 +72,7 @@ import SupplyList from "layouts/supply/supply-list";
 import AcceptRequest from "layouts/request/accept-request";
 import BarangayRequest from "layouts/barangay/request"
 import RequestList from "layouts/barangay/request-list"
+import Calamities from "layouts/calamity/select-calamity"
 
 // Material Dashboard 2 PRO React components
 import MDAvatar from "components/MDAvatar";
@@ -83,6 +84,7 @@ import Icon from "@mui/material/Icon";
 import profilePicture from "assets/images/team-3.jpg";
 import Registration from "components/Registration";
 import {getCurrentUser} from "components/Utility"
+import EvacuationMap from "layouts/evacuation-map";
 // const currentUser = getCurrentUser();
 if (!currentUser){
   currentUser = {
@@ -115,10 +117,26 @@ const routes = [
   },
   {
     type: "collapse",
+    name: "Calamity",
+    key: "calamity",
+    route: "/calamity",
+    component: <Calamities/>,
+    noCollapse: true
+  },
+  {
+    type: "collapse",
     name: "Barangay Request",
     key: "barangay-request",
     route: "/request",
     component: <BarangayRequest/>,
+    noCollapse: true
+  },
+  {
+    type: "collapse",
+    name: "Evacuation Map",
+    key: "evacuation-map",
+    route: "/evacuationmap",
+    component: <EvacuationMap/>,
     noCollapse: true
   },
   {

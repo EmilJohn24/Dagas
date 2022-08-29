@@ -70,6 +70,10 @@ INSTALLED_APPS = [
     'django_filters',
     # Notifications
     'notifications',
+    # Django Extensions
+    # For pygraphviz:
+    # https://stackoverflow.com/questions/59707234/issues-installing-pygrahviz-fatal-error-c1083-cannot-open-include-file-graph
+    'django_extensions',
 
 ]
 
@@ -280,5 +284,9 @@ CELERY_TIMEZONE = "Australia/Tasmania"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
+# Django Model Graph
+GRAPH_MODELS = {
+  'app_labels': ["relief"],
+}
 
 django_heroku.settings(locals())
