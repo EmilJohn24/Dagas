@@ -402,7 +402,9 @@ def generate_data_model_from_db():
     data['item_types'] = []
     data['demand_types'] = []
     data['supply_types'] = []
-    for item_type in ItemType.objects.all():
+    data['demand_matrix'] = np.zeros((len(barangay_requests), len(ItemType.objects.all())))
+    data['supply_matrix'] = np.zeros((len(valid_donors), len(ItemType.objects.all())))
+    for type_index, item_type in enumerate(ItemType.objects.all()):
         item_type_name = item_type.name
         demand_type_name = item_type_name + '_demand'
         supply_type_name = item_type_name + '_supply'
@@ -411,14 +413,17 @@ def generate_data_model_from_db():
         data['supply_types'].append(supply_type_name)
         data[demand_type_name] = []
         data[supply_type_name] = []
-        for request in barangay_requests:
+        for request_index, request in enumerate(barangay_requests):
+            data['demand_matrix'][request_index][type_index] = request.calculate_untransacted_pax(item_type)
             data[demand_type_name].append(request.calculate_untransacted_pax(item_type))
-        for donor in valid_donors:
+        data[demand_type_name + '_total'] = sum(data[demand_type_name])
+        for donor_ix, donor in enumerate(valid_donors):
             total_supply = 0
             supplies = Supply.objects.filter(donation__donor=donor, type=item_type)
             for supply in supplies:
                 total_supply += supply.calculate_available_pax()
             data[supply_type_name].append(total_supply)
+            data['supply_matrix'][donor_ix][type_index] = total_supply
     data['donor_objs'] = valid_donors
     data['request_objs'] = list(barangay_requests)
     return data
