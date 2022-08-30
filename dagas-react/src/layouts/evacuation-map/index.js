@@ -55,6 +55,12 @@ function EvacuationMap({ google, locations = [] }){
             }
             
         })
+
+        const [{data: postEvacuationCenter, loading: postLoading, error: postError}, executeEvacuationCenter] = useAxios({
+            url: "/relief/api/evacuation-center/",
+            method: "POST"
+        }, {  manual: true  });
+
         console.log(clickMarkerCoord);
         console.log(placePredictions);
         console.log(data);
@@ -114,7 +120,20 @@ function EvacuationMap({ google, locations = [] }){
                   })}
                   onSubmit={
                     (values, {setSubmitting}) => {
+                        console.log(values);
+                        console.log(clickMarkerCoord);
+                        var requestValues = {};
+                        requestValues["name"] = values.name;
+                        requestValues["address"] = values.address;
+                        requestValues["geolocation"] = clickMarkerCoord.lat + "," + clickMarkerCoord.lng;
 
+                        executeEvacuationCenter({
+                            data: requestValues
+                        });
+
+                        //Refetch evacuation centers
+                        refetch();
+                        // setSubmitting(false);
                     }
                   }>{
                       (formik) => (
@@ -185,8 +204,8 @@ function EvacuationMap({ google, locations = [] }){
                                         onClick={onMapClick}
                                         initialCenter={
                                             clickMarkerCoord? clickMarkerCoord :{
-                                                lat: -1.2884,
-                                                lng: 36.8233
+                                                lat: 14.546047,
+                                                lng: 121.069761
                                             }
                                         }
                                     >
