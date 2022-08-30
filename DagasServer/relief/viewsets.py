@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets, status, serializers, filters
 from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError, ValidationError
+from silk.profiling.profiler import silk_profile
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
     BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder, UserLocation, \
@@ -265,7 +266,19 @@ class BarangayRequestViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
     filterset_fields = ['barangay', 'evacuation_center', ]
     search_fields = ['barangay__user__username', 'evacuation_center__name', ]
+    
+    @silk_profile(name="Retrieve barangay requests")
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    @silk_profile(name="Retrieve specific barangay request")
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
+    @silk_profile(name="Create barangay request")
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+        
     def get_queryset(self):
         current_user = self.request.user
         queryset = BarangayRequest.objects.all()
