@@ -1,9 +1,6 @@
 import os
 
 from celery import Celery
-from celery.schedules import crontab
-
-from relief.tasks import algorithm
 
 # For installing the broker:
 # https://docs.celeryq.dev/en/latest/getting-started/backends-and-brokers/rabbitmq.html#broker-rabbitmq

@@ -11,9 +11,10 @@ const basic_auth_header =  'Basic ' + btoa(user.username + ':' + user.password);
 // For simplicity, we allow the server to use Basic Auth here
 const instance = autocannon({
     workers: 4,
-    url: '192.168.100.2:8000', //NOTE: This should be changed to localhost when doing more query-oriented tests
+    url: 'https://dagas.herokuapp.com', //NOTE: This should be changed to localhost or a local IP address when doing more query-oriented tests
     connections: 10,
-    duration: 120,
+    // duration: 120,
+    amount: 100,
     timeout: 30,
     headers: {
         "Content-Type": 'application/json',
@@ -23,7 +24,15 @@ const instance = autocannon({
         {
             method: 'GET',
             path: '/relief/api/requests/'
-        }
+        },
+        // {
+        //     method: 'GET',
+        //     path: '/relief/api/supplies/'
+        // }, 
+        // {
+        //     method: 'GET',
+        //     path: '/relief/api/user-location/'
+        // }
     ]
 }, console.log);
 

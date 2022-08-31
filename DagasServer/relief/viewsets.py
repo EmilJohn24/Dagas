@@ -1,6 +1,7 @@
 from django.db.models import Sum, QuerySet
 from django.utils.datetime_safe import datetime
 from django.utils import timezone
+from django_auto_prefetching import AutoPrefetchViewSetMixin
 from django_filters.rest_framework import DjangoFilterBackend
 from notifications.signals import notify
 from notifications.models import Notification
@@ -13,6 +14,7 @@ from silk.profiling.profiler import silk_profile
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
     BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder, UserLocation, \
     RouteSuggestion, RouteNode, Fulfillment, Disaster, TransactionStub, Rating
+from relief.pagination import SmallResultsSetPagination
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
     ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
@@ -129,7 +131,6 @@ class TransactionOrderViewSet(viewsets.ModelViewSet):
     queryset = TransactionOrder.objects.all()
     serializer_class = TransactionOrderSerializer
 
-    
     def create(self, request, *args, **kwargs):
         is_many = isinstance(request.data, list)
         if not is_many:
@@ -139,8 +140,8 @@ class TransactionOrderViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer=serializer)
             headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers,)
-    
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers, )
+
 
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
@@ -224,14 +225,14 @@ class TransactionViewSet(viewsets.ModelViewSet):
                                                         transaction=created_transaction, )
                         remaining_fulfillment_pax = 0
                     else:
-                        TransactionOrder.objects.create(pax=available_pax, supply=supply, transaction=created_transaction, )
+                        TransactionOrder.objects.create(pax=available_pax, supply=supply,
+                                                        transaction=created_transaction, )
                         remaining_fulfillment_pax = remaining_fulfillment_pax - available_pax
 
         # serializer = EvacuationCenterSerializer(barangay_request.evacuation_center)
         return Response(TransactionSerializer(created_transactions,
                                               many=True,
                                               context={'request': request}).data, status=201)
-
 
     def perform_create(self, serializer):
         current_donor = DonorProfile.objects.get(user=self.request.user)
@@ -260,17 +261,18 @@ class TransactionViewSet(viewsets.ModelViewSet):
     #     serializer.save(donor=current_donor,)
 
 
-class BarangayRequestViewSet(viewsets.ModelViewSet):
+class BarangayRequestViewSet(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
     # queryset = BarangayRequest.objects.all()
     serializer_class = BarangayRequestSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
+    pagination_class = SmallResultsSetPagination
     filterset_fields = ['barangay', 'evacuation_center', ]
     search_fields = ['barangay__user__username', 'evacuation_center__name', ]
-    
+
     @silk_profile(name="Retrieve barangay requests")
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-    
+
     @silk_profile(name="Retrieve specific barangay request")
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
@@ -278,7 +280,7 @@ class BarangayRequestViewSet(viewsets.ModelViewSet):
     @silk_profile(name="Create barangay request")
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
-        
+
     def get_queryset(self):
         current_user = self.request.user
         queryset = BarangayRequest.objects.all()
@@ -375,13 +377,14 @@ class EvacuationCenterViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class SupplyViewSet(viewsets.ModelViewSet):
+class SupplyViewSet(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
     queryset = Supply.objects.all()
     serializer_class = SupplySerializer
+
     def perform_create(self, serializer):
         serializer.save(datetime_added=datetime.now(timezone.utc),
                         donor=DonorProfile.objects.get(user=self.request.user),
-                    )
+                        )
 
     @action(detail=True, methods=['put', 'patch'], name='Upload Picture')
     def upload_picture(self, request, pk=None):
