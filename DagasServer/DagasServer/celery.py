@@ -30,15 +30,15 @@ app.autodiscover_tasks()
 def debug_task(self):
     print(f'Request: {self.request!r}')
 
-app.conf.beat_schedule = {
-    'run-algorithm-regularly': {
-        'task': 'relief.tasks.algorithm',
-        'schedule': 300.0, # seconds
-        'args': (),
-    }
-}
+# app.conf.beat_schedule = {
+#     'run-algorithm-regularly': {
+#         'task': 'relief.tasks.algorithm',
+#         'schedule': 300.0, # seconds
+#         'args': (),
+#     }
+# }
 
-app.conf.timezone = 'UTC'
+# app.conf.timezone = 'UTC'
 
 # @app.on_after_finalize.connect
 # def setup_periodic_tasks(sender, **kwargs):
