@@ -5,6 +5,7 @@ from django_auto_prefetching import AutoPrefetchViewSetMixin
 from django_filters.rest_framework import DjangoFilterBackend
 from notifications.signals import notify
 from notifications.models import Notification
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import viewsets, status, serializers, filters
 from rest_framework.decorators import action
@@ -130,6 +131,7 @@ class DonorViewSet(viewsets.ModelViewSet):
 class TransactionOrderViewSet(viewsets.ModelViewSet):
     queryset = TransactionOrder.objects.all()
     serializer_class = TransactionOrderSerializer
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         is_many = isinstance(request.data, list)
@@ -150,6 +152,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
     filterset_fields = ['donor', 'barangay_request', 'received', ]
     search_fields = ['donor__user__username', 'barangay_request__barangay__user__username',
                      'barangay_request__evacuation_center__name', ]
+    permission_classes = [IsAuthenticated]
 
     @action(detail=True, methods=['patch', 'put'], name='Quick Update status',
             permission_classes=[IsProfileUserOrReadOnly])
@@ -184,7 +187,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
         return Response({"status": "Successful update"}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['patch', 'put'], name='Upload Transaction Picture',
-            permission_classes=[IsProfileUserOrReadOnly])
+            permission_classes=[IsProfileUserOrReadOnly, IsAuthenticated])
     def upload_image(self, request, pk=None):
         transaction: Transaction = self.get_object()
         new_image: TransactionImage = TransactionImage.objects.create()
@@ -193,7 +196,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
         new_image.save()
 
     @action(detail=True, methods=['get'], name='Get Evacuation',
-            permission_classes=[IsProfileUserOrReadOnly])
+            permission_classes=[IsProfileUserOrReadOnly, IsAuthenticated])
     def evacuation_center(self, request, pk=None):
         current_transaction: Transaction = self.get_object()
         barangay_request: BarangayRequest = current_transaction.barangay_request
@@ -268,6 +271,7 @@ class BarangayRequestViewSet(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
     pagination_class = SmallResultsSetPagination
     filterset_fields = ['barangay', 'evacuation_center', ]
     search_fields = ['barangay__user__username', 'evacuation_center__name', ]
+    permission_classes = [IsAuthenticated]
 
     @silk_profile(name="Retrieve barangay requests")
     def list(self, request, *args, **kwargs):
@@ -310,6 +314,7 @@ class BarangayRequestViewSet(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
 class DonationViewSet(viewsets.ModelViewSet):
     queryset = Donation.objects.all()
     serializer_class = DonationSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(datetime_added=datetime.now(),
@@ -324,9 +329,6 @@ class DisasterViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=['get'], name='Change to Disaster',
             permission_classes=[IsProfileUserOrReadOnly])
     def change_to_disaster(self, request, pk=None):
-        # TODO: Change to permission
-        if self.request.user.is_anonymous:
-            return Response({'error': 'Please log in'})
         current_donor = DonorProfile.objects.get(user=self.request.user)
         if current_donor is not None:
             current_donor.current_disaster = self.get_object()
