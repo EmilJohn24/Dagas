@@ -30,3 +30,4 @@ geatpy
 matplotlib
 pymoo
 django-extensions
+django-celery-beat
