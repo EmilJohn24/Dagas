@@ -26,7 +26,7 @@ import * as Yup from 'yup';
 //   } from "reactstrap";
 
 import Form from 'react-bootstrap/Form';
-
+import { useNavigate } from "react-router-dom";
 import packageJson from '../../package.json';
 
 
@@ -38,6 +38,8 @@ import packageJson from '../../package.json';
 // Formik Tutorial: https://formik.org/docs/tutorial
 // TODO: Consider using class-based handling using <Formik> (https://stackblitz.com/edit/react-formik-form-validation-gge2u7?file=App%2FRegister.jsx)
 function Registration(props){
+    const { navigation } = props;
+
     const {history} = props;
 
     const [value, setValue] = useState('');
@@ -74,7 +76,11 @@ function Registration(props){
                 .post('/api/rest-auth/registration', JSON.stringify(values), {
                     "headers": {'Content-Type': 'application/json'}
                 })
-                .then((res) => {result = res.data})
+                .then((res) => {
+                    result = res.data
+                    alert("Registration Successful!");
+                    navigation('/login');
+                })
                 .catch((error) => console.log(error));
         console.log(result);
         //     const data = await fetch('/api/rest-auth/registration', {
@@ -246,4 +252,7 @@ function Registration(props){
 
     )
   }
-export default Registration;
+export default function(props) {
+    const navigation = useNavigate();
+    return <Registration {...props} navigation={navigation} />;
+    }
