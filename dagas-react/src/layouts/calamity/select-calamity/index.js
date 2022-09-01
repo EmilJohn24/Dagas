@@ -17,30 +17,16 @@ Coded by www.creative-tim.com
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
 
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
-import MDProgress from "components/MDProgress";
 import MDInput from "components/MDInput";
-import MDButton from "components/MDButton";
 
 // Material Dashboard 2 PRO React examples
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
-import DataTable from "examples/Tables/DataTable";
-// ProductPage page components
-import ProductImages from "./components/ProductImages";
-import ProductInfo from "./components/ProductInfo";
-import DefaultCell from "./components/DefaultCell";
-import ProductCell from "./components/ProductCell"
-import FormField from "./components/FormField";
 
 //React
 import { useEffect, useState } from "react";
@@ -59,7 +45,11 @@ import {configure} from 'axios-hooks';
 import useAxios from 'axios-hooks';
 import logo from 'logo.svg';
 import { Navigate } from "react-router-dom";
-import { Icon } from "@mui/material";
+import { Avatar, darkScrollbar, Icon } from "@mui/material";
+import { Map, GoogleApiWrapper, InfoWindow, Marker } from 'google-maps-react';
+import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocompleteService";
+import { geocodeByPlaceId } from "react-google-places-autocomplete";
+
 
 //Image imports
 import tip1 from "assets/images/tip1.png";
@@ -69,17 +59,76 @@ import tip4 from "assets/images/tip4.png";
 import tip5 from "assets/images/tip5.png";
 
 
-function Calamities() {
+function Calamities({ google, locations = [] }) {
 
   const [disasterForm, setDisasterForm] = useState(() => {
     return "Loading...";
   });
+  const [showingInfoWindow, setShowingInfoWindow] = useState(false);
+  const [activeMarker, setActiveMarker] = useState({});
+  const [selectedPlace, setSelectedPlace] = useState({});
+  const [clickMarkerCoord, setClickMarkerCoord] = useState(null);
 
   const cache = new LRU({max: 10})
   configure({axiosConfig, cache});
-  const [{data, loading, error}, refetch] = useAxios("/relief/api/supplies/current_supplies/");
-    // Loading item types
+  // Loading item types
+  const [{data, loading, error}, refetch] = useAxios("/relief/api/evacuation-center/");
+  const {
+      placesService,
+      placePredictions,
+      getPlacePredictions,
+      isPlacePredictionsLoading,
+    } = usePlacesService({
+      apiKey: 'AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM',
+      onPlaceSelected: (place, inputRef, autocomplete) => {
+          console.log(autocomplete);
+      },
+      options: {
+          componentRestrictions: { country: "ph" },
+      }
+      
+  })
+  console.log(clickMarkerCoord);
+  console.log(placePredictions);
+  console.log(data);
   const [{data: disasterArray, loading: disasterLoading, error: disasterError}, refetchTypes] = useAxios("/relief/api/disasters/");
+
+  const onMarkerClick = (props, marker, e) =>{
+    setSelectedPlace(props);
+    setActiveMarker(marker);
+    setShowingInfoWindow(true);
+  };
+
+
+
+  const onMapClick = (t, map, coord) => {
+      setClickMarkerCoord(coord.latLng);
+  }
+
+  const onClickMarkerDragged = (t, map, coord) => {onMapClick(t, map, coord)};
+
+  const onClose = (props) => {
+      if (this.state.showingInfoWindow) {
+          setShowingInfoWindow(false);
+          setActiveMarker(null);
+
+      }
+  };
+
+  const mapStyles = {
+      position: "relative",
+      width: '100%',
+      height: '100%'
+  };
+  const evacMarkerRender = data?.map((evac_data) => {
+      const [lat, lng]= evac_data.geolocation.split(',');
+      const geoloc = {lat: lat, lng, lng};
+      return <Marker
+                  onClick={onMarkerClick}
+                  name={evac_data.name}
+                  position={geoloc}
+                  />
+  });
 
   // Disaster Name insertion effect
   useEffect(() =>{
@@ -105,7 +154,6 @@ function Calamities() {
                     requestValues["type"] = disasterArray.filter(item => item.name == values.type)[0].id;
                     console.log(JSON.stringify(requestValues));
                     //Refetch supplies
-                    refetch();
                     setSubmitting(false);
                    
                     //   return result;                     
@@ -113,7 +161,7 @@ function Calamities() {
                 >
                 {
                 formik => (
-                  <MDBox py={3} px={70}>
+                  <MDBox px={70}>
                       <Card sx={{ overflow: "visible" }}>
                         <MDBox p={3}>
                           {formHeader}
@@ -165,12 +213,51 @@ function Calamities() {
       
     }
 }, [disasterLoading, disasterError, disasterArray]);
-  
+
+  const mapRender = (
+    <MDBox p={3} >
+      <Grid spacing={2} p={1} container style={{backgroundColor: '#ffffff' }}>
+          <Grid xs={12} p={1} container justifyContent="center">
+              <div style={{ width: 1500, height: 1000 }}>
+                  <Map
+                      google={google}
+                      zoom={14}
+                      containerStyle={mapStyles}
+                      center={clickMarkerCoord}
+                      onClick={onMapClick}
+                      initialCenter={
+                          clickMarkerCoord? clickMarkerCoord :{
+                              lat: 14.546047,
+                              lng: 121.069761
+                          }
+                      }
+                  >
+                      {evacMarkerRender}
+                      <Marker
+                          position={clickMarkerCoord}
+                          draggable={true}
+                          onDragEnd={onClickMarkerDragged}
+                          />
+                      <InfoWindow
+                          marker={activeMarker}
+                          visible={showingInfoWindow}
+                          onClose={onClose}>
+                          <div>
+                              <h4>{selectedPlace.name}</h4>
+                          </div>
+                      </InfoWindow>
+                  </Map>
+              </div>
+          </Grid>
+      </Grid>
+  </MDBox>
+  ) 
+
   console.log(`Loading type array: ${disasterArray}`);
-  if (loading || disasterLoading) return;
-  if (error) return <Navigate to="/login"/>;
+  if (isPlacePredictionsLoading || loading || disasterLoading) return;
+  if (error || disasterError) return <Navigate to="/login"/>;
   
-//FROM https://coreui.io/react/docs/components/carousel/#how-it-works
+  //FROM https://coreui.io/react/docs/components/carousel/#how-it-works
   const carouselRender = (
     <MDBox>
       <CCarousel controls indicators>
@@ -197,6 +284,7 @@ function Calamities() {
     <DashboardLayout>
       <DashboardNavbar />
       {disasterForm}
+      {mapRender}
       <MDBox mx={50}>
         {carouselRender}
       </MDBox>
@@ -205,4 +293,6 @@ function Calamities() {
   );
 }
 
-export default Calamities;
+export default GoogleApiWrapper({
+  apiKey: 'AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM'
+})(Calamities);
