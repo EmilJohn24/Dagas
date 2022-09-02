@@ -2,7 +2,6 @@
   "name": "dagas-react",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://192.168.31.25:8000",
   "dependencies": {
     "@asseinfo/react-kanban": "2.2.0",
     "@coreui/react": "^4.3.0",
