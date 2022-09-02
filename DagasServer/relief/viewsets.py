@@ -1,17 +1,21 @@
 from django.db.models import Sum, QuerySet
 from django.utils.datetime_safe import datetime
 from django.utils import timezone
+from django_auto_prefetching import AutoPrefetchViewSetMixin
 from django_filters.rest_framework import DjangoFilterBackend
 from notifications.signals import notify
 from notifications.models import Notification
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import viewsets, status, serializers, filters
 from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError, ValidationError
+from silk.profiling.profiler import silk_profile
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
     BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder, UserLocation, \
     RouteSuggestion, RouteNode, Fulfillment, Disaster, TransactionStub, Rating
+from relief.pagination import SmallResultsSetPagination
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
     ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
@@ -127,8 +131,8 @@ class DonorViewSet(viewsets.ModelViewSet):
 class TransactionOrderViewSet(viewsets.ModelViewSet):
     queryset = TransactionOrder.objects.all()
     serializer_class = TransactionOrderSerializer
+    permission_classes = [IsAuthenticated]
 
-    
     def create(self, request, *args, **kwargs):
         is_many = isinstance(request.data, list)
         if not is_many:
@@ -138,8 +142,8 @@ class TransactionOrderViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer=serializer)
             headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers,)
-    
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers, )
+
 
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
@@ -148,6 +152,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
     filterset_fields = ['donor', 'barangay_request', 'received', ]
     search_fields = ['donor__user__username', 'barangay_request__barangay__user__username',
                      'barangay_request__evacuation_center__name', ]
+    permission_classes = [IsAuthenticated]
 
     @action(detail=True, methods=['patch', 'put'], name='Quick Update status',
             permission_classes=[IsProfileUserOrReadOnly])
@@ -182,7 +187,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
         return Response({"status": "Successful update"}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['patch', 'put'], name='Upload Transaction Picture',
-            permission_classes=[IsProfileUserOrReadOnly])
+            permission_classes=[IsProfileUserOrReadOnly, IsAuthenticated])
     def upload_image(self, request, pk=None):
         transaction: Transaction = self.get_object()
         new_image: TransactionImage = TransactionImage.objects.create()
@@ -191,7 +196,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
         new_image.save()
 
     @action(detail=True, methods=['get'], name='Get Evacuation',
-            permission_classes=[IsProfileUserOrReadOnly])
+            permission_classes=[IsProfileUserOrReadOnly, IsAuthenticated])
     def evacuation_center(self, request, pk=None):
         current_transaction: Transaction = self.get_object()
         barangay_request: BarangayRequest = current_transaction.barangay_request
@@ -223,14 +228,14 @@ class TransactionViewSet(viewsets.ModelViewSet):
                                                         transaction=created_transaction, )
                         remaining_fulfillment_pax = 0
                     else:
-                        TransactionOrder.objects.create(pax=available_pax, supply=supply, transaction=created_transaction, )
+                        TransactionOrder.objects.create(pax=available_pax, supply=supply,
+                                                        transaction=created_transaction, )
                         remaining_fulfillment_pax = remaining_fulfillment_pax - available_pax
 
         # serializer = EvacuationCenterSerializer(barangay_request.evacuation_center)
         return Response(TransactionSerializer(created_transactions,
                                               many=True,
                                               context={'request': request}).data, status=201)
-
 
     def perform_create(self, serializer):
         current_donor = DonorProfile.objects.get(user=self.request.user)
@@ -259,12 +264,26 @@ class TransactionViewSet(viewsets.ModelViewSet):
     #     serializer.save(donor=current_donor,)
 
 
-class BarangayRequestViewSet(viewsets.ModelViewSet):
+class BarangayRequestViewSet(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
     # queryset = BarangayRequest.objects.all()
     serializer_class = BarangayRequestSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
+    pagination_class = SmallResultsSetPagination
     filterset_fields = ['barangay', 'evacuation_center', ]
     search_fields = ['barangay__user__username', 'evacuation_center__name', ]
+    permission_classes = [IsAuthenticated]
+
+    @silk_profile(name="Retrieve barangay requests")
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @silk_profile(name="Retrieve specific barangay request")
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @silk_profile(name="Create barangay request")
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
 
     def get_queryset(self):
         current_user = self.request.user
@@ -295,6 +314,7 @@ class BarangayRequestViewSet(viewsets.ModelViewSet):
 class DonationViewSet(viewsets.ModelViewSet):
     queryset = Donation.objects.all()
     serializer_class = DonationSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(datetime_added=datetime.now(),
@@ -309,9 +329,6 @@ class DisasterViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=['get'], name='Change to Disaster',
             permission_classes=[IsProfileUserOrReadOnly])
     def change_to_disaster(self, request, pk=None):
-        # TODO: Change to permission
-        if self.request.user.is_anonymous:
-            return Response({'error': 'Please log in'})
         current_donor = DonorProfile.objects.get(user=self.request.user)
         if current_donor is not None:
             current_donor.current_disaster = self.get_object()
@@ -362,13 +379,14 @@ class EvacuationCenterViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class SupplyViewSet(viewsets.ModelViewSet):
+class SupplyViewSet(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
     queryset = Supply.objects.all()
     serializer_class = SupplySerializer
+
     def perform_create(self, serializer):
         serializer.save(datetime_added=datetime.now(timezone.utc),
                         donor=DonorProfile.objects.get(user=self.request.user),
-                    )
+                        )
 
     @action(detail=True, methods=['put', 'patch'], name='Upload Picture')
     def upload_picture(self, request, pk=None):

@@ -1,0 +1,9 @@
+{
+  "name": "dagasbenchmark",
+  "dependencies": {
+    "autocannon": "^7.9.0"
+  },
+  "scripts": {
+    "start": "node benchmark.js"
+  }
+}

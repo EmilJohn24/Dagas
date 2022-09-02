@@ -36,14 +36,15 @@ import LRU from 'lru-cache';
 import {configure} from 'axios-hooks';
 import useAxios from 'axios-hooks';
 import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { darkScrollbar } from "@mui/material";
 
-function BarangayRequest() {
+function BarangayRequest(props) {
   const [foodAmount, setFoodAmount] = useState(0);
   const [waterAmount, setWaterAmount] = useState(0);
   const [ClothesAmount, setClothesAmount] = useState(0);
   const [EvacuationCenterID, setEvacuationCenterID] = useState([]);
-
+  const { navigation } = props;
  
   const [evacCenter, setEvacCenter] = React.useState('');
 
@@ -164,13 +165,14 @@ function BarangayRequest() {
                   data: evacValues
                 });
                 console.log(typeof postRequest);
-                
 
                 // set values
                 setFoodAmount(values.food);
                 setWaterAmount(values.water);
                 setClothesAmount(values.clothes);
-
+                
+                alert("Supplies Requested!")
+                navigation('/requests');
               }
             }>{
                 (formik) => (
@@ -258,4 +260,7 @@ function BarangayRequest() {
   );
 }
 
-export default BarangayRequest;
+export default function(props) {
+  const navigation = useNavigate();
+  return <BarangayRequest {...props} navigation={navigation} />;
+  }

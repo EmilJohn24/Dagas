@@ -5,10 +5,12 @@ from multiprocessing.pool import ThreadPool
 from random import random
 
 import numpy as np
+from matplotlib import pyplot as plt
 from pymoo.algorithms.moo.nsga2 import NSGA2
-from pymoo.core.duplicate import NoDuplicateElimination
+from pymoo.core.duplicate import NoDuplicateElimination, ElementwiseDuplicateElimination, DuplicateElimination
 from pymoo.core.mutation import Mutation
 from pymoo.core.problem import Problem, ElementwiseProblem, StarmapParallelization
+from pymoo.core.repair import Repair
 from pymoo.core.sampling import Sampling
 from pymoo.operators.crossover.pntx import TwoPointCrossover
 from pymoo.optimize import minimize
@@ -123,7 +125,7 @@ def window(seq, n=2):
         yield result
 
 
-def fitness_func(solution):
+def fitness_func(routes, working_data):
     # Iterate through every donor
     global metadata
 
@@ -131,7 +133,6 @@ def fitness_func(solution):
         """This currently assumes all supply types are equally valuable"""
         return np.sum(metadata['demand_matrix'][request_index])
 
-    routes, working_data = chromosome_to_routes(solution)
     demands = np.zeros(metadata['num_requests'])
     for request_ix in range(metadata['num_requests']):
         demands[request_ix] = get_total_weighted_demand(request_ix)
@@ -153,6 +154,23 @@ def fitness_func(solution):
     unmet_demand = np.sum(working_data['demand_matrix'], axis=0)
     unmet_demand_ratio = unmet_demand / np.sum(metadata['demand_matrix'], axis=0)
     return total_distance, *unmet_demand_ratio
+
+
+class SimpleDuplicationElimination(ElementwiseDuplicateElimination):
+    def is_equal(self, a, b):
+        return np.array_equal(a.X, b.X)
+
+
+class RepetitionRepair(Repair):
+    def _do(self, problem, X, **kwargs):
+        for i, chromosome in enumerate(X):
+            unique_genes, count = np.unique(chromosome, return_counts=True)
+            unique_mask = np.isin(chromosome, unique_genes[count > 1])  # locate all elements with duplicates
+            new_values = np.setdiff1d(np.arange(len(chromosome)), chromosome[~unique_mask])
+            np.random.shuffle(new_values)
+            chromosome[unique_mask] = new_values
+            X[i] = chromosome
+        return X
 
 
 class SwapMutation(Mutation):
@@ -180,14 +198,16 @@ class PermutationSequenceSampling(Sampling):
 
 class DagasProblemParalellizedWrapper(ElementwiseProblem):
     def _evaluate(self, x, out, *args, **kwargs):
-        out['F'] = np.array(fitness_func(x))
+        routes, working_data = chromosome_to_routes(x)
+        out['F'] = np.array(fitness_func(routes, working_data))
 
 
 class DagasProblemWrapper(Problem):
     def _evaluate(self, X, out, *args, **kwargs):
         results = []
         for solution in X:
-            results.append(fitness_func(solution))
+            routes, working_data = chromosome_to_routes(solution)
+            results.append(fitness_func(routes, working_data))
         out['F'] = np.array(results)
 
 
@@ -208,7 +228,8 @@ def run_ga_algo(data):
                       sampling=PermutationSequenceSampling(),
                       crossover=TwoPointCrossover(),
                       mutation=SwapMutation(),
-                      eliminate_duplicates=NoDuplicateElimination()
+                      repair=RepetitionRepair(),
+                      eliminate_duplicates=SimpleDuplicationElimination()
                       )
     terminating_condition = get_termination('n_gen', 100, )
     res = minimize(
@@ -218,6 +239,5 @@ def run_ga_algo(data):
         seed=1,
         verbose=True,
     )
-
     print(res.F)
     return res
