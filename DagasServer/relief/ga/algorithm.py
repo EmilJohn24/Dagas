@@ -128,6 +128,7 @@ class DagasProblemParalellizedWrapper(ElementwiseProblem):
         total_demand = np.sum(demands)
 
         total_distance = 0
+        max_distance = 0
         for route, start_node in zip(routes, metadata['starts']):
             # Initialize distance between donor and first evacuation node
             # Fitness 1: Total distance
@@ -137,12 +138,14 @@ class DagasProblemParalellizedWrapper(ElementwiseProblem):
             for i, j in window(route):
                 route_distance += distance_between(i, j)
             route_distance += distance_between(route[len(route) - 1], start_node)
+            if route_distance > max_distance:
+                max_distance = route_distance
             total_distance += route_distance
 
         # Fitness 2: Unmet demand
         unmet_demand = np.sum(working_data['demand_matrix'], axis=0)
         unmet_demand_ratio = unmet_demand / np.sum(metadata['demand_matrix'], axis=0)
-        return total_distance, *unmet_demand_ratio
+        return total_distance, max_distance, *unmet_demand_ratio
 
     def _evaluate(self, x, out, *args, **kwargs):
         routes, working_data = self.chromosome_to_routes(x)
@@ -155,7 +158,7 @@ class DagasGreedParallelizedWrapper(DagasProblemParalellizedWrapper):
         lower_bound = np.zeros(algo_data['num_requests'])
         upper_bound = np.full(algo_data['num_requests'], algo_data['num_requests'] - 1)
         super().__init__(elementwise, algo_data,
-                         n_var=algo_data['num_requests'], n_obj=1 + len(algo_data['item_types']),
+                         n_var=algo_data['num_requests'], n_obj=2 + len(algo_data['item_types']),
                          xl=lower_bound, xu=upper_bound, **kwargs)
 
     def chromosome_to_routes(self, chromosome) -> object:
@@ -238,7 +241,7 @@ class DagasDenseParallelizedWrapper(DagasProblemParalellizedWrapper):
         lower_bound = np.zeros(chromosome_length)
         upper_bound = np.full(chromosome_length, chromosome_length - 1)
         super().__init__(elementwise, algo_data,
-                         n_var=chromosome_length, n_obj=1 + len(algo_data['item_types']),
+                         n_var=chromosome_length, n_obj=2 + len(algo_data['item_types']),
                          xl=lower_bound, xu=upper_bound, **kwargs)
 
     def chromosome_to_routes(self, chromosome) -> object:
@@ -288,7 +291,6 @@ def run_ga_algo(data):
 
     problem = DagasDenseParallelizedWrapper(algo_data=data, elementwise_runner=runner)
     algorithm = NSGA2(pop_size=100,
-                      selection=TournamentSelection(),
                       sampling=PermutationSequenceSampling(),
                       crossover=OrderCrossover(),
                       mutation=InversionMutation(),
