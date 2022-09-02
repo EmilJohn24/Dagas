@@ -93,7 +93,7 @@
 
     <Spinner
         android:id="@+id/evacuationCenterSelector"
-        android:layout_width="422dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@+id/residentQrCodeImageView"
         app:layout_constraintEnd_toEndOf="parent"
