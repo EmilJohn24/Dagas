@@ -294,8 +294,8 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
         for request_index in [index for index, x in enumerate(algo_data['request_assignments']) if x is None]:
 
             for donor_index in range(data['num_vehicles']):
-                donor_supply = data[data['supply_types'][item_type_index]][donor_index]
-                request_demand = data[data['demand_types'][item_type_index]][request_index]
+                donor_supply = data['supply_matrix'][donor_index][item_type_index]
+                request_demand = data['demand_matrix'][request_index][item_type_index]
                 if donor_supply >= request_demand > 0 and donor_supply > 0:
                     if algo_data['donor_request_counts'][donor_index] == 0:
                         distance = distance_n2n(data['starts'][donor_index], request_index)
@@ -321,25 +321,25 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
         else:
             algo_data["routes"][chosen_donor_index].insert(0, chosen_request_index)
         algo_data['donor_request_counts'][chosen_donor_index] += 1
-        supply_reduced = data[data['demand_types'][item_type_index]][chosen_request_index]
+        supply_reduced = data['demand_matrix'][chosen_request_index][item_type_index]
         algo_data['request_assignments'][chosen_request_index] = chosen_donor_index
-        data[data['supply_types'][item_type_index]][chosen_donor_index] -= supply_reduced
-        data[data['demand_types'][item_type_index]][chosen_request_index] = 0
+        data['supply_matrix'][chosen_donor_index][item_type_index] -= supply_reduced
+        data['demand_matrix'][chosen_request_index][item_type_index] = 0
         # Fulfillment
         algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][item_type_index] += supply_reduced
         for j in range(item_type_index + 1, len(data['item_types'])):
-            demand_remaining = data[data['demand_types'][j]][chosen_request_index]
-            supply_remaining = data[data['supply_types'][j]][chosen_donor_index]
+            demand_remaining = data['demand_matrix'][chosen_request_index][j]
+            supply_remaining = data['supply_matrix'][chosen_donor_index][j]
             surplus = supply_remaining - demand_remaining
             if surplus >= 0:
-                data[data['demand_types'][j]][chosen_request_index] = 0
-                data[data['supply_types'][j]][chosen_donor_index] = surplus
+                data['demand_matrix'][chosen_request_index][j] = 0
+                data['supply_matrix'][chosen_donor_index][j] = surplus
                 algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][
                     j] += demand_remaining
 
             else:
-                data[data['demand_types'][j]][chosen_request_index] = abs(surplus)
-                data[data['supply_types'][j]][chosen_donor_index] = 0
+                data['demand_matrix'][chosen_request_index][j] = abs(surplus)
+                data['supply_matrix'][chosen_donor_index][j] = 0
                 algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][
                     j] += supply_remaining
         donor_mat_index = data['starts'][chosen_donor_index]
@@ -625,11 +625,16 @@ def algo_test(model):
     #               min_supply=100, max_supply=1000)
     print("Generating data model from database...")
     data = generate_data_model_from_db()
+    print("Displaying minimum/ideal fulfillment ratios...")
+    total_demands = np.sum(data['demand_matrix'], axis=0)
+    excess = total_demands - np.sum(data['supply_matrix'], axis=0)
+    print(np.divide(excess, total_demands))
     # print("Calculating custom algorithm...")
     # results, manipulated_data = algo_main(data)
     res = None
     if model == "standard":
-        res, _ = algo_main(data)
+        print("Running the greedy simple algorithm")
+        return algo_main(data)
     elif model == "google-or":
         print("Calculating one-supply type problem for custom algorithm...")
         algo_data, _ = algo_v1(data, item_type_index=1)
@@ -638,7 +643,7 @@ def algo_test(model):
         res = algo_or(data, algo_data_init=algo_data, item_type=1)
     elif model == "ga":
         print("Running the genetic algorithm model...")
-        res = run_ga_algo(data)
+        return run_ga_algo(data)
     return res
 
 
