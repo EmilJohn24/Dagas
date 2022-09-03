@@ -152,6 +152,65 @@ class DagasProblemParalellizedWrapper(ElementwiseProblem):
         out['F'] = np.array(self.fitness_func(routes, working_data))
 
 
+class DagasGreedyDonorParallelizedWrapper(DagasProblemParalellizedWrapper):
+    def __init__(self, elementwise=True, algo_data=None, **kwargs):
+        lower_bound = np.zeros(algo_data['num_vehicles'])
+        upper_bound = np.full(algo_data['num_vehicles'], algo_data['num_vehicles'] - 1)
+        super().__init__(elementwise, algo_data,
+                         n_var=algo_data['num_vehicles'], n_obj=2 + len(algo_data['item_types']),
+                         xl=lower_bound, xu=upper_bound, **kwargs)
+
+    def chromosome_to_routes(self, chromosome) -> object:
+        global metadata
+        routes = []
+
+        working_data = copy.deepcopy(metadata)
+        working_data['fulfillment_matrix'] = np.zeros((working_data['num_vehicles'],
+                                                       working_data['num_requests'], len(working_data['item_types'])))
+
+        def update_demand(req_ix, donor_ix):
+            """Update current supply and demand based on chosen pair"""
+            for type_index in range(len(working_data['item_types'])):
+                current_supply = working_data['supply_matrix'][donor_ix][type_index]
+                current_demand = working_data['demand_matrix'][req_ix][type_index]
+                surplus = current_supply - current_demand
+                working_data['fulfillment_matrix'][donor_ix, req_ix, type_index] += abs(surplus)
+                if surplus >= 0:
+                    working_data['demand_matrix'][req_ix][type_index] = 0
+                    working_data['supply_matrix'][donor_ix][type_index] = surplus
+
+                else:
+                    working_data['demand_matrix'][req_ix][type_index] = abs(surplus)
+                    working_data['supply_matrix'][donor_ix][type_index] = 0
+
+        donor_request_counts = np.zeros(metadata['num_vehicles'])
+        request_count = self.algo_data['num_requests']
+        for i in range(metadata['num_vehicles']):
+            routes.append([])
+        # gene = Donor
+        for gene in chromosome:
+            if np.sum(working_data['supply_matrix'][gene]) == 0:
+                continue
+            donor_matrix_ix = gene + request_count
+            current_node = donor_matrix_ix
+            if np.sum(working_data['demand_matrix']) == 0:
+                break
+            explored_nodes = []
+            while not np.sum(working_data['supply_matrix'][gene]) == 0:
+                closest_requests = np.argsort(self.algo_data['distance_matrix'][current_node, :request_count - 1])
+                if closest_requests[0] == current_node:
+                    closest_requests = closest_requests[1:]
+                for request_ix in closest_requests:
+                    if not np.sum(working_data['demand_matrix'][request_ix]) == 0 \
+                            and request_ix not in explored_nodes:
+                        update_demand(request_ix, gene)
+                        routes[gene].append(request_ix)
+                        current_node = request_ix
+                        explored_nodes.append(current_node)
+                        break
+        return routes, working_data
+
+
 class DagasGreedParallelizedWrapper(DagasProblemParalellizedWrapper):
 
     def __init__(self, elementwise=True, algo_data=None, **kwargs):
@@ -261,7 +320,7 @@ def run_ga_algo(data):
     pool = ThreadPool(n_threads)
     runner = StarmapParallelization(pool.starmap)
 
-    problem = DagasGreedParallelizedWrapper(algo_data=data, elementwise_runner=runner)
+    problem = DagasDenseParallelizedWrapper(algo_data=data, elementwise_runner=runner)
     algorithm = NSGA2(pop_size=100,
                       sampling=PermutationSequenceSampling(),
                       crossover=OrderCrossover(),
@@ -270,7 +329,7 @@ def run_ga_algo(data):
                       # eliminate_duplicates=NoDuplicateElimination(),
                       eliminate_duplicates=SimpleDuplicationElimination()
                       )
-    terminating_condition = get_termination('n_gen', 100, )
+    terminating_condition = get_termination('n_gen', 1000, )
     res = minimize(
         problem=problem,
         algorithm=algorithm,
