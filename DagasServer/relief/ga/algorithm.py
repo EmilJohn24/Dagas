@@ -166,18 +166,8 @@ class DagasGreedParallelizedWrapper(DagasProblemParalellizedWrapper):
         routes = []
 
         working_data = copy.deepcopy(metadata)
-
-        def is_gene_complete(gene_index):
-            demand_remaining = np.sum(working_data['demand_matrix'][gene_index])
-            return demand_remaining == 0
-
-        def complete_supply_remaining(donor_ix):
-            supply_remaining = 0
-            supply_remaining = np.sum(working_data['supply_matrix'][donor_ix])
-            return supply_remaining
-
-        def is_donor_done(donor_ix):
-            return complete_supply_remaining(donor_ix) == 0
+        working_data['fulfillment_matrix'] = np.zeros((working_data['num_vehicles'],
+                                                       working_data['num_requests'], len(working_data['item_types'])))
 
         def update_gene_demand(gene_index, donor_ix):
             """Update current supply and demand based on chosen pair"""
@@ -185,6 +175,7 @@ class DagasGreedParallelizedWrapper(DagasProblemParalellizedWrapper):
                 current_supply = working_data['supply_matrix'][donor_ix][type_index]
                 current_demand = working_data['demand_matrix'][gene_index][type_index]
                 surplus = current_supply - current_demand
+                working_data['fulfillment_matrix'][donor_ix, gene_index, type_index] += abs(surplus)
                 if surplus >= 0:
                     working_data['demand_matrix'][gene_index][type_index] = 0
                     working_data['supply_matrix'][donor_ix][type_index] = surplus
@@ -193,44 +184,24 @@ class DagasGreedParallelizedWrapper(DagasProblemParalellizedWrapper):
                     working_data['demand_matrix'][gene_index][type_index] = abs(surplus)
                     working_data['supply_matrix'][donor_ix][type_index] = 0
 
-        def supply_out():
-            """Check if all donors are out of supplies"""
-            total_supply_remaining = 0
-            for donor_ix in range(working_data['num_vehicles']):
-                total_supply_remaining += complete_supply_remaining(donor_ix)
-            return total_supply_remaining == 0
-
         donor_request_counts = np.zeros(metadata['num_vehicles'])
+        request_count = self.algo_data['num_requests']
         for i in range(metadata['num_vehicles']):
             routes.append([])
         for gene in chromosome:
-
-            # TODO: Consider implementing donor request or distance limits
-            while not is_gene_complete(gene) and not supply_out():
-                min_add_distance = sys.maxsize
-                chosen_donor = None
-                chosen_position = None
-                for donor_index in range(metadata['num_vehicles']):
-
-                    donor_route = routes[donor_index]
-                    if is_donor_done(donor_index) or gene in donor_route:
-                        continue
-                    if len(donor_route) == 0:
-                        if distance_between(donor_index, gene) < min_add_distance:
-                            min_add_distance = distance_between(donor_index, gene)
-                            chosen_donor = donor_index
-                            chosen_position = 0
-                    else:
-                        index, cheapest_distance = cheapest_insertion(donor_route, donor_index, gene)
-                        if cheapest_distance < min_add_distance:
-                            min_add_distance = cheapest_distance
-                            chosen_donor = donor_index
-                            chosen_position = index
-                if chosen_donor is None:
+            if np.sum(working_data['demand_matrix'][gene]) == 0:
+                continue
+            closest_donor = np.argmin(self.algo_data['distance_matrix'][request_count:, gene])
+            routes[closest_donor].append(gene)
+            update_gene_demand(gene, closest_donor)
+            closest_donor_matrix_ix = request_count + closest_donor
+            closest_requests = np.argsort(self.algo_data['distance_matrix']
+                                          [closest_donor_matrix_ix, :request_count - 1])
+            for request_ix in closest_requests:
+                if np.sum(working_data['supply_matrix'][closest_donor]) == 0:
                     break
-                routes[chosen_donor].insert(chosen_position, gene)
-                update_gene_demand(gene, chosen_donor)
-
+                update_gene_demand(request_ix, closest_donor)
+                routes[closest_donor].append(request_ix)
         return routes, working_data
 
 
@@ -255,9 +226,8 @@ class DagasDenseParallelizedWrapper(DagasProblemParalellizedWrapper):
             request_index = gene % working_data['num_requests']
             if np.sum(working_data['supply_matrix']) == 0 or np.sum(working_data['demand_matrix']) == 0:
                 break
-            demand_remaining = np.sum(working_data['supply_matrix'][donor_index])
-            supply_remaining = np.sum(working_data['demand_matrix'][request_index])
-            if supply_remaining == 0 or demand_remaining == 0:
+            if np.sum(working_data['supply_matrix'][donor_index]) == 0 \
+                    or np.sum(working_data['demand_matrix'][request_index]) == 0:
                 continue
             for type_index in range(len(working_data['item_types'])):
                 current_supply = working_data['supply_matrix'][donor_index][type_index]
@@ -272,6 +242,8 @@ class DagasDenseParallelizedWrapper(DagasProblemParalellizedWrapper):
                     working_data['supply_matrix'][donor_index][type_index] = 0
             routes[donor_index].append(request_index)
         return routes, working_data
+
+
 # class DagasProblemWrapper(Problem):
 #     def _evaluate(self, X, out, *args, **kwargs):
 #         results = []
@@ -289,7 +261,7 @@ def run_ga_algo(data):
     pool = ThreadPool(n_threads)
     runner = StarmapParallelization(pool.starmap)
 
-    problem = DagasDenseParallelizedWrapper(algo_data=data, elementwise_runner=runner)
+    problem = DagasGreedParallelizedWrapper(algo_data=data, elementwise_runner=runner)
     algorithm = NSGA2(pop_size=100,
                       sampling=PermutationSequenceSampling(),
                       crossover=OrderCrossover(),
@@ -303,7 +275,7 @@ def run_ga_algo(data):
         problem=problem,
         algorithm=algorithm,
         termination=terminating_condition,
-        seed=2,
+        seed=1,
         verbose=True,
     )
     print(res.F)
