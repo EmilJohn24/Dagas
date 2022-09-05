@@ -2,24 +2,20 @@ import copy
 import sys
 from itertools import islice
 from multiprocessing.pool import ThreadPool
-from random import random
 
 import numpy as np
-from matplotlib import pyplot as plt
+from numpy import uint8
 from pymoo.algorithms.moo.nsga2 import NSGA2
-from pymoo.algorithms.moo.nsga3 import NSGA3
-from pymoo.core.duplicate import NoDuplicateElimination, ElementwiseDuplicateElimination, DuplicateElimination
-from pymoo.core.mutation import Mutation
-from pymoo.core.problem import Problem, ElementwiseProblem, StarmapParallelization
-from pymoo.core.repair import Repair
-from pymoo.core.sampling import Sampling
+from pymoo.core.problem import ElementwiseProblem, StarmapParallelization
 from pymoo.operators.crossover.ox import OrderCrossover
-from pymoo.operators.crossover.pntx import TwoPointCrossover
 from pymoo.operators.mutation.inversion import InversionMutation
-from pymoo.operators.selection.rnd import RandomSelection
-from pymoo.operators.selection.tournament import TournamentSelection
 from pymoo.optimize import minimize
 from pymoo.termination import get_termination
+
+from relief.ga.dupl_elim import SimpleDuplicationElimination
+from relief.ga.mutation import SwapMutation
+from relief.ga.repair import RepetitionRepair
+from relief.ga.sampling import PermutationSequenceSampling, PermutationCombinedRouteSampling
 
 metadata = {}
 
@@ -56,54 +52,6 @@ def window(seq, n=2):
     for elem in it:
         result = result[1:] + (elem,)
         yield result
-
-
-class SimpleDuplicationElimination(ElementwiseDuplicateElimination):
-    def is_equal(self, a, b):
-        return np.array_equal(a.X, b.X)
-
-
-class RepetitionRepair(Repair):
-    def _do(self, problem, X, **kwargs):
-        for i, chromosome in enumerate(X):
-            unique_genes, count = np.unique(chromosome, return_counts=True)
-            unique_mask = np.isin(chromosome, unique_genes[count > 1])  # locate all elements with duplicates
-            new_values = np.setdiff1d(np.arange(len(chromosome)), chromosome[~unique_mask])
-            np.random.shuffle(new_values)
-            chromosome[unique_mask] = new_values
-            X[i] = chromosome
-        return X
-
-
-class SwapMutation(Mutation):
-
-    def _do(self, problem, X, **kwargs):
-        for i in range(len(X)):
-            r = np.random.random()
-
-            # Swap two numbers (20% of the time)
-            if r < 0.2:
-                num_count = len(X[i])
-                x1, x2 = np.random.randint(low=0, high=num_count, size=2)
-                X[i][x1], X[i][x2] = X[i][x2], X[i][x1]
-
-            p = np.random.random()
-            # Swap two numbers on the same donor
-            if p < 0.2:
-                rem = X[i] // problem.algo_data['num_requests']
-                donor_swap_index = np.random.randint(low=0, high=problem.algo_data['num_vehicles'])
-                request_indices = np.where(rem == donor_swap_index)
-                x1, x2 = np.random.choice(request_indices[0], size=2)
-                X[i][x1], X[i][x2] = X[i][x2], X[i][x1]
-        return X
-
-
-class PermutationSequenceSampling(Sampling):
-    def _do(self, problem, n_samples, **kwargs):
-        samples = []
-        for i in range(n_samples):
-            samples.append(np.random.permutation(problem.n_var))
-        return np.array(samples)
 
 
 class DagasProblemParalellizedWrapper(ElementwiseProblem):
@@ -150,6 +98,116 @@ class DagasProblemParalellizedWrapper(ElementwiseProblem):
     def _evaluate(self, x, out, *args, **kwargs):
         routes, working_data = self.chromosome_to_routes(x)
         out['F'] = np.array(self.fitness_func(routes, working_data))
+
+
+class DagasSequenceParalellizedWrapper(DagasProblemParalellizedWrapper):
+    MARKER = -1
+
+    def __init__(self, elementwise=True, algo_data=None, **kwargs):
+        chromosome_length = algo_data['num_requests'] + algo_data['num_vehicles'] - 1
+        lower_bound = np.zeros(chromosome_length)
+        upper_bound = np.full(chromosome_length, chromosome_length - 1)
+        super().__init__(elementwise, algo_data,
+                         n_var=chromosome_length, n_obj=2 + len(algo_data['item_types']),
+                         xl=lower_bound, xu=upper_bound, **kwargs)
+
+    def chromosome_to_routes(self, chromosome) -> object:
+        global metadata
+        routes = []
+        for i in range(metadata['num_vehicles']):
+            routes.append([])
+        working_data = copy.deepcopy(metadata)
+        # a = np.where(chromosome >= -1)
+        pseudo_routes = np.split(chromosome, np.where(chromosome >= self.algo_data['num_requests'])[0])
+        working_data['fulfillment_matrix'] = np.zeros((working_data['num_vehicles'],
+                                                       working_data['num_requests'], len(working_data['item_types'])))
+        unvisited_requests = np.array([])
+        tail_requests = np.array([])
+        for donor_ix, pseudo_route in enumerate(pseudo_routes):
+            for ix, request_ix in enumerate(pseudo_route):
+                if request_ix >= self.algo_data['num_requests']:
+                    continue
+                if np.sum(working_data['supply_matrix'][donor_ix]) == 0:
+                    unvisited_requests = np.append(unvisited_requests, pseudo_route[ix:])
+                    break
+                routes[donor_ix].append(request_ix)
+                # current_supply = working_data['supply_matrix'][donor_ix]
+                # current_demand = working_data['demand_matrix'][request_ix]
+                # surplus = current_supply - current_demand
+                for type_index in range(len(working_data['item_types'])):
+                    current_supply = working_data['supply_matrix'][donor_ix][type_index]
+                    current_demand = working_data['demand_matrix'][request_ix][type_index]
+                    surplus = current_supply - current_demand
+                    working_data['fulfillment_matrix'][donor_ix, request_ix, type_index] += abs(surplus)
+
+                    if surplus >= 0:
+                        working_data['demand_matrix'][request_ix][type_index] = 0
+                        working_data['supply_matrix'][donor_ix][type_index] = surplus
+
+                    else:
+                        # Take note of surplus
+                        working_data['demand_matrix'][request_ix][type_index] = abs(surplus)
+                        working_data['supply_matrix'][donor_ix][type_index] = 0
+        working_data['unvisited_requests'] = np.where(np.sum(working_data['demand_matrix'], axis=1))
+        return routes, working_data
+
+class DagasMDVRPFDStyleParallelizedWrapper(DagasProblemParalellizedWrapper):
+    def __init__(self, elementwise=True, algo_data=None, **kwargs):
+        lower_bound = np.zeros(algo_data['num_requests'])
+        upper_bound = np.full(algo_data['num_vehicles'], algo_data['num_vehicles'] - 1)
+        super().__init__(elementwise, algo_data,
+                         n_var=algo_data['num_vehicles'], n_obj=2 + len(algo_data['item_types']),
+                         xl=lower_bound, xu=upper_bound, **kwargs)
+
+    def chromosome_to_routes(self, chromosome) -> object:
+        global metadata
+        routes = []
+
+        working_data = copy.deepcopy(metadata)
+        working_data['fulfillment_matrix'] = np.zeros((working_data['num_vehicles'],
+                                                       working_data['num_requests'], len(working_data['item_types'])))
+
+        def update_demand(req_ix, donor_ix):
+            """Update current supply and demand based on chosen pair"""
+            for type_index in range(len(working_data['item_types'])):
+                current_supply = working_data['supply_matrix'][donor_ix][type_index]
+                current_demand = working_data['demand_matrix'][req_ix][type_index]
+                surplus = current_supply - current_demand
+                working_data['fulfillment_matrix'][donor_ix, req_ix, type_index] += abs(surplus)
+                if surplus >= 0:
+                    working_data['demand_matrix'][req_ix][type_index] = 0
+                    working_data['supply_matrix'][donor_ix][type_index] = surplus
+
+                else:
+                    working_data['demand_matrix'][req_ix][type_index] = abs(surplus)
+                    working_data['supply_matrix'][donor_ix][type_index] = 0
+
+        donor_request_counts = np.zeros(metadata['num_vehicles'])
+        request_count = self.algo_data['num_requests']
+        for i in range(metadata['num_vehicles']):
+            routes.append([])
+        # gene = Donor
+        for gene in chromosome:
+            if np.sum(working_data['supply_matrix'][gene]) == 0:
+                continue
+            donor_matrix_ix = gene + request_count
+            current_node = donor_matrix_ix
+            if np.sum(working_data['demand_matrix']) == 0:
+                break
+            explored_nodes = []
+            while not np.sum(working_data['supply_matrix'][gene]) == 0:
+                closest_requests = np.argsort(self.algo_data['distance_matrix'][current_node, :request_count - 1])
+                if closest_requests[0] == current_node:
+                    closest_requests = closest_requests[1:]
+                for request_ix in closest_requests:
+                    if not np.sum(working_data['demand_matrix'][request_ix]) == 0 \
+                            and request_ix not in explored_nodes:
+                        update_demand(request_ix, gene)
+                        routes[gene].append(request_ix)
+                        current_node = request_ix
+                        explored_nodes.append(current_node)
+                        break
+        return routes, working_data
 
 
 class DagasGreedyDonorParallelizedWrapper(DagasProblemParalellizedWrapper):
@@ -220,6 +278,24 @@ class DagasGreedParallelizedWrapper(DagasProblemParalellizedWrapper):
                          n_var=algo_data['num_requests'], n_obj=2 + len(algo_data['item_types']),
                          xl=lower_bound, xu=upper_bound, **kwargs)
 
+    def distance_n2n(self, src_node, dst_node):
+        return self.algo_data['distance_matrix'][src_node][dst_node]
+
+    def distance_delta_n2n(self, src_node, new_node, dst_node):
+        return self.distance_n2n(src_node, new_node) + self.distance_n2n(new_node, dst_node) \
+               - self.distance_n2n(src_node, dst_node)
+
+    def cheapest_insertion(self, route, src_donor_index, new_node):
+        """ Donor to first node"""
+
+        first_distance = self.distance_n2n(self.algo_data['starts'][src_donor_index], new_node)
+        if len(route) == 1:
+            return 1, first_distance
+        distances = [distance_delta_n2n(head, new_node, tail) for (head, tail) in window(route, 2)]
+
+        min_distance = min(distances)
+        return distances.index(min_distance) + 1, min_distance
+
     def chromosome_to_routes(self, chromosome) -> object:
         global metadata
         routes = []
@@ -228,20 +304,20 @@ class DagasGreedParallelizedWrapper(DagasProblemParalellizedWrapper):
         working_data['fulfillment_matrix'] = np.zeros((working_data['num_vehicles'],
                                                        working_data['num_requests'], len(working_data['item_types'])))
 
-        def update_gene_demand(gene_index, donor_ix):
+        def update_gene_demand(gene_index, d_ix):
             """Update current supply and demand based on chosen pair"""
             for type_index in range(len(working_data['item_types'])):
-                current_supply = working_data['supply_matrix'][donor_ix][type_index]
+                current_supply = working_data['supply_matrix'][d_ix][type_index]
                 current_demand = working_data['demand_matrix'][gene_index][type_index]
                 surplus = current_supply - current_demand
-                working_data['fulfillment_matrix'][donor_ix, gene_index, type_index] += abs(surplus)
+                working_data['fulfillment_matrix'][d_ix, gene_index, type_index] += abs(surplus)
                 if surplus >= 0:
                     working_data['demand_matrix'][gene_index][type_index] = 0
-                    working_data['supply_matrix'][donor_ix][type_index] = surplus
+                    working_data['supply_matrix'][d_ix][type_index] = surplus
 
                 else:
                     working_data['demand_matrix'][gene_index][type_index] = abs(surplus)
-                    working_data['supply_matrix'][donor_ix][type_index] = 0
+                    working_data['supply_matrix'][d_ix][type_index] = 0
 
         donor_request_counts = np.zeros(metadata['num_vehicles'])
         request_count = self.algo_data['num_requests']
@@ -250,17 +326,38 @@ class DagasGreedParallelizedWrapper(DagasProblemParalellizedWrapper):
         for gene in chromosome:
             if np.sum(working_data['demand_matrix'][gene]) == 0:
                 continue
-            closest_donor = np.argmin(self.algo_data['distance_matrix'][request_count:, gene])
+            closest_donors = np.argsort(self.algo_data['distance_matrix'][request_count:, gene])
+            closest_donor = None
+            for donor_ix in closest_donors:
+                if not np.sum(working_data['supply_matrix'][donor_ix]) == 0:
+                    closest_donor = donor_ix
+                    break
+
+            if closest_donor is None:
+                continue
             routes[closest_donor].append(gene)
             update_gene_demand(gene, closest_donor)
             closest_donor_matrix_ix = request_count + closest_donor
-            closest_requests = np.argsort(self.algo_data['distance_matrix']
-                                          [closest_donor_matrix_ix, :request_count - 1])
-            for request_ix in closest_requests:
-                if np.sum(working_data['supply_matrix'][closest_donor]) == 0:
-                    break
-                update_gene_demand(request_ix, closest_donor)
-                routes[closest_donor].append(request_ix)
+            # closest_requests = np.argsort(self.algo_data['distance_matrix']
+            #                               [closest_donor_matrix_ix, :request_count - 1])
+            cheapest_insertion_distance = sys.maxsize
+            cheapest_position_ix = None
+            cheapest_request_ix = None
+            for request_ix in range(request_count):
+                if np.sum(working_data['demand_matrix'][request_ix]) == 0:
+                    continue
+                position_ix, distance = self.cheapest_insertion(routes[closest_donor],
+                                                                closest_donor,
+                                                                request_ix)
+                if cheapest_insertion_distance > distance:
+                    cheapest_insertion_distance = distance
+                    cheapest_position_ix = position_ix
+                    cheapest_request_ix = request_ix
+            if cheapest_request_ix is not None:
+                update_gene_demand(cheapest_request_ix, closest_donor)
+                # routes[closest_donor].append(request_ix)
+                routes[closest_donor].insert(cheapest_position_ix, cheapest_request_ix)
+                # routes[closest_donor].insert(cheapest_position_ix, cheapest_request_ix)
         return routes, working_data
 
 
@@ -320,12 +417,12 @@ def run_ga_algo(data):
     pool = ThreadPool(n_threads)
     runner = StarmapParallelization(pool.starmap)
 
-    problem = DagasDenseParallelizedWrapper(algo_data=data, elementwise_runner=runner)
+    problem = DagasSequenceParalellizedWrapper(algo_data=data, elementwise_runner=runner)
     algorithm = NSGA2(pop_size=100,
-                      sampling=PermutationSequenceSampling(),
+                      sampling=PermutationSequenceSampling(),  # PermutationSequenceSampling for other algos
                       crossover=OrderCrossover(),
                       mutation=InversionMutation(),
-                      # repair=RepetitionRepair(),
+                      # repair=RepetitionRepair(), # Disabled for DagasSequenceParallelizedWrapper
                       # eliminate_duplicates=NoDuplicateElimination(),
                       eliminate_duplicates=SimpleDuplicationElimination()
                       )
