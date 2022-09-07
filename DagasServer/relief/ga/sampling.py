@@ -10,6 +10,26 @@ class PermutationSequenceSampling(Sampling):
         return np.array(samples)
 
 
+class ClosestDepotSampling(Sampling):
+    def _do(self, problem, n_samples, **kwargs):
+        samples = []
+        request_count = problem.algo_data['num_requests']
+        donor_count = problem.algo_data['num_vehicles']
+        # donor_ix, request_ix
+        distance_matrix_d2r = problem.algo_data['distance_matrix'][request_count:, :request_count]
+        donor_assignments = []
+        for donor_ix in range(donor_count):
+            donor_assignments.append([])
+        for request_ix in range(request_count):
+            closest_donor_ix = np.argmin(distance_matrix_d2r[:, request_ix])
+            donor_assignments[closest_donor_ix].append(request_ix)
+        for assignment_ix, donor_ix in enumerate(range(donor_count - 1)):
+            donor_assignments[donor_ix].append(assignment_ix + request_count)
+        for i in range(n_samples):
+            samples.append(np.concatenate(donor_assignments).astype(int))
+        return np.array(samples)
+
+
 class PermutationCombinedRouteSampling(Sampling):
     def _do(self, problem, n_samples, **kwargs):
         samples = []

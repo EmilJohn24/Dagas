@@ -15,7 +15,7 @@ from pymoo.termination import get_termination
 from relief.ga.dupl_elim import SimpleDuplicationElimination
 from relief.ga.mutation import SwapMutation
 from relief.ga.repair import RepetitionRepair
-from relief.ga.sampling import PermutationSequenceSampling, PermutationCombinedRouteSampling
+from relief.ga.sampling import PermutationSequenceSampling, PermutationCombinedRouteSampling, ClosestDepotSampling
 
 metadata = {}
 
@@ -111,6 +111,24 @@ class DagasSequenceParalellizedWrapper(DagasProblemParalellizedWrapper):
                          n_var=chromosome_length, n_obj=2 + len(algo_data['item_types']),
                          xl=lower_bound, xu=upper_bound, **kwargs)
 
+    def distance_n2n(self, src_node, dst_node):
+        return self.algo_data['distance_matrix'][src_node][dst_node]
+
+    def distance_delta_n2n(self, src_node, new_node, dst_node):
+        return self.distance_n2n(src_node, new_node) + self.distance_n2n(new_node, dst_node) \
+               - self.distance_n2n(src_node, dst_node)
+
+    def cheapest_insertion(self, route, src_donor_index, new_node):
+        """ Donor to first node"""
+
+        first_distance = self.distance_n2n(self.algo_data['starts'][src_donor_index], new_node)
+        if len(route) == 1 or len(route) == 0:
+            return len(route), first_distance
+        distances = [self.distance_delta_n2n(head, new_node, tail) for (head, tail) in window(route, 2)]
+
+        min_distance = min(distances)
+        return distances.index(min_distance) + 1, min_distance
+
     def chromosome_to_routes(self, chromosome) -> object:
         global metadata
         routes = []
@@ -121,35 +139,78 @@ class DagasSequenceParalellizedWrapper(DagasProblemParalellizedWrapper):
         pseudo_routes = np.split(chromosome, np.where(chromosome >= self.algo_data['num_requests'])[0])
         working_data['fulfillment_matrix'] = np.zeros((working_data['num_vehicles'],
                                                        working_data['num_requests'], len(working_data['item_types'])))
-        unvisited_requests = np.array([])
-        tail_requests = np.array([])
-        for donor_ix, pseudo_route in enumerate(pseudo_routes):
-            for ix, request_ix in enumerate(pseudo_route):
-                if request_ix >= self.algo_data['num_requests']:
+        request_count = self.algo_data['num_requests']
+        unfinished_requests = np.array([])
+
+        def update_demand(req_ix, d_ix):
+            """Update current supply and demand based on chosen pair"""
+            for type_index in range(len(working_data['item_types'])):
+                current_supply = working_data['supply_matrix'][d_ix][type_index]
+                current_demand = working_data['demand_matrix'][req_ix][type_index]
+                surplus = current_supply - current_demand
+                working_data['fulfillment_matrix'][d_ix, req_ix, type_index] += abs(surplus)
+                if surplus >= 0:
+                    working_data['demand_matrix'][req_ix][type_index] = 0
+                    working_data['supply_matrix'][d_ix][type_index] = surplus
+
+                else:
+                    working_data['demand_matrix'][req_ix][type_index] = abs(surplus)
+                    working_data['supply_matrix'][d_ix][type_index] = 0
+
+        for current_donor_ix, pseudo_route in enumerate(pseudo_routes):
+            donor_matrix_ix = current_donor_ix + request_count
+            current_node = donor_matrix_ix
+            explored_nodes = []
+            pseudo_route = pseudo_route[pseudo_route < request_count]
+            if np.sum(working_data['supply_matrix'][current_donor_ix]) == 0:
+                continue
+            if np.sum(working_data['demand_matrix']) == 0:
+                break
+            while not np.sum(working_data['supply_matrix'][current_donor_ix]) == 0 \
+                    and not len(pseudo_route) == 0:
+                closest_requests_ix = np.argsort(self.algo_data['distance_matrix'][current_node, pseudo_route])
+                closest_requests = pseudo_route[closest_requests_ix]
+
+                for request_ix in closest_requests:
+                    if not np.sum(working_data['demand_matrix'][request_ix]) == 0:
+                        update_demand(request_ix, current_donor_ix)
+                        routes[current_donor_ix].append(request_ix)
+                        current_node = request_ix
+                        pseudo_route = np.delete(pseudo_route, np.argwhere(pseudo_route == current_node))
+                        break
+        unfinished_requests = np.where(np.sum(working_data['demand_matrix'], axis=1) > 0)[0]
+        for _ in unfinished_requests:
+            cheapest_insertion_distance = sys.maxsize
+            cheapest_donor_ix = None
+            cheapest_position_ix = None
+            cheapest_request_ix = None
+            for donor_ix in range(self.algo_data['num_vehicles']):
+                if np.sum(working_data['supply_matrix'][donor_ix] == 0):
                     continue
-                if np.sum(working_data['supply_matrix'][donor_ix]) == 0:
-                    unvisited_requests = np.append(unvisited_requests, pseudo_route[ix:])
-                    break
-                routes[donor_ix].append(request_ix)
-                # current_supply = working_data['supply_matrix'][donor_ix]
-                # current_demand = working_data['demand_matrix'][request_ix]
-                # surplus = current_supply - current_demand
-                for type_index in range(len(working_data['item_types'])):
-                    current_supply = working_data['supply_matrix'][donor_ix][type_index]
-                    current_demand = working_data['demand_matrix'][request_ix][type_index]
-                    surplus = current_supply - current_demand
-                    working_data['fulfillment_matrix'][donor_ix, request_ix, type_index] += abs(surplus)
+                for request_ix in unfinished_requests:
+                    if np.sum(working_data['demand_matrix'][request_ix]) == 0:
+                        unfinished_requests = np.delete(unfinished_requests,
+                                                        np.argwhere(unfinished_requests == request_ix))
+                        continue
 
-                    if surplus >= 0:
-                        working_data['demand_matrix'][request_ix][type_index] = 0
-                        working_data['supply_matrix'][donor_ix][type_index] = surplus
+                    position_ix, distance = self.cheapest_insertion(routes[donor_ix],
+                                                                    donor_ix,
+                                                                    request_ix)
+                    if cheapest_insertion_distance > distance:
+                        cheapest_insertion_distance = distance
+                        cheapest_position_ix = position_ix
+                        cheapest_request_ix = request_ix
+                        cheapest_donor_ix = donor_ix
+            if cheapest_donor_ix is not None:
+                routes[cheapest_donor_ix].insert(cheapest_position_ix, cheapest_request_ix)
+                update_demand(cheapest_request_ix, cheapest_donor_ix)
+                if np.sum(working_data['demand_matrix'][cheapest_request_ix]) == 0:
+                    unfinished_requests = np.delete(unfinished_requests,
+                                                    np.argwhere(unfinished_requests == cheapest_request_ix))
 
-                    else:
-                        # Take note of surplus
-                        working_data['demand_matrix'][request_ix][type_index] = abs(surplus)
-                        working_data['supply_matrix'][donor_ix][type_index] = 0
-        working_data['unvisited_requests'] = np.where(np.sum(working_data['demand_matrix'], axis=1))
+        # working_data['unvisited_requests'] = np.where(np.sum(working_data['demand_matrix'], axis=1))
         return routes, working_data
+
 
 class DagasMDVRPFDStyleParallelizedWrapper(DagasProblemParalellizedWrapper):
     def __init__(self, elementwise=True, algo_data=None, **kwargs):
@@ -210,7 +271,109 @@ class DagasMDVRPFDStyleParallelizedWrapper(DagasProblemParalellizedWrapper):
         return routes, working_data
 
 
-class DagasGreedyDonorParallelizedWrapper(DagasProblemParalellizedWrapper):
+class DagasLNNHDonorParallelizedWrapper(DagasProblemParalellizedWrapper):
+    def __init__(self, elementwise=True, algo_data=None, n_neighbors=3, **kwargs):
+        self.n_neighbors = n_neighbors
+        lower_bound = np.zeros(algo_data['num_vehicles'])
+        upper_bound = np.full(algo_data['num_vehicles'], algo_data['num_vehicles'] - 1)
+        super().__init__(elementwise, algo_data,
+                         n_var=algo_data['num_vehicles'], n_obj=2 + len(algo_data['item_types']),
+                         xl=lower_bound, xu=upper_bound, **kwargs)
+
+    def distance_between(self, a, b):
+        return self.algo_data['distance_matrix'][a][b]
+
+    def chromosome_to_routes(self, chromosome) -> object:
+        global metadata
+        routes = []
+
+        working_data = copy.deepcopy(metadata)
+        working_data['fulfillment_matrix'] = np.zeros((working_data['num_vehicles'],
+                                                       working_data['num_requests'], len(working_data['item_types'])))
+
+        def check_resulting_supply(supplies, req_ix):
+            """Update current supply and demand based on chosen pair"""
+            new_supplies = np.copy(supplies)
+            for type_index in range(len(working_data['item_types'])):
+                current_supply = supplies[type_index]
+                current_demand = working_data['demand_matrix'][req_ix][type_index]
+                surplus = current_supply - current_demand
+                if surplus >= 0:
+                    new_supplies[type_index] = surplus
+                else:
+                    new_supplies[type_index] = 0
+            return new_supplies
+
+        def update_demand(req_ix, donor_ix):
+            """Update current supply and demand based on chosen pair"""
+            for type_index in range(len(working_data['item_types'])):
+                current_supply = working_data['supply_matrix'][donor_ix][type_index]
+                current_demand = working_data['demand_matrix'][req_ix][type_index]
+                surplus = current_supply - current_demand
+                working_data['fulfillment_matrix'][donor_ix, req_ix, type_index] += abs(surplus)
+                if surplus >= 0:
+                    working_data['demand_matrix'][req_ix][type_index] = 0
+                    working_data['supply_matrix'][donor_ix][type_index] = surplus
+
+                else:
+                    working_data['demand_matrix'][req_ix][type_index] = abs(surplus)
+                    working_data['supply_matrix'][donor_ix][type_index] = 0
+
+        donor_request_counts = np.zeros(metadata['num_vehicles'])
+        request_count = self.algo_data['num_requests']
+        for i in range(metadata['num_vehicles']):
+            routes.append([])
+        # gene = Donor
+        for gene in chromosome:
+            if np.sum(working_data['supply_matrix'][gene]) == 0:
+                continue
+            donor_matrix_ix = gene + request_count
+            current_node = donor_matrix_ix
+            if np.sum(working_data['demand_matrix']) == 0:
+                break
+            current_supplies = working_data['supply_matrix'][gene]
+            while not np.sum(working_data['supply_matrix'][gene]) == 0:
+                closest_requests = np.argsort(self.algo_data['distance_matrix'][current_node, :request_count])
+                closest_requests = closest_requests[closest_requests != current_node]
+                a = np.isin(closest_requests, routes[gene])
+                closest_requests = closest_requests[np.logical_not(np.isin(closest_requests, routes[gene]))]
+                unfinished_requests = np.where(np.sum(self.algo_data['demand_matrix'][closest_requests], axis=1) != 0)
+                unfinished_closest_requests = closest_requests[unfinished_requests]
+                cheapest_distance = sys.maxsize
+                cheapest_neighbors = None
+                neighbor_layer_1 = unfinished_closest_requests[:self.n_neighbors]
+                for neighbor_ix in neighbor_layer_1:
+                    resulting_supply = check_resulting_supply(current_supplies, neighbor_ix)
+                    if np.sum(resulting_supply) == 0:
+                        if distance_between(current_node, neighbor_ix) < cheapest_distance:
+                            cheapest_distance = distance_between(current_node, neighbor_ix)
+                            cheapest_neighbors = [neighbor_ix]
+                        continue
+                    neighbor_closest_requests = np.argsort(self.algo_data['distance_matrix'][neighbor_ix,
+                                                           :request_count])
+                    neighbor_closest_requests = neighbor_closest_requests[np.logical_and(
+                                                                    neighbor_closest_requests != current_node,
+                                                                    neighbor_closest_requests != neighbor_ix)]
+                    # np.logical_not(np.isin(closest_requests, routes[gene]))
+                    neighbor_closest_requests = neighbor_closest_requests[np.logical_not(
+                        np.isin(neighbor_closest_requests, routes[gene]))]
+                    unfinished_neighbor_requests = np.where(np.sum(
+                        self.algo_data['demand_matrix'][neighbor_closest_requests], axis=1) != 0)
+                    unfinished_closest_neighbor_requests = neighbor_closest_requests[unfinished_neighbor_requests]
+                    neighbor_layer_2 = unfinished_closest_neighbor_requests[:self.n_neighbors]
+                    for neighbor_ix_2 in neighbor_layer_2:
+                        distance = distance_between(current_node, neighbor_ix) + distance_between(neighbor_ix,
+                                                                                                  neighbor_ix_2)
+                        if distance < cheapest_distance:
+                            cheapest_distance = distance
+                            cheapest_neighbors = [neighbor_ix, neighbor_ix_2]
+                for cheap_neighbor in cheapest_neighbors:
+                    routes[gene].append(cheap_neighbor)
+                    update_demand(cheap_neighbor, gene)
+        return routes, working_data
+
+
+class DagasNNHDonorParallelizedWrapper(DagasProblemParalellizedWrapper):
     def __init__(self, elementwise=True, algo_data=None, **kwargs):
         lower_bound = np.zeros(algo_data['num_vehicles'])
         upper_bound = np.full(algo_data['num_vehicles'], algo_data['num_vehicles'] - 1)
@@ -269,7 +432,7 @@ class DagasGreedyDonorParallelizedWrapper(DagasProblemParalellizedWrapper):
         return routes, working_data
 
 
-class DagasGreedParallelizedWrapper(DagasProblemParalellizedWrapper):
+class DagasGreedyNeighborParallelizedWrapper(DagasProblemParalellizedWrapper):
 
     def __init__(self, elementwise=True, algo_data=None, **kwargs):
         lower_bound = np.zeros(algo_data['num_requests'])
@@ -289,8 +452,8 @@ class DagasGreedParallelizedWrapper(DagasProblemParalellizedWrapper):
         """ Donor to first node"""
 
         first_distance = self.distance_n2n(self.algo_data['starts'][src_donor_index], new_node)
-        if len(route) == 1:
-            return 1, first_distance
+        if len(route) == 1 or len(route) == 0:
+            return len(route), first_distance
         distances = [distance_delta_n2n(head, new_node, tail) for (head, tail) in window(route, 2)]
 
         min_distance = min(distances)
@@ -338,26 +501,29 @@ class DagasGreedParallelizedWrapper(DagasProblemParalellizedWrapper):
             routes[closest_donor].append(gene)
             update_gene_demand(gene, closest_donor)
             closest_donor_matrix_ix = request_count + closest_donor
+
             # closest_requests = np.argsort(self.algo_data['distance_matrix']
             #                               [closest_donor_matrix_ix, :request_count - 1])
-            cheapest_insertion_distance = sys.maxsize
-            cheapest_position_ix = None
-            cheapest_request_ix = None
-            for request_ix in range(request_count):
-                if np.sum(working_data['demand_matrix'][request_ix]) == 0:
-                    continue
-                position_ix, distance = self.cheapest_insertion(routes[closest_donor],
-                                                                closest_donor,
-                                                                request_ix)
-                if cheapest_insertion_distance > distance:
-                    cheapest_insertion_distance = distance
-                    cheapest_position_ix = position_ix
-                    cheapest_request_ix = request_ix
-            if cheapest_request_ix is not None:
-                update_gene_demand(cheapest_request_ix, closest_donor)
-                # routes[closest_donor].append(request_ix)
-                routes[closest_donor].insert(cheapest_position_ix, cheapest_request_ix)
-                # routes[closest_donor].insert(cheapest_position_ix, cheapest_request_ix)
+            # Generate immediate neighbors
+
+            # cheapest_insertion_distance = sys.maxsize
+            # cheapest_position_ix = None
+            # cheapest_request_ix = None
+            # for request_ix in range(request_count):
+            #     if np.sum(working_data['demand_matrix'][request_ix]) == 0:
+            #         continue
+            #     position_ix, distance = self.cheapest_insertion(routes[closest_donor],
+            #                                                     closest_donor,
+            #                                                     request_ix)
+            #     if cheapest_insertion_distance > distance:
+            #         cheapest_insertion_distance = distance
+            #         cheapest_position_ix = position_ix
+            #         cheapest_request_ix = request_ix
+            # if cheapest_request_ix is not None:
+            #     update_gene_demand(cheapest_request_ix, closest_donor)
+            #     # routes[closest_donor].append(request_ix)
+            #     routes[closest_donor].insert(cheapest_position_ix, cheapest_request_ix)
+            # routes[closest_donor].insert(cheapest_position_ix, cheapest_request_ix)
         return routes, working_data
 
 
@@ -417,7 +583,7 @@ def run_ga_algo(data):
     pool = ThreadPool(n_threads)
     runner = StarmapParallelization(pool.starmap)
 
-    problem = DagasSequenceParalellizedWrapper(algo_data=data, elementwise_runner=runner)
+    problem = DagasLNNHDonorParallelizedWrapper(algo_data=data, elementwise_runner=runner, n_neighbors=3)
     algorithm = NSGA2(pop_size=100,
                       sampling=PermutationSequenceSampling(),  # PermutationSequenceSampling for other algos
                       crossover=OrderCrossover(),
@@ -426,12 +592,20 @@ def run_ga_algo(data):
                       # eliminate_duplicates=NoDuplicateElimination(),
                       eliminate_duplicates=SimpleDuplicationElimination()
                       )
-    terminating_condition = get_termination('n_gen', 1000, )
+    # algorithm = NSGA2(pop_size=100,
+    #                   sampling=ClosestDepotSampling(),  # PermutationSequenceSampling for other algos
+    #                   crossover=OrderCrossover(),
+    #                   mutation=InversionMutation(),
+    #                   # repair=RepetitionRepair(), # Disabled for DagasSequenceParallelizedWrapper
+    #                   # eliminate_duplicates=NoDuplicateElimination(),
+    #                   eliminate_duplicates=SimpleDuplicationElimination()
+    #                   )
+    terminating_condition = get_termination('n_gen', 100, )
     res = minimize(
         problem=problem,
         algorithm=algorithm,
         termination=terminating_condition,
-        seed=1,
+        seed=4,
         verbose=True,
     )
     print(res.F)
