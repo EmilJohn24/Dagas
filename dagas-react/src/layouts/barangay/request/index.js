@@ -43,6 +43,7 @@ function BarangayRequest(props) {
   const [foodAmount, setFoodAmount] = useState(0);
   const [waterAmount, setWaterAmount] = useState(0);
   const [ClothesAmount, setClothesAmount] = useState(0);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [EvacuationCenterID, setEvacuationCenterID] = useState([]);
   const { navigation } = props;
  
@@ -90,7 +91,7 @@ function BarangayRequest(props) {
   const handleChange = (event) => {
     console.log(event.target.value);
     setEvacCenter(event.target.value);
-  };
+  };    
   
   useEffect(() => {
     console.log("Triggered effect for handling post");
@@ -122,8 +123,8 @@ function BarangayRequest(props) {
       executeClothesRequestPost({
           data: requestValues
       });
-
-  }, [postLoading, postRequest])
+      if (isSubmitted) navigation('/requests');
+  }, [postLoading, postRequest, isSubmitted])
 //   const handleSubmit = (event) => {
 
     
@@ -131,7 +132,6 @@ function BarangayRequest(props) {
 
   if (loading) return;
   if (error) return <Navigate to="/login"/>;
-
   const listEvacuationCenters = data.map((data) =>
     <MenuItem value={data.id}>{data.name}</MenuItem>,
   );
@@ -172,7 +172,7 @@ function BarangayRequest(props) {
                 setClothesAmount(values.clothes);
                 
                 alert("Supplies Requested!")
-                navigation('/requests');
+                setIsSubmitted(true);
               }
             }>{
                 (formik) => (
@@ -253,7 +253,6 @@ function BarangayRequest(props) {
   return (
     <DashboardLayout>
       <DashboardNavbar />
-
             {formikRender}
       <Footer />
     </DashboardLayout>
