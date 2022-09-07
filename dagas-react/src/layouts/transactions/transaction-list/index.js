@@ -99,7 +99,7 @@ function TransactionList() {
   // }
    var dataTableData = {
       columns: [
-        { Header: "id", 
+        { Header: "reference id", 
           accessor: "id", 
           Cell: ({ value }) => {
             return ( 
