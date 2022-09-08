@@ -70,9 +70,10 @@ import Login from './components/Login';
 import TransactionList from "layouts/transactions/transaction-list";
 import SupplyList from "layouts/supply/supply-list";
 import AcceptRequest from "layouts/request/accept-request";
-import BarangayRequest from "layouts/barangay/request"
-import RequestList from "layouts/barangay/request-list"
-import Calamities from "layouts/calamity/select-calamity"
+import BarangayRequest from "layouts/barangay/request";
+import RequestList from "layouts/barangay/request-list";
+import Calamities from "layouts/calamity/select-calamity";
+import Suggestions from "layouts/suggestions";
 
 // Material Dashboard 2 PRO React components
 import MDAvatar from "components/MDAvatar";
@@ -190,6 +191,14 @@ const routes = [
         component: <RequestList />,
       }
     ],
+  },
+  {
+    type: "collapse",
+    name: "Suggestions",
+    key: "suggestions",
+    route: "/suggestions",
+    component: <Suggestions/>,
+    noCollapse: true
   },
   {
     type: "collapse",
