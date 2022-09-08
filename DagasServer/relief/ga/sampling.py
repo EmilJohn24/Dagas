@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 from pymoo.core.sampling import Sampling
 
@@ -7,6 +9,35 @@ class PermutationSequenceSampling(Sampling):
         samples = []
         for i in range(n_samples):
             samples.append(np.random.permutation(problem.n_var))
+        return np.array(samples)
+
+
+class ClosestDenseDepotSampling(Sampling):
+    def _do(self, problem, n_samples, **kwargs):
+        samples = []
+        request_count = problem.algo_data['num_requests']
+        distance_matrix_d2r = problem.algo_data['distance_matrix'][request_count:, :request_count]
+        donor_count = problem.algo_data['num_vehicles']
+        assignments = [None] * problem.n_var
+        for request_ix in range(request_count):
+            donors_sorted = np.argsort(distance_matrix_d2r[:, request_ix])
+            for ix, donor_ix in enumerate(donors_sorted):
+                gene = request_count * donor_ix + request_ix
+                assignments[request_count * ix + request_ix] = gene
+        for i in range(n_samples):
+            samples.append(assignments)
+        # itr_specimen = np.array(assignments)
+        # samples.append(np.array(assignments))
+        # for i in range(n_samples - 1):
+        #     # ITR (Iterated Swap Procedure)
+        #     swap_genes = random.sample(range(0, request_count * donor_count), 2)  # return 2 random genes
+        #     itr_specimen[swap_genes[0]], itr_specimen[swap_genes[1]] = itr_specimen[swap_genes[1]], \
+        #                                                                itr_specimen[swap_genes[0]]
+        #     for swap_gene in swap_genes:
+        #         sequence = itr_specimen[swap_gene-1:swap_gene+2]
+        #         np.random.shuffle(sequence)
+        #         itr_specimen[swap_gene-1:swap_gene+2] = sequence
+        #     samples.append(itr_specimen)
         return np.array(samples)
 
 

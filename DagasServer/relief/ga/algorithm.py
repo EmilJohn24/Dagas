@@ -15,7 +15,8 @@ from pymoo.termination import get_termination
 from relief.ga.dupl_elim import SimpleDuplicationElimination
 from relief.ga.mutation import SwapMutation
 from relief.ga.repair import RepetitionRepair
-from relief.ga.sampling import PermutationSequenceSampling, PermutationCombinedRouteSampling, ClosestDepotSampling
+from relief.ga.sampling import PermutationSequenceSampling, PermutationCombinedRouteSampling, ClosestDepotSampling, \
+    ClosestDenseDepotSampling
 
 metadata = {}
 
@@ -592,6 +593,15 @@ def run_ga_algo(data):
                       # eliminate_duplicates=NoDuplicateElimination(),
                       eliminate_duplicates=SimpleDuplicationElimination()
                       )
+    # problem = DagasDenseParallelizedWrapper(algo_data=data, elementwise_runner=runner)
+    # algorithm = NSGA2(pop_size=100,
+    #                   sampling=ClosestDenseDepotSampling(),  # PermutationSequenceSampling for other algos
+    #                   crossover=OrderCrossover(),
+    #                   mutation=SwapMutation(),
+    #                   # repair=RepetitionRepair(), # Disabled for DagasSequenceParallelizedWrapper
+    #                   # eliminate_duplicates=NoDuplicateElimination(),
+    #                   eliminate_duplicates=SimpleDuplicationElimination()
+    #                   )
     # algorithm = NSGA2(pop_size=100,
     #                   sampling=ClosestDepotSampling(),  # PermutationSequenceSampling for other algos
     #                   crossover=OrderCrossover(),

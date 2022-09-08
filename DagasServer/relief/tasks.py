@@ -245,7 +245,7 @@ def algo_or(data, algo_data_init=None, item_type=None):
     return solution
 
 
-def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
+def algo_v1(orig_data, algo_data_init=None):
     # Algo-data setup
     #   1: Requests assigned to each donor
     data = copy.deepcopy(orig_data)  # copy the contents of the data model
@@ -291,12 +291,13 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
         chosen_donor_index = None
         chosen_request_index = None
         chosen_position = None
-        for request_index in [index for index, x in enumerate(algo_data['request_assignments']) if x is None]:
-
+        for request_index in range(data['num_requests']):
+        # for request_index in [index for index, x in enumerate(algo_data['request_assignments']) if x is None]:
             for donor_index in range(data['num_vehicles']):
-                donor_supply = data['supply_matrix'][donor_index][item_type_index]
-                request_demand = data['demand_matrix'][request_index][item_type_index]
-                if donor_supply >= request_demand > 0 and donor_supply > 0:
+                # donor_supply = data['supply_matrix'][donor_index][item_type_index]
+                # request_demand = data['demand_matrix'][request_index][item_type_index]
+                # if donor_supply >= request_demand > 0 and donor_supply > 0:
+                if np.sum(data['supply_matrix'][donor_index]) > 0:
                     if algo_data['donor_request_counts'][donor_index] == 0:
                         distance = distance_n2n(data['starts'][donor_index], request_index)
                         if distance < algo_data['min_add_distance'][i]:
@@ -316,32 +317,24 @@ def algo_v1(orig_data, item_type_index=0, algo_data_init=None):
         # insertion here (including all updates)
         if chosen_donor_index is None:
             continue
+
         if chosen_position is not None:
             algo_data["routes"][chosen_donor_index].insert(chosen_position, chosen_request_index)
         else:
             algo_data["routes"][chosen_donor_index].insert(0, chosen_request_index)
         algo_data['donor_request_counts'][chosen_donor_index] += 1
-        supply_reduced = data['demand_matrix'][chosen_request_index][item_type_index]
-        algo_data['request_assignments'][chosen_request_index] = chosen_donor_index
-        data['supply_matrix'][chosen_donor_index][item_type_index] -= supply_reduced
-        data['demand_matrix'][chosen_request_index][item_type_index] = 0
-        # Fulfillment
-        algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][item_type_index] += supply_reduced
-        for j in range(item_type_index + 1, len(data['item_types'])):
-            demand_remaining = data['demand_matrix'][chosen_request_index][j]
-            supply_remaining = data['supply_matrix'][chosen_donor_index][j]
-            surplus = supply_remaining - demand_remaining
+        for type_index in range(len(data['item_types'])):
+            current_supply = data['supply_matrix'][chosen_donor_index][type_index]
+            current_demand = data['demand_matrix'][chosen_request_index][type_index]
+            surplus = current_supply - current_demand
+            algo_data['fulfillment_matrix'][chosen_donor_index, chosen_request_index, type_index] += abs(surplus)
             if surplus >= 0:
-                data['demand_matrix'][chosen_request_index][j] = 0
-                data['supply_matrix'][chosen_donor_index][j] = surplus
-                algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][
-                    j] += demand_remaining
+                data['demand_matrix'][chosen_request_index][type_index] = 0
+                data['supply_matrix'][chosen_donor_index][type_index] = surplus
 
             else:
-                data['demand_matrix'][chosen_request_index][j] = abs(surplus)
-                data['supply_matrix'][chosen_donor_index][j] = 0
-                algo_data['fulfillment_matrix'][chosen_donor_index][chosen_request_index][
-                    j] += supply_remaining
+                data['demand_matrix'][chosen_request_index][type_index] = abs(surplus)
+                data['supply_matrix'][chosen_donor_index][type_index] = 0
         donor_mat_index = data['starts'][chosen_donor_index]
         algo_route = algo_data['routes'][chosen_donor_index]
         algo_data['routes'][chosen_donor_index] = simple_detail_routing(data, donor_mat_index, algo_route)
@@ -634,10 +627,10 @@ def algo_test(model):
     res = None
     if model == "standard":
         print("Running the greedy simple algorithm")
-        return algo_main(data)
+        return algo_v1(data)
     elif model == "google-or":
         print("Calculating one-supply type problem for custom algorithm...")
-        algo_data, _ = algo_v1(data, item_type_index=1)
+        algo_data, _ = algo_v1(data)
 
         print("Calculating using Google OR algorithm...")
         res = algo_or(data, algo_data_init=algo_data, item_type=1)
