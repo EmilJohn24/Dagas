@@ -12,28 +12,28 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/transactionSupplyRecycler"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="350dp"
         android:layout_marginStart="1dp"
         android:layout_marginEnd="1dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/transactionTable"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.111">
+        app:layout_constraintTop_toTopOf="@id/supplSearch"
+        app:layout_constraintVertical_bias="0.35">
 
     </androidx.recyclerview.widget.RecyclerView>
 
     <TableLayout
         android:id="@+id/transactionTable"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/transactionSubmit"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/transactionSupplyRecycler"
-        app:layout_constraintVertical_bias="0.178">
+        app:layout_constraintVertical_bias="0">
 
         <!--        <TableRow-->
         <!--            android:layout_width="match_parent"-->
@@ -62,7 +62,7 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/transactionTable"
-        app:layout_constraintVertical_bias="0.529" />
+        app:layout_constraintVertical_bias="0" />
 
     <EditText
         android:id="@+id/supplSearch"
@@ -79,6 +79,6 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.4" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
