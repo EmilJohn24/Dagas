@@ -19,6 +19,8 @@ from django.utils import timezone
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 
 from relief.ga.algorithm import run_ga_algo
+from relief.google_or.algorithm import algo_or
+from relief.google_or.unisplit_algo import unisplit_algo_or
 from relief.models import DonorProfile, BarangayRequest, User, ItemType, Supply, ResidentProfile, Donation, \
     UserLocation, ItemRequest, Transaction, TransactionOrder, EvacuationCenter, BarangayProfile, Fulfillment, RouteNode, \
     RouteSuggestion
@@ -141,108 +143,6 @@ def simple_detail_routing(data, donor_mat_index, route):
     return new_route
 
 
-def algo_or(data, algo_data_init=None, item_type=None):
-    """Solve the problem using Google OR"""
-    # Step 1: Initial routes
-    end_node_index = len(data['distance_matrix'])
-    end_nodes = [end_node_index] * data['num_vehicles']
-    manager = pywrapcp.RoutingIndexManager(len(data['distance_matrix']) + 1,  # +1 for the pseudo-node
-                                           data['num_vehicles'],
-                                           data['starts'],
-                                           end_nodes, )  # from data['ends'])
-    routing = pywrapcp.RoutingModel(manager)
-
-    # Distance callback
-    def distance_callback(from_index, to_index):
-        from_node = manager.IndexToNode(from_index)
-        to_node = manager.IndexToNode(to_index)
-        if from_node == end_node_index or to_node == end_node_index:
-            return 0
-
-        return int(data['distance_matrix'][from_node][to_node])
-
-    transit_callback_index = routing.RegisterTransitCallback(distance_callback)
-    routing.SetArcCostEvaluatorOfAllVehicles(transit_callback_index)
-
-    # Constraints:
-    # 1: Distance
-    # distance_constraint_name = "Distance"
-    # routing.AddDimension(
-    #     transit_callback_index,
-    #     0,
-    #     2000,
-    #     True,
-    #     distance_constraint_name,
-    # )
-    # distance_dimension = routing.GetDimensionOrDie(distance_constraint_name)
-    # distance_dimension.SetGlobalSpanCostCoefficient(100)
-
-    # 2: Demands
-    def demand_callback_with_index(type_index):
-        def demand_callback(from_index):
-            local_type_index = type_index
-            from_node = manager.IndexToNode(from_index)
-            # print("New: " + str(from_node))
-            # print(local_type_index)
-            if from_node in data['starts']:
-                return 0
-            if from_node == end_node_index:
-                return 0
-            demand_type_name = data['demand_types'][local_type_index]
-            demand_data = data[demand_type_name]
-            # print(demand_data)
-            demand = demand_data[from_node]
-            # print(demand)
-            return demand
-
-        return demand_callback
-
-    if item_type is None:
-        for i in range(len(data['demand_types'])):
-            demand_callback_index = routing.RegisterUnaryTransitCallback(
-                demand_callback_with_index(i))
-            routing.AddDimensionWithVehicleCapacity(
-                demand_callback_index,
-                0,
-                data[data['supply_types'][i]],
-                True,
-                data['item_types'][i],
-            )
-    else:
-        demand_callback_index = routing.RegisterUnaryTransitCallback(
-            demand_callback_with_index(item_type))
-        routing.AddDimensionWithVehicleCapacity(
-            demand_callback_index,
-            0,
-            data[data['supply_types'][item_type]],
-            True,
-            data['item_types'][item_type],
-        )
-    # Perform algorithm
-    # Setting first solution heuristic.
-    initial_solution = None
-    if algo_data_init:
-        initial_solution = routing.ReadAssignmentFromRoutes(algo_data_init['routes'], True)
-        if initial_solution is not None:
-            print_or_solution(data, manager, routing, initial_solution)
-    search_parameters = pywrapcp.DefaultRoutingSearchParameters()
-    search_parameters.first_solution_strategy = (
-        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
-    search_parameters.local_search_metaheuristic = (
-        routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH)
-    search_parameters.time_limit.FromSeconds(30)
-
-    # Solve the problem.
-    solution = routing.SolveWithParameters(search_parameters)
-
-    # Print solution on console.
-    if solution:
-        print_or_solution(data, manager, routing, solution)
-
-    solution_from_init = routing.SolveFromAssignmentWithParameters(initial_solution, search_parameters)
-    if solution_from_init:
-        print_or_solution(data, manager, routing, solution_from_init)
-    return solution
 
 
 def algo_v1(orig_data, algo_data_init=None):
@@ -618,9 +518,11 @@ def algo_test(model):
     #               min_supply=100, max_supply=1000)
     print("Generating data model from database...")
     data = generate_data_model_from_db()
-    print("Displaying minimum/ideal fulfillment ratios...")
     total_demands = np.sum(data['demand_matrix'], axis=0)
     excess = total_demands - np.sum(data['supply_matrix'], axis=0)
+    print("Displaying maximum distributed supplies...")
+    print(np.sum(data['supply_matrix'], axis=0))
+    print("Displaying minimum/ideal fulfillment ratios...")
     print(np.divide(excess, total_demands))
     # print("Calculating custom algorithm...")
     # results, manipulated_data = algo_main(data)
@@ -629,11 +531,9 @@ def algo_test(model):
         print("Running the greedy simple algorithm")
         return algo_v1(data)
     elif model == "google-or":
-        print("Calculating one-supply type problem for custom algorithm...")
-        algo_data, _ = algo_v1(data)
-
         print("Calculating using Google OR algorithm...")
-        res = algo_or(data, algo_data_init=algo_data, item_type=1)
+        unisplit_algo_or(data)
+        return
     elif model == "ga":
         print("Running the genetic algorithm model...")
         return run_ga_algo(data)

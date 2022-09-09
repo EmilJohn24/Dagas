@@ -584,24 +584,24 @@ def run_ga_algo(data):
     pool = ThreadPool(n_threads)
     runner = StarmapParallelization(pool.starmap)
 
-    problem = DagasLNNHDonorParallelizedWrapper(algo_data=data, elementwise_runner=runner, n_neighbors=3)
-    algorithm = NSGA2(pop_size=100,
-                      sampling=PermutationSequenceSampling(),  # PermutationSequenceSampling for other algos
-                      crossover=OrderCrossover(),
-                      mutation=InversionMutation(),
-                      # repair=RepetitionRepair(), # Disabled for DagasSequenceParallelizedWrapper
-                      # eliminate_duplicates=NoDuplicateElimination(),
-                      eliminate_duplicates=SimpleDuplicationElimination()
-                      )
-    # problem = DagasDenseParallelizedWrapper(algo_data=data, elementwise_runner=runner)
+    # problem = DagasLNNHDonorParallelizedWrapper(algo_data=data, elementwise_runner=runner, n_neighbors=3)
     # algorithm = NSGA2(pop_size=100,
-    #                   sampling=ClosestDenseDepotSampling(),  # PermutationSequenceSampling for other algos
+    #                   sampling=PermutationSequenceSampling(),  # PermutationSequenceSampling for other algos
     #                   crossover=OrderCrossover(),
-    #                   mutation=SwapMutation(),
+    #                   mutation=InversionMutation(),
     #                   # repair=RepetitionRepair(), # Disabled for DagasSequenceParallelizedWrapper
     #                   # eliminate_duplicates=NoDuplicateElimination(),
     #                   eliminate_duplicates=SimpleDuplicationElimination()
     #                   )
+    problem = DagasDenseParallelizedWrapper(algo_data=data, elementwise_runner=runner)
+    algorithm = NSGA2(pop_size=100,
+                      sampling=ClosestDenseDepotSampling(),  # PermutationSequenceSampling for other algos
+                      crossover=OrderCrossover(),
+                      mutation=SwapMutation(),
+                      # repair=RepetitionRepair(), # Disabled for DagasSequenceParallelizedWrapper
+                      # eliminate_duplicates=NoDuplicateElimination(),
+                      eliminate_duplicates=SimpleDuplicationElimination()
+                      )
     # algorithm = NSGA2(pop_size=100,
     #                   sampling=ClosestDepotSampling(),  # PermutationSequenceSampling for other algos
     #                   crossover=OrderCrossover(),
