@@ -17,6 +17,7 @@ Coded by www.creative-tim.com
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid";
 import Autocomplete from "@mui/material/Autocomplete";
+import { Paper, Typography, Button } from '@mui/material';
 
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
@@ -34,8 +35,7 @@ import { Formik, useFormik } from "formik";
 import * as Yup from 'yup';
 
 //Carousel
-import { CCarousel } from '@coreui/react'
-import { CCarouselItem } from '@coreui/react'
+import Carousel from 'react-material-ui-carousel'
 import { CImage } from '@coreui/react'
 
 //AXIOS and navigation
@@ -260,23 +260,23 @@ function Calamities({ google, locations = [] }) {
   //FROM https://coreui.io/react/docs/components/carousel/#how-it-works
   const carouselRender = (
     <MDBox>
-      <CCarousel controls indicators>
-        <CCarouselItem>
+      <Carousel>
+        <Paper>
           <CImage className="d-block w-100" src={tip1} alt="Tip 1" />
-        </CCarouselItem>
-        <CCarouselItem>
+        </Paper>
+        <Paper>
           <CImage className="d-block w-100" src={tip2} alt="Tip 2" />
-        </CCarouselItem>
-        <CCarouselItem>
+        </Paper>
+        <Paper>
           <CImage className="d-block w-100" src={tip3} alt="Tip 3" />
-        </CCarouselItem>
-        <CCarouselItem>
+        </Paper>
+        <Paper>
           <CImage className="d-block w-100" src={tip4} alt="Tip 4" />
-        </CCarouselItem>
-        <CCarouselItem>
+        </Paper>
+        <Paper>
           <CImage className="d-block w-100" src={tip5} alt="Tip 5" />
-        </CCarouselItem>
-      </CCarousel>
+        </Paper>
+      </Carousel>
     </MDBox>
   )
   
