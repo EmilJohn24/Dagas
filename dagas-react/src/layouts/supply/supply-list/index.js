@@ -248,7 +248,7 @@ function SupplyList() {
                                       "Water": [
                                         {primary: "Bottled Water", secondary: "500mL - 1L"}
                                       ],
-                                      "Clothes": [{primary: "Blanket", secondary: "Yung kasya tao please"}]
+                                      "Clothes": [{primary: "Blanket", secondary: "Adult sized"}]
                                     };
                                     console.log(supplyDescriptions[value]);
                                     const supplyDescriptionListRender = supplyDescriptions[value].map(({primary, secondary}) => (
