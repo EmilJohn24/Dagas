@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-    <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/purplegradientbackground"
@@ -10,7 +10,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="380dp"
-            android:layout_height="400dp"
+            android:layout_height="550dp"
             android:background="@drawable/innerlayou"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -30,10 +30,9 @@
                 android:inputType="textPersonName"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.497"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.248" />
+                app:layout_constraintVertical_bias="0.108" />
 
             <Spinner
                 android:id="@+id/spinnerType"
@@ -41,26 +40,9 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.498"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/supplyName"
-                app:layout_constraintVertical_bias="0.0" />
-
-            <EditText
-                android:id="@+id/editNumberQuantity"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/searchbar"
-                android:drawableLeft="@drawable/ic_quantity_foreground"
-                android:ems="10"
-                android:hint="Quantity"
-                android:inputType="number"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.497"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/spinnerType"
-                app:layout_constraintVertical_bias="0.056" />
+                app:layout_constraintTop_toBottomOf="@+id/editNumberPax"
+                app:layout_constraintVertical_bias="0.042" />
 
             <EditText
                 android:id="@+id/editNumberPax"
@@ -73,10 +55,9 @@
                 android:inputType="number"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.497"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editNumberQuantity"
-                app:layout_constraintVertical_bias="0.06" />
+                app:layout_constraintTop_toBottomOf="@+id/supplyName"
+                app:layout_constraintVertical_bias="0.061" />
 
             <Button
                 android:id="@+id/supplySubmitButton"
@@ -93,10 +74,25 @@
                 android:id="@+id/takeSupplyPictureButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:text="Take Picture"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.502"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/editNumberPax" />
+                app:layout_constraintTop_toBottomOf="@+id/typeDescription" />
+
+            <TextView
+                android:id="@+id/typeDescription"
+                android:layout_width="250dp"
+                android:layout_height="150dp"
+                android:background="@drawable/searchbar"
+                android:padding="25dp"
+                android:text="Description"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/spinnerType"
+                app:layout_constraintVertical_bias="0.092" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -59,8 +59,9 @@ import okhttp3.Response;
 public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyCallback {
     private final static String TAG = EvacuationVisualMapFragment.class.getName();
     private static String roleVerbose = null;
+    private static String CURR_EVAC_CENTER_URL = "/relief/api/evacuation-center/current_evac/";
     public static class GrabEvacsThread extends DagasJSONServerThread {
-        private static final String CURR_EVAC_CENTER_URL = "/relief/api/evacuation-center/current_evac/";
+//        private static final String CURR_EVAC_CENTER_URL = "/relief/api/evacuation-center/current_evac/";
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
 
@@ -85,6 +86,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
         }
         private void grabEvacCoords() throws IOException, JSONException {
             JSONArray evacCenterJSONArray = this.getList(CURR_EVAC_CENTER_URL);
+//            Log.e(TAG, evacCenterJSONArray.getJSONObject(0).getString());
             for (int typeIndex = 0; typeIndex < evacCenterJSONArray.length(); typeIndex++) {
                 JSONObject typeJSONObject = evacCenterJSONArray.getJSONObject(typeIndex);
                 this.centers.add(typeJSONObject);
@@ -177,6 +179,9 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        if(roleVerbose.equals("2")) {
+            CURR_EVAC_CENTER_URL = "/relief/api/evacuation-center/";
+        }
         if(!roleVerbose.equals("3")) {
             root.findViewById(R.id.addEvacButton).setVisibility(View.INVISIBLE);
             root.findViewById(R.id.searchBarContainer).setVisibility(View.INVISIBLE);
@@ -231,7 +236,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
             String name = null;
             try {
                 coord = center.getString("geolocation");
-                name = center.getString("name");
+                name = center.getString("name") + " (Barangay " + center.getString("barangays") + ")";
 
             } catch (JSONException e) {
                 Log.e(TAG, e.getMessage());

@@ -40,6 +40,7 @@ function EvacuationMap({ google, locations = [] }){
         const cache = new LRU({max: 10})
         configure({axiosConfig, cache});
         const [{data, loading, error}, refetch] = useAxios("/relief/api/evacuation-center/");
+        const [{data: profileData, loading: profileLoading, error: profileError}, refetchProfile] = useAxios("/relief/api/users/current_user/");
         const {
             placesService,
             placePredictions,
@@ -64,8 +65,8 @@ function EvacuationMap({ google, locations = [] }){
         console.log(clickMarkerCoord);
         console.log(placePredictions);
         console.log(data);
-        if (loading) return;
-        if (error) return <Navigate to="/login"/>;
+        if (loading || profileLoading) return;
+        if (error || profileError) return <Navigate to="/login"/>;
         
         const onMarkerClick = (props, marker, e) =>{
             setSelectedPlace(props);
@@ -187,9 +188,9 @@ function EvacuationMap({ google, locations = [] }){
                   )}</Formik>
         );
 
-        
-        
-        return (
+        console.log(profileData.role_verbose);
+        console.log(profileData.role_verbose == 'Barangay');
+        return profileData.role_verbose == 'Barangay' ? (
             <DashboardLayout>
                 <DashboardNavbar />
                     <MDBox p={10} mr={2}>
@@ -233,6 +234,46 @@ function EvacuationMap({ google, locations = [] }){
                             <Grid xs={3} p={1}>
                                 {formikRender}
                             </Grid>
+                        </Grid>
+                    </MDBox>
+                <Footer />
+            </DashboardLayout>
+        ) : (
+            <DashboardLayout>
+                <DashboardNavbar />
+                    <MDBox p={10} mr={2}>
+                        <Grid spacing={1} p={2} container style={{backgroundColor: '#ffffff' }}>
+                            <Grid xs={12} p={3} container justifyContent="center">
+                                <div style={{ width: 1000, height: 1000 }}>
+                                    <Map
+                                        google={google}
+                                        zoom={14}
+                                        containerStyle={mapStyles}
+                                        center={clickMarkerCoord}
+                                        initialCenter={
+                                            clickMarkerCoord? clickMarkerCoord :{
+                                                lat: 14.546047,
+                                                lng: 121.069761
+                                            }
+                                        }
+                                    >
+                                        {/* <Marker
+                                            onClick={onMarkerClick}
+                                            name={'Kenyatta International Convention Centre'}
+                                        /> */}
+                                        {evacMarkerRender}
+                                        <InfoWindow
+                                            marker={activeMarker}
+                                            visible={showingInfoWindow}
+                                            onClose={onClose}>
+                                            <div>
+                                                <h4>{selectedPlace.name}</h4>
+                                            </div>
+                                        </InfoWindow>
+                                    </Map>
+                                </div>
+                            </Grid>
+
                         </Grid>
                     </MDBox>
                 <Footer />

@@ -10,10 +10,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
@@ -27,10 +29,13 @@ import com.cnil.dagas.databinding.FragmentDonorAddSupplyBinding;
 import com.cnil.dagas.databinding.NextPreviousBinding;
 import com.cnil.dagas.http.DagasJSONServer;
 import com.cnil.dagas.http.OkHttpSingleton;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,7 +57,7 @@ public class DonorAddSupply extends Fragment {
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
         private final int donationID;
         private final String supplyName;
-        private final int quantity, pax;
+        private final int pax;
         private final int type;
         private String responseSupplyName;
         private int responseSupplyId;
@@ -60,10 +65,9 @@ public class DonorAddSupply extends Fragment {
         String getResponseSupplyName(){
             return this.responseSupplyName;
         }
-        SupplyAddThread(int donationID, String supplyName, int quantity, int pax, int type){
+        SupplyAddThread(int donationID, String supplyName, int pax, int type){
             this.donationID = donationID;
             this.supplyName = supplyName;
-            this.quantity = quantity;
             this.pax = pax;
             this.type = type;
         }
@@ -81,7 +85,7 @@ public class DonorAddSupply extends Fragment {
                 createRequestJSON.put("name", supplyName);
                 // TODO: Check type + 1 (index)
                 createRequestJSON.put("type", type + 1);
-                createRequestJSON.put("quantity", quantity);
+                createRequestJSON.put("quantity", pax);
                 createRequestJSON.put("pax", pax);
                 createRequestJSON.put("donation", donationID);
             } catch (JSONException e) {
@@ -192,6 +196,7 @@ public class DonorAddSupply extends Fragment {
         });
         //Load spinner content
         Spinner spinnerType = root.findViewById(R.id.spinnerType);
+        TextView typeDescription = root.findViewById(R.id.typeDescription);
         DonorAddThread thread = new DonorAddThread();
         thread.start();
         try {
@@ -201,10 +206,28 @@ public class DonorAddSupply extends Fragment {
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_spinner_item, thread.getTypes());
         spinnerType.setAdapter(adapter);
+        spinnerType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String type = spinnerType.getSelectedItem().toString();
+                try {
+                    if(type.equals("food")) typeDescription.setText("Rice [1-2 kilo/s]\nCup noodles[2 cups]\nCanned Goods (i.e. Sardines, Corned Beef, Meatloaf) [2 cans]");
+                    else if(type.equals("water")) typeDescription.setText("Bottled Water [500mL - 1L]");
+                    else if(type.equals("clothes")) typeDescription.setText("Blanket [Yung kasya tao please]");
+                    else typeDescription.setText(spinnerType.getSelectedItem().toString());
+                } catch (Exception e) {
+                    Log.e(TAG, e.getMessage());
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
         // Form data
         EditText supplyName = root.findViewById(R.id.supplyName);
-        EditText editNumberQuantity = root.findViewById(R.id.editNumberQuantity);
         EditText editNumberPax = root.findViewById(R.id.editNumberPax);
         int editDonationId = -1;
         JSONObject supplyLiveData = null;
@@ -216,7 +239,6 @@ public class DonorAddSupply extends Fragment {
             }
             supplyName.setText(supplyData.getName());
             if (supplyLiveData != null) {
-                editNumberQuantity.setText(String.valueOf(supplyLiveData.optInt("quantity")));
                 editNumberPax.setText(String.valueOf(supplyLiveData.optInt("pax")));
                 editDonationId = supplyLiveData.optInt("donation");
             }
@@ -267,7 +289,6 @@ public class DonorAddSupply extends Fragment {
                     if (finalSupplyData == null) {
                         SupplyAddThread supplyThread = new SupplyAddThread(thread.getDonationID(),
                                 supplyName.getText().toString(),
-                                Integer.parseInt(editNumberQuantity.getText().toString()),
                                 Integer.parseInt(editNumberPax.getText().toString()), spinnerType.getSelectedItemPosition());
                         supplyThread.start();
                         supplyThread.join();
@@ -281,7 +302,6 @@ public class DonorAddSupply extends Fragment {
                         // if editing supply
                         JSONObject supplyEdit = new JSONObject();
                         supplyEdit.put("name", supplyName.getText().toString());
-                        supplyEdit.put("quantity", Integer.parseInt(editNumberQuantity.getText().toString()));
                         supplyEdit.put("pax", Integer.parseInt(editNumberPax.getText().toString()));
                         supplyEdit.put("type", spinnerType.getSelectedItemPosition() + 1);
                         supplyEdit.put("donation", finalEditDonationId);
@@ -293,7 +313,6 @@ public class DonorAddSupply extends Fragment {
 
                     supplyName.getText().clear();
                     editNumberPax.getText().clear();
-                    editNumberQuantity.getText().clear();
                     spinnerType.setSelection(0);
 
                 } catch (JSONException | InterruptedException e) {
