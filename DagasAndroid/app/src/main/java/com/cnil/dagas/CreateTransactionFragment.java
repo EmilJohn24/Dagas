@@ -279,12 +279,13 @@ public class CreateTransactionFragment extends Fragment {
             //TODO: Do dimensions.xml version:
             // https://stackoverflow.com/questions/9494037/how-to-set-text-size-of-textview-dynamically-for-different-screens
             typeName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f);
+            typeName.setGravity(Gravity.CENTER);
             typeName.setBackgroundResource(R.drawable.createtransactionsearch);
             untransactedAmountTextView.setText(String.valueOf(untransactedAmount));
             untransactedAmountTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f);
-            untransactedAmountTextView.setPaddingRelative(300,10,0,10);
+//            untransactedAmountTextView.setPaddingRelative(300,10,0,10);
             untransactedAmountTextView.setBackgroundResource(R.drawable.createtransactionsearch);
-            untransactedAmountTextView.setGravity(Gravity.RIGHT);
+            untransactedAmountTextView.setGravity(Gravity.CENTER);
             if(i == 0){
                 TableRow headerRow = new TableRow(this.getContext());
 
@@ -302,7 +303,7 @@ public class CreateTransactionFragment extends Fragment {
                 amountHeader.setGravity(Gravity.CENTER);
                 amountHeader.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f);
                 amountHeader.setGravity(Gravity.CENTER);
-                amountHeader.setPaddingRelative(300,10,0,10);
+//                amountHeader.setPaddingRelative(300,10,0,10);
                 amountHeader.setBackgroundResource(R.drawable.createtransactionsearch);
                 headerRow.addView(amountHeader);
                 transactionTable.addView(headerRow);

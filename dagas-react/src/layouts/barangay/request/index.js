@@ -123,13 +123,17 @@ function BarangayRequest(props) {
       executeClothesRequestPost({
           data: requestValues
       });
-      if (isSubmitted) navigation('/requests');
+      //if (isSubmitted) navigation('/requests');
   }, [postLoading, postRequest, isSubmitted])
 //   const handleSubmit = (event) => {
 
     
 // };
-
+  useEffect(() => {
+      if (postFoodRequest && postWaterRequest && postClothesRequest && !postFoodLoading && !postWaterLoading && !postClothesLoading){
+        navigation('/requests');
+      }
+  }, [postFoodRequest, postWaterRequest, postClothesRequest, postClothesLoading, postWaterLoading, postFoodLoading])
   if (loading) return;
   if (error) return <Navigate to="/login"/>;
   const listEvacuationCenters = data.map((data) =>
@@ -171,7 +175,7 @@ function BarangayRequest(props) {
                 setWaterAmount(values.water);
                 setClothesAmount(values.clothes);
                 
-                alert("Supplies Requested!")
+                alert("Supplies Requested!");
                 setIsSubmitted(true);
               }
             }>{
@@ -193,7 +197,7 @@ function BarangayRequest(props) {
                           </MDTypography>
                         </Grid>
                         <Grid xs={6} pl={5} pr={5} pt={1}>
-                          <Tooltip title="help me God">
+                          <Tooltip title="1-2 kilo/s Rice, 2 Cup Noodles, 2 Canned Goods">
                             <TextField id="foodAmount" label="Amount" fullWidth color="secondary" type='number' {...formik.getFieldProps('food')}/>
                           </Tooltip>
                         </Grid>
@@ -207,7 +211,7 @@ function BarangayRequest(props) {
                           </MDTypography>
                         </Grid>
                         <Grid xs={6} pl={5} pr={5} pt={1}>
-                          <Tooltip title="help me God">
+                          <Tooltip title="500mL - 1L Bottled Water">
                             <TextField id="waterAmount" label="Amount" fullWidth color="secondary" type='number'  {...formik.getFieldProps('water')}/>
                           </Tooltip> 
                         </Grid>
@@ -221,7 +225,7 @@ function BarangayRequest(props) {
                           </MDTypography>
                         </Grid>
                         <Grid xs={6} pl={5} pr={5} pt={1}>
-                          <Tooltip title="help me God">
+                          <Tooltip title="Blanket">
                            <TextField id="clothesAmount" label="Amount" fullWidth color="secondary" type='number'  {...formik.getFieldProps('clothes')}/>
                           </Tooltip>
                         </Grid>
