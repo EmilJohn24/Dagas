@@ -123,13 +123,17 @@ function BarangayRequest(props) {
       executeClothesRequestPost({
           data: requestValues
       });
-      if (isSubmitted) navigation('/requests');
+      //if (isSubmitted) navigation('/requests');
   }, [postLoading, postRequest, isSubmitted])
 //   const handleSubmit = (event) => {
 
     
 // };
-
+  useEffect(() => {
+      if (postFoodRequest && postWaterRequest && postClothesRequest && !postFoodLoading && !postWaterLoading && !postClothesLoading){
+        navigation('/requests');
+      }
+  }, [postFoodRequest, postWaterRequest, postClothesRequest, postClothesLoading, postWaterLoading, postFoodLoading])
   if (loading) return;
   if (error) return <Navigate to="/login"/>;
   const listEvacuationCenters = data.map((data) =>
@@ -171,7 +175,7 @@ function BarangayRequest(props) {
                 setWaterAmount(values.water);
                 setClothesAmount(values.clothes);
                 
-                alert("Supplies Requested!")
+                alert("Supplies Requested!");
                 setIsSubmitted(true);
               }
             }>{

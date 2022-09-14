@@ -184,7 +184,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
             elif transaction.received == Transaction.RECEIVED:
                 raise ValidationError(detail="Already received.")
         transaction.save()
-        return Response({"status": "Successful update"}, status=status.HTTP_200_OK)
+        # return Response({"status": "Successful update"}, status=status.HTTP_200_OK)
+        return Response(TransactionSerializer(transaction, context={'request': request}).data, status=status.HTTP_200_OK,)
 
     @action(detail=True, methods=['patch', 'put'], name='Upload Transaction Picture',
             permission_classes=[IsProfileUserOrReadOnly, IsAuthenticated])

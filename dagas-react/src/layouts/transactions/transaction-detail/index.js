@@ -34,7 +34,39 @@ import PaymentDetails from "./components/PaymentDetails";
 import BillingInformation from "./components/BillingInformation";
 import OrderSummary from "./components/OrderSummary";
 
+//AXIOS
+import axiosConfig from "axiosConfig";
+import LRU from 'lru-cache';
+import {configure} from 'axios-hooks';
+import useAxios from 'axios-hooks';
+import { Navigate } from "react-router-dom";
+
+//react 
+import { useState, useEffect } from "react";
+import * as React from 'react';
+
 function TransactionDetail({details}) {
+  const [roleCheck, setRole] = useState();
+
+  const cache = new LRU({max: 10})
+  configure({axiosConfig, cache});
+  const [{data, loading, error}, refetch] = useAxios("/relief/api/users/current_user/");
+  
+
+  useEffect(() => {
+    console.log("Triggered effect for handling post");
+    if (data) {
+      if (data.role_verbose == "Barangay") setRole(3);
+      else if (data.role_verbose == "Donor") setRole(2);
+      else if (data.role_verbose == "Resident") setRole(1);
+    }
+    
+  }, [data, roleCheck])
+
+  if (loading) return;
+  if (error) return <Navigate to="/login"/>
+
+
   console.log(details);
   return (
       <MDBox my={6}>
@@ -48,8 +80,8 @@ function TransactionDetail({details}) {
               <Divider />
               <MDBox pt={1} pb={3} px={2}>
                 <MDBox mb={3}>
-                  <OrderInfo qrImage={details.qr_code} status={details.status_string} 
-                          received={details.received} isExpired={details.is_expired}/>
+                  <OrderInfo orderID={details.id} qrImage={details.qr_code} status={details.status_string} 
+                          received={details.received} isExpired={details.is_expired} checkRole={roleCheck}/>
                 </MDBox>
                 <Divider />
                 <MDBox mt={3}>

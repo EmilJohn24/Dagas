@@ -23,8 +23,48 @@ import MDButton from "components/MDButton";
 import MDAvatar from "components/MDAvatar";
 import MDBadge from "components/MDBadge";
 
+//React
+import { useEffect, useState } from "react";
+import { Formik, useFormik } from "formik";
+import * as Yup from 'yup';
+import React from "react";
 
-function OrderInfo({qrImage, status, received, isExpired}) {
+//AXIOS and navigation
+import axiosConfig from "axiosConfig";
+import LRU from 'lru-cache';
+import {configure} from 'axios-hooks';
+import useAxios from 'axios-hooks';
+import { Navigate } from "react-router-dom";
+
+function OrderInfo({orderID, qrImage, status, received, isExpired, checkRole}) {
+
+  const cache = new LRU({max: 10})
+  configure({axiosConfig, cache});
+  const [{data: putTransaction, loading: transactionPutLoading, error: transactionPutError}, executeTransactionPut] = useAxios({
+    url: `/relief/api/transactions/${orderID}/quick_update_status/`,
+    method: "PUT"
+  }, {  manual: true  });
+
+  const [currentStatus, setCurrentStatus] = useState(() => status);
+  const [currentReceived, setCurrentReceived] = useState(() => received);
+
+  useEffect(() => {
+    if (putTransaction){
+      setCurrentStatus(putTransaction.status_string);
+      setCurrentReceived(putTransaction.received);
+      console.log(putTransaction);
+    }
+  }, [putTransaction, transactionPutLoading])
+
+  function handlePackage(event){
+    executeTransactionPut({});
+  }
+
+
+  if (transactionPutLoading) return;
+  if (transactionPutError) return <Navigate to="/login"/>;
+  console.log(status);
+
   const statusColors = ["error", "error", "warning", "success"]
   return (
     <Grid container spacing={3} alignItems="center">
@@ -41,28 +81,36 @@ function OrderInfo({qrImage, status, received, isExpired}) {
             </MDBox>
             <MDBadge
               variant="gradient"
-              color={isExpired?"error" : statusColors[received]}
+              color={isExpired?"error" : statusColors[currentReceived]}
               size="xs"
-              badgeContent={status}
+              badgeContent={currentStatus}
               container
             />
           </MDBox>
         </MDBox>
       </Grid>
-      <Grid item xs={12} md={6} sx={{ textAlign: "right" }}>
-        <MDButton variant="gradient" color="dark" size="small">
-          contact us
+      {checkRole == 3 && currentStatus == "Incoming"? <Grid item xs={12} md={6} sx={{ textAlign: "right" }}>
+        <MDButton onClick={handlePackage} variant="gradient" color="light" size="small">
+          Received
         </MDButton>
         <MDBox mt={0.5}>
-          <MDTypography variant="button" color="text">
-            Do you like the product? Leave us a review{" "}
-            <MDTypography component="a" href="#" variant="button" color="text" fontWeight="regular">
-              here
-            </MDTypography>
-            .
+          <MDTypography variant="subtitle2" color="text">
+            Recieved donation? Click here!
           </MDTypography>
         </MDBox>
-      </Grid>
+      </Grid>:
+      checkRole == 2 && currentStatus == "Packaging"? 
+      <Grid item xs={12} md={6} sx={{ textAlign: "right" }}>
+        <MDButton onClick={handlePackage} variant="gradient" color="light" size="small">
+          Packaged
+        </MDButton>
+        <MDBox mt={0.5}>
+          <MDTypography variant="subtitle2" color="text">
+            Packaged your donation? Click here!
+          </MDTypography>
+        </MDBox>
+      </Grid>:null
+      }
     </Grid>
   );
 }
