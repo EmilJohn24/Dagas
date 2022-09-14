@@ -61,6 +61,38 @@ class ClosestDepotSampling(Sampling):
         return np.array(samples)
 
 
+class ClosestSoloDepotSampling(Sampling):
+    def _do(self, problem, n_samples, **kwargs):
+        samples = []
+        request_count = problem.algo_data['num_requests']
+        distance_matrix_d2r = problem.algo_data['distance_matrix']
+        current_node = problem.algo_data['starts'][0]  # Donor
+        visited_nodes = [current_node]
+        route = []
+        while not len(route) == request_count:
+            requests_sorted = np.argsort(distance_matrix_d2r[:request_count, current_node])
+            for request_ix in requests_sorted:
+                if request_ix not in visited_nodes and not request_ix == current_node:
+                    route.append(request_ix)
+                    visited_nodes.append(request_ix)
+                    current_node = request_ix
+                    break
+        # for i in range(n_samples):
+        samples.append(np.array(route))
+        itr_specimen = np.array(route)
+        for i in range(n_samples - 1):
+            # ITR (Iterated Swap Procedure)
+            swap_genes = random.sample(range(1, request_count - 1), 2)  # return 2 random genes
+            itr_specimen[swap_genes[0]], itr_specimen[swap_genes[1]] = itr_specimen[swap_genes[1]], \
+                                                                       itr_specimen[swap_genes[0]]
+            for swap_gene in swap_genes:
+                sequence = itr_specimen[swap_gene - 1:swap_gene + 2]
+                np.random.shuffle(sequence)
+                itr_specimen[swap_gene - 1:swap_gene + 2] = sequence
+            samples.append(itr_specimen)
+        return np.array(samples)
+
+
 class PermutationCombinedRouteSampling(Sampling):
     def _do(self, problem, n_samples, **kwargs):
         samples = []
