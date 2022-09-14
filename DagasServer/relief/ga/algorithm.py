@@ -16,7 +16,7 @@ from relief.ga.dupl_elim import SimpleDuplicationElimination
 from relief.ga.mutation import SwapMutation
 from relief.ga.repair import RepetitionRepair
 from relief.ga.sampling import PermutationSequenceSampling, PermutationCombinedRouteSampling, ClosestDepotSampling, \
-    ClosestDenseDepotSampling
+    ClosestDenseDepotSampling, ClosestSoloDepotSampling
 
 metadata = {}
 
@@ -63,8 +63,7 @@ class DagasProblemParalellizedWrapper(ElementwiseProblem):
     def chromosome_to_routes(self, chromosome) -> object:
         pass
 
-    @staticmethod
-    def fitness_func(routes, working_data):
+    def fitness_func(self, routes, working_data):
         global metadata
 
         def get_total_weighted_demand(request_index):
@@ -99,6 +98,69 @@ class DagasProblemParalellizedWrapper(ElementwiseProblem):
     def _evaluate(self, x, out, *args, **kwargs):
         routes, working_data = self.chromosome_to_routes(x)
         out['F'] = np.array(self.fitness_func(routes, working_data))
+
+
+class DagasSoloProblemParalellizedWrapper(DagasProblemParalellizedWrapper):
+    def __init__(self, elementwise=True, algo_data=None, **kwargs):
+        chromosome_length = algo_data['num_requests']
+        lower_bound = np.zeros(chromosome_length)
+        upper_bound = np.full(chromosome_length, chromosome_length - 1)
+        super().__init__(elementwise, algo_data,
+                         n_var=chromosome_length, n_obj=1 + len(algo_data['item_types']),
+                         xl=lower_bound, xu=upper_bound, **kwargs)
+
+    def chromosome_to_routes(self, chromosome) -> object:
+        global metadata
+        route = []
+
+        working_data = copy.deepcopy(self.algo_data)
+        for gene in chromosome:
+
+            if np.sum(working_data['supply_matrix']) == 0 or np.sum(working_data['demand_matrix']) == 0:
+                break
+            if np.sum(working_data['demand_matrix'][gene]) == 0:
+                continue
+            for type_index in range(len(working_data['item_types'])):
+                current_supply = working_data['supply_matrix'][type_index]
+                current_demand = working_data['demand_matrix'][gene][type_index]
+                surplus = current_supply - current_demand
+                if surplus >= 0:
+                    working_data['demand_matrix'][gene][type_index] = 0
+                    working_data['supply_matrix'][type_index] = surplus
+
+                else:
+                    working_data['demand_matrix'][gene][type_index] = abs(surplus)
+                    working_data['supply_matrix'][type_index] = 0
+            route.append(gene)
+        return route, working_data
+
+    def fitness_func(self, route, working_data):
+        global metadata
+
+        def get_total_weighted_demand(request_index):
+            """This currently assumes all supply types are equally valuable"""
+            return np.sum(metadata['demand_matrix'][request_index])
+
+        demands = np.zeros(metadata['num_requests'])
+        for request_ix in range(metadata['num_requests']):
+            demands[request_ix] = get_total_weighted_demand(request_ix)
+
+        total_distance = 0
+        max_distance = 0
+        # Initialize distance between donor and first evacuation node
+        # Fitness 1: Total distance
+        start_node = working_data['starts'][0]
+        route_distance = distance_between(start_node, route[0])
+        for i, j in window(route):
+            route_distance += distance_between(i, j)
+        route_distance += distance_between(route[len(route) - 1], start_node)
+        if route_distance > max_distance:
+            total_distance += route_distance
+
+        # Fitness 2: Unmet demand
+        unmet_demand = np.sum(working_data['demand_matrix'], axis=0)
+        unmet_demand_ratio = unmet_demand / np.sum(metadata['demand_matrix'], axis=0)
+        return total_distance, *unmet_demand_ratio
 
 
 class DagasSequenceParalellizedWrapper(DagasProblemParalellizedWrapper):
@@ -353,8 +415,8 @@ class DagasLNNHDonorParallelizedWrapper(DagasProblemParalellizedWrapper):
                     neighbor_closest_requests = np.argsort(self.algo_data['distance_matrix'][neighbor_ix,
                                                            :request_count])
                     neighbor_closest_requests = neighbor_closest_requests[np.logical_and(
-                                                                    neighbor_closest_requests != current_node,
-                                                                    neighbor_closest_requests != neighbor_ix)]
+                        neighbor_closest_requests != current_node,
+                        neighbor_closest_requests != neighbor_ix)]
                     # np.logical_not(np.isin(closest_requests, routes[gene]))
                     neighbor_closest_requests = neighbor_closest_requests[np.logical_not(
                         np.isin(neighbor_closest_requests, routes[gene]))]
@@ -576,6 +638,36 @@ class DagasDenseParallelizedWrapper(DagasProblemParalellizedWrapper):
 #         out['F'] = np.array(results)
 
 
+def run_solo_ga_algo(data):
+    global metadata
+    metadata = data
+    # Parallelization Configuration
+    n_threads = 20
+    pool = ThreadPool(n_threads)
+    runner = StarmapParallelization(pool.starmap)
+
+    problem = DagasSoloProblemParalellizedWrapper(algo_data=data, elementwise_runner=runner)
+    algorithm = NSGA2(pop_size=100,
+                      sampling=ClosestSoloDepotSampling(),  # PermutationSequenceSampling for other algos
+                      crossover=OrderCrossover(),
+                      mutation=InversionMutation(),
+                      # repair=RepetitionRepair(), # Disabled for DagasSequenceParallelizedWrapper
+                      # eliminate_duplicates=NoDuplicateElimination(),
+                      eliminate_duplicates=SimpleDuplicationElimination()
+                      )
+
+    terminating_condition = get_termination('n_gen', 1, )
+    res = minimize(
+        problem=problem,
+        algorithm=algorithm,
+        termination=terminating_condition,
+        seed=4,
+        verbose=True,
+    )
+    print(res.F)
+    return res, problem
+
+
 def run_ga_algo(data):
     global metadata
     metadata = data
@@ -584,24 +676,24 @@ def run_ga_algo(data):
     pool = ThreadPool(n_threads)
     runner = StarmapParallelization(pool.starmap)
 
-    # problem = DagasLNNHDonorParallelizedWrapper(algo_data=data, elementwise_runner=runner, n_neighbors=3)
-    # algorithm = NSGA2(pop_size=100,
-    #                   sampling=PermutationSequenceSampling(),  # PermutationSequenceSampling for other algos
-    #                   crossover=OrderCrossover(),
-    #                   mutation=InversionMutation(),
-    #                   # repair=RepetitionRepair(), # Disabled for DagasSequenceParallelizedWrapper
-    #                   # eliminate_duplicates=NoDuplicateElimination(),
-    #                   eliminate_duplicates=SimpleDuplicationElimination()
-    #                   )
-    problem = DagasDenseParallelizedWrapper(algo_data=data, elementwise_runner=runner)
+    problem = DagasNNHDonorParallelizedWrapper(algo_data=data, elementwise_runner=runner, n_neighbors=3)
     algorithm = NSGA2(pop_size=100,
-                      sampling=ClosestDenseDepotSampling(),  # PermutationSequenceSampling for other algos
+                      sampling=PermutationSequenceSampling(),  # PermutationSequenceSampling for other algos
                       crossover=OrderCrossover(),
-                      mutation=SwapMutation(),
+                      mutation=InversionMutation(),
                       # repair=RepetitionRepair(), # Disabled for DagasSequenceParallelizedWrapper
                       # eliminate_duplicates=NoDuplicateElimination(),
                       eliminate_duplicates=SimpleDuplicationElimination()
                       )
+    # problem = DagasDenseParallelizedWrapper(algo_data=data, elementwise_runner=runner)
+    # algorithm = NSGA2(pop_size=100,
+    #                   sampling=ClosestDenseDepotSampling(),  # PermutationSequenceSampling for other algos
+    #                   crossover=OrderCrossover(),
+    #                   mutation=SwapMutation(),
+    #                   # repair=RepetitionRepair(), # Disabled for DagasSequenceParallelizedWrapper
+    #                   # eliminate_duplicates=NoDuplicateElimination(),
+    #                   eliminate_duplicates=SimpleDuplicationElimination()
+    #                   )
     # algorithm = NSGA2(pop_size=100,
     #                   sampling=ClosestDepotSampling(),  # PermutationSequenceSampling for other algos
     #                   crossover=OrderCrossover(),

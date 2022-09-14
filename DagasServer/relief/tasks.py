@@ -13,13 +13,15 @@ from celery import shared_task
 # https://docs.celeryq.dev/en/latest/django/first-steps-with-django.html#using-celery-with-django
 from django.contrib.auth import get_user_model
 from django.contrib.sessions.backends.db import SessionStore
+from django.core.exceptions import ValidationError
 from django.http import HttpRequest
 from django.utils.datetime_safe import datetime
 from django.utils import timezone
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
+from rest_framework import status
 
-from relief.ga.algorithm import run_ga_algo
-from relief.google_or.algorithm import algo_or
+from relief.ga.algorithm import run_ga_algo, run_solo_ga_algo
+from relief.google_or.tsp import algo_or
 from relief.google_or.unisplit_algo import unisplit_algo_or
 from relief.models import DonorProfile, BarangayRequest, User, ItemType, Supply, ResidentProfile, Donation, \
     UserLocation, ItemRequest, Transaction, TransactionOrder, EvacuationCenter, BarangayProfile, Fulfillment, RouteNode, \
@@ -36,6 +38,8 @@ from haversine import haversine_vector, Unit
 from relief.serializers import UserSerializer, EvacuationCenterSerializer, UserLocationSerializer, DonationSerializer, \
     CustomRegisterSerializer
 from shapely.geometry import Polygon, Point
+
+from relief.tabu.algorithm import tabu_algorithm
 
 
 def window(seq, n=2):
@@ -143,8 +147,6 @@ def simple_detail_routing(data, donor_mat_index, route):
     return new_route
 
 
-
-
 def algo_v1(orig_data, algo_data_init=None):
     # Algo-data setup
     #   1: Requests assigned to each donor
@@ -192,7 +194,7 @@ def algo_v1(orig_data, algo_data_init=None):
         chosen_request_index = None
         chosen_position = None
         for request_index in range(data['num_requests']):
-        # for request_index in [index for index, x in enumerate(algo_data['request_assignments']) if x is None]:
+            # for request_index in [index for index, x in enumerate(algo_data['request_assignments']) if x is None]:
             for donor_index in range(data['num_vehicles']):
                 # donor_supply = data['supply_matrix'][donor_index][item_type_index]
                 # request_demand = data['demand_matrix'][request_index][item_type_index]
@@ -255,7 +257,7 @@ def algo_main(data):
 
 
 # Data handling
-def generate_data_model_from_db():
+def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     """
     Returns a dictionary containing all relevant data sets from the database
     """
@@ -267,17 +269,26 @@ def generate_data_model_from_db():
     evacuation_lons = list(map(lambda request_tuple: request_tuple.lon, evacuation_geolocations))
 
     #   Phase 2: Get Donor Latitudes and Longitudes
-    donors = DonorProfile.objects.all()
-
+    donors = None
     valid_donors = []
     donor_lats = []
     donor_lons = []
-    for donor in donors:
-        # TODO: Consider creating geolocation for user directly.
-        if donor.user.get_most_recent_location():
-            donor_lats.append(donor.user.get_most_recent_location().geolocation.lat)
-            donor_lons.append(donor.user.get_most_recent_location().geolocation.lon)
-            valid_donors.append(donor)
+    if not solo_mode:
+        donors = DonorProfile.objects.all()
+
+        for donor in donors:
+            # TODO: Consider creating geolocation for user directly.
+            if donor.user.get_most_recent_location():
+                donor_lats.append(donor.user.get_most_recent_location().geolocation.lat)
+                donor_lons.append(donor.user.get_most_recent_location().geolocation.lon)
+                valid_donors.append(donor)
+    else:
+        if solo_donor.user.get_most_recent_location():
+            donor_lats.append(solo_donor.user.get_most_recent_location().geolocation.lat)
+            donor_lons.append(solo_donor.user.get_most_recent_location().geolocation.lon)
+            valid_donors.append(solo_donor)
+        else:
+            raise ValidationError("Your location is unknown", code=status.HTTP_400_BAD_REQUEST, )
     #   Phase 3: Append coordinates (for haversine)
     combined_coords = list(zip(evacuation_lats + donor_lats, evacuation_lons + donor_lons))
     combined_coords_len = len(combined_coords)
@@ -296,7 +307,10 @@ def generate_data_model_from_db():
     data['demand_types'] = []
     data['supply_types'] = []
     data['demand_matrix'] = np.zeros((len(barangay_requests), len(ItemType.objects.all())))
-    data['supply_matrix'] = np.zeros((len(valid_donors), len(ItemType.objects.all())))
+    if solo_mode:
+        data['supply_matrix'] = np.zeros(len(ItemType.objects.all()))
+    else:
+        data['supply_matrix'] = np.zeros((len(valid_donors), len(ItemType.objects.all())))
     for type_index, item_type in enumerate(ItemType.objects.all()):
         item_type_name = item_type.name
         demand_type_name = item_type_name + '_demand'
@@ -307,16 +321,25 @@ def generate_data_model_from_db():
         data[demand_type_name] = []
         data[supply_type_name] = []
         for request_index, request in enumerate(barangay_requests):
-            data['demand_matrix'][request_index][type_index] = request.calculate_untransacted_pax(item_type)
+            data['demand_matrix'][request_index][type_index] = request.calculate_untransacted_pax(item_type) \
+                                                               - request.calculate_suggested_pax(item_type)
             data[demand_type_name].append(request.calculate_untransacted_pax(item_type))
         data[demand_type_name + '_total'] = sum(data[demand_type_name])
-        for donor_ix, donor in enumerate(valid_donors):
+        if not solo_mode:
+            for donor_ix, donor in enumerate(valid_donors):
+                total_supply = 0
+                supplies = Supply.objects.filter(donation__donor=donor, type=item_type)
+                for supply in supplies:
+                    total_supply += supply.calculate_available_pax()
+                data[supply_type_name].append(total_supply)
+                data['supply_matrix'][donor_ix][type_index] = total_supply
+        else:
             total_supply = 0
-            supplies = Supply.objects.filter(donation__donor=donor, type=item_type)
+            supplies = Supply.objects.filter(donation__donor=solo_donor, type=item_type)
             for supply in supplies:
                 total_supply += supply.calculate_available_pax()
             data[supply_type_name].append(total_supply)
-            data['supply_matrix'][donor_ix][type_index] = total_supply
+            data['supply_matrix'][type_index] = total_supply
     data['donor_objs'] = valid_donors
     data['request_objs'] = list(barangay_requests)
     return data
@@ -509,6 +532,40 @@ def routes_to_db(input_data, algo_data):
                     type=item_type,
                     pax=item_count,
                 )
+
+
+def solo_algo_tests(model, donor_ix):
+    donors = DonorProfile.objects.all()
+    # donor = donors[random.randint(0, len(donors) - 1)]
+    donor = donors[donor_ix]
+    print("Generating data model from database...")
+    data = generate_data_model_from_db(solo_mode=True, solo_donor=donor)
+    total_demands = np.sum(data['demand_matrix'], axis=0)
+    excess = total_demands - np.sum(data['supply_matrix'], axis=0)
+    print("Displaying maximum distributed supplies...")
+    print(np.sum(data['supply_matrix'], axis=0))
+    print("Displaying minimum/ideal fulfillment ratios...")
+    print(np.divide(excess, total_demands))
+    # print("Calculating custom algorithm...")
+    # results, manipulated_data = algo_main(data)
+    res = None
+    # if model == "standard":
+    #     print("Running the greedy simple algorithm")
+    #     return algo_v1(data)
+    # elif model == "google-or":
+    #     print("Calculating using Google OR algorithm...")
+    #     unisplit_algo_or(data)
+    #     return
+    if model == "ga":
+        print("Running the genetic algorithm model...")
+        ga_res = run_solo_ga_algo(data)
+    if model == "or":
+        print("Running the Google OR algorithm...")
+        or_res = algo_or(data)
+    if model == "tabu":
+        print("Running the Tabu search")
+        tabu_res = tabu_algorithm(data)
+        print(tabu_res)
 
 
 def algo_test(model):

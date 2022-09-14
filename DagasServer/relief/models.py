@@ -1,6 +1,6 @@
 from time import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import StringIO
 
 import django.contrib.auth
@@ -202,15 +202,13 @@ class Supply(models.Model):
     type = models.ForeignKey(ItemType, on_delete=models.CASCADE, related_name='supplies')
     quantity = models.IntegerField()
     pax = models.IntegerField()
-    donation = models.ForeignKey(Donation, on_delete=models.CASCADE, related_name='supplies', null=True, blank=True,)
+    donation = models.ForeignKey(Donation, on_delete=models.CASCADE, related_name='supplies', null=True, blank=True, )
     transaction = models.ForeignKey(to="Transaction", on_delete=models.CASCADE, related_name='transaction_supply',
                                     null=True)
     picture = models.ImageField(null=True, blank=True, upload_to=supply_image_path)
-    donor = models.ForeignKey(to="DonorProfile", on_delete=models.CASCADE, 
-                        related_name='donor_supplies', null=True, blank=True,)
-    datetime_added = models.DateTimeField('Date added', null=True, default=datetime.now,)
-
-
+    donor = models.ForeignKey(to="DonorProfile", on_delete=models.CASCADE,
+                              related_name='donor_supplies', null=True, blank=True, )
+    datetime_added = models.DateTimeField('Date added', null=True, default=datetime.now, )
 
     # Not in transaction
     def calculate_available_pax(self):
@@ -268,6 +266,7 @@ class Transaction(models.Model):
 
     # Constants
     EXPIRATION_TIME_HRS = 24
+
     def status_string(self):
         if self.is_expired():
             return "Expired"
@@ -277,6 +276,7 @@ class Transaction(models.Model):
             return "Incoming"
         if self.received == Transaction.RECEIVED:
             return "Received"
+
     def is_expired(self):
         timespan = datetime.now(timezone.utc) - self.created_on
         timespan_hrs = timespan.seconds / 60 / 60
@@ -297,12 +297,13 @@ class Transaction(models.Model):
             img.save(qr_code_file)
             self.qr_code = qr_code_file
         if self.received == Transaction.RECEIVED and self.received is None:
-            self.received_date = timezone.now(timezone.utc)
+            self.received_date = datetime.now(timezone.utc)
         super(Transaction, self).save(*args, **kwargs)
 
 
 def transaction_img_path(instance, filename):
     return 'transactions/id_{0}/{1}'.format(instance.transaction.id, filename)
+
 
 # @receiver(post_save, sender=Transaction)
 # def update_received_date(sender, instance, created, **kwargs):
@@ -338,18 +339,31 @@ class BarangayRequest(models.Model):
         else:
             return 0
 
+    def calculate_suggested_pax(self, item_type: ItemType):
+        """Returns the number of pax for item_type that has been suggested to others"""
+        # Unaccepted route nodes: Filters out accepted suggestions to
+        # prevent calculation conflict with calculate_untransacted_pax
+        # This also filters out expired requests
+        request_nodes = RouteNode.objects.filter(request=self).filter(suggestion__accepted=False)\
+            .filter(suggestion__expiration_time__gte=datetime.now(timezone.utc))
+        item_fulfillments = Fulfillment.objects.filter(node__in=request_nodes).filter(type=item_type)
+        if len(item_fulfillments) > 0:
+            return item_fulfillments.aggregate(Sum('pax')).get('pax__sum')
+        else:
+            return 0
+
     def calculate_untransacted_pax(self, item_type: ItemType):
         type_requests = ItemRequest.objects.filter(barangay_request=self)
         type_requests = type_requests.filter(type=item_type)
         transaction_orders = TransactionOrder.objects.filter(transaction__barangay_request=self)
         transaction_orders = transaction_orders.filter(supply__type=item_type)
         pax_from_requests = 0
-        if type_requests is not None:
+        if not len(type_requests) == 0:
             pax_from_requests = type_requests.aggregate(Sum('pax')).get('pax__sum')
         else:
             return 0
 
-        if transaction_orders is not None:
+        if not len(transaction_orders) == 0:
             pax_in_transaction = transaction_orders.aggregate(Sum('pax')).get('pax__sum')
             if pax_in_transaction is None:
                 return pax_from_requests
@@ -362,7 +376,7 @@ class BarangayRequest(models.Model):
         :return: true if the current date precedes the expected date of the request,
                 returns false otherwise
         """
-        return datetime.now(timezone.utc)  <= self.expected_date
+        return datetime.now(timezone.utc) <= self.expected_date
         # now = timezone.now()
         # return now - datetime.timedelta(days=1) <= self.pub_date <= now
         # return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
@@ -455,6 +469,17 @@ class RouteSuggestion(models.Model):
     # TODO: Add date/time?
     donor = models.ForeignKey(to=DonorProfile, on_delete=models.CASCADE,
                               related_name='route_donor', )
+    accepted = models.BooleanField(default=False)
+    # Reserve for 15 minutes only
+    expiration_time = models.DateTimeField(editable=False, null=True, blank=True,)
+
+    def is_expired(self):
+        return datetime.now(timezone.utc) > self.expiration_time and not self.accepted
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.expiration_time = datetime.now(timezone.utc) + timedelta(minutes=15)
+        return super(RouteSuggestion, self).save(*args, **kwargs)
 
 
 class RouteNode(models.Model):
