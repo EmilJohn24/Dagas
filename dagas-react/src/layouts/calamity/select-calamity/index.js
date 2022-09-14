@@ -73,6 +73,7 @@ function Calamities({ google, locations = [] }) {
   configure({axiosConfig, cache});
   // Loading item types
   const [{data, loading, error}, refetch] = useAxios("/relief/api/evacuation-center/");
+  const [chosenDisaster, setChosenDisaster] = useState(null);
   const {
       placesService,
       placePredictions,
@@ -92,7 +93,6 @@ function Calamities({ google, locations = [] }) {
   console.log(placePredictions);
   console.log(data);
   const [{data: disasterArray, loading: disasterLoading, error: disasterError}, refetchTypes] = useAxios("/relief/api/disasters/");
-
   const onMarkerClick = (props, marker, e) =>{
     setSelectedPlace(props);
     setActiveMarker(marker);
@@ -120,15 +120,30 @@ function Calamities({ google, locations = [] }) {
       width: '100%',
       height: '100%'
   };
-  const evacMarkerRender = data?.map((evac_data) => {
-      const [lat, lng]= evac_data.geolocation.split(',');
-      const geoloc = {lat: lat, lng, lng};
-      return <Marker
-                  onClick={onMarkerClick}
-                  name={evac_data.name}
-                  position={geoloc}
-                  />
-  });
+  var evacMarkerRender = null;
+  if (chosenDisaster){
+      evacMarkerRender = data?.map((evac_data) => {
+        if (evac_data.disaster == chosenDisaster){
+          const [lat, lng]= evac_data.geolocation.split(',');
+          const geoloc = {lat: lat, lng, lng};
+          return <Marker
+                      onClick={onMarkerClick}
+                      name={evac_data.name}
+                      position={geoloc}
+                      />
+        }
+      })
+  } else {
+    evacMarkerRender = data?.map((evac_data) => {
+        const [lat, lng]= evac_data.geolocation.split(',');
+        const geoloc = {lat: lat, lng, lng};
+        return <Marker
+                    onClick={onMarkerClick}
+                    name={evac_data.name}
+                    position={geoloc}
+                    />
+    });
+  }
 
   // Disaster Name insertion effect
   useEffect(() =>{
@@ -187,6 +202,7 @@ function Calamities({ google, locations = [] }) {
                                   onChange={(event, value) => {
                                     console.log(`Changing to ${value}...`)
                                     formik.setFieldValue('type', value);
+                                    setChosenDisaster(value);
                                   }}
                                   renderInput={(params) => {
                                       return (
@@ -233,11 +249,11 @@ function Calamities({ google, locations = [] }) {
                       }
                   >
                       {evacMarkerRender}
-                      <Marker
+                      {/* <Marker
                           position={clickMarkerCoord}
-                          draggable={true}
+                          draggable={false}
                           onDragEnd={onClickMarkerDragged}
-                          />
+                          /> */}
                       <InfoWindow
                           marker={activeMarker}
                           visible={showingInfoWindow}
