@@ -656,12 +656,12 @@ def run_solo_ga_algo(data):
                       eliminate_duplicates=SimpleDuplicationElimination()
                       )
 
-    terminating_condition = get_termination('n_gen', 1, )
+    terminating_condition = get_termination('n_gen', 100, )
     res = minimize(
         problem=problem,
         algorithm=algorithm,
         termination=terminating_condition,
-        seed=4,
+        seed=2,
         verbose=True,
     )
     print(res.F)

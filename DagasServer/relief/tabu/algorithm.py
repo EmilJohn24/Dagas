@@ -97,33 +97,55 @@ def solution_to_route(solution, data):
 
 
 def generate_neighbors(data, solution, route_len):
-    visited_nodes = solution[0:route_len]
-    unvisited_nodes = solution[route_len:]
+    visited_nodes = solution[0:route_len].copy()
+    unvisited_nodes = solution[route_len:].copy()
     neighbors = []
 
-    # Operator 1: insert unvisited to visited (preferably non-uniform distribution)
-    if not len(unvisited_nodes) == 0:
-        random_unvisited_ix = np.random.choice(range(len(unvisited_nodes)), 1)
-        random_unvisited = unvisited_nodes[random_unvisited_ix]
-        unvisited_nodes = np.delete(unvisited_nodes, random_unvisited_ix)
-        visited_nodes = np.insert(visited_nodes, np.random.randint(0, len(visited_nodes)), random_unvisited)
-        neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
-    for _ in range(10):
-        visited_nodes = solution[0:route_len]
-        unvisited_nodes = solution[route_len:]
-        # Operator 2: Swap two visited nodes
+    for _ in range(100):
+        # Operator 1: insert unvisited to visited (preferably non-uniform distribution)
+        if not len(unvisited_nodes) == 0:
+            visited_nodes = solution[0:route_len].copy()
+            unvisited_nodes = solution[route_len:].copy()
+            random_unvisited_ix = np.random.choice(range(len(unvisited_nodes)), 1)
+            random_unvisited = unvisited_nodes[random_unvisited_ix]
+            unvisited_nodes = np.delete(unvisited_nodes, random_unvisited_ix)
+            visited_nodes = np.insert(visited_nodes, np.random.randint(0, len(visited_nodes)), random_unvisited)
+            neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
+        # Operator 2: remove visited
+        if not len(unvisited_nodes) == 0:
+            visited_nodes = solution[0:route_len].copy()
+            unvisited_nodes = solution[route_len:].copy()
+            random_visited_ix = np.random.choice(range(len(visited_nodes)), 1)
+            random_visited = visited_nodes[random_visited_ix]
+            visited_nodes = np.delete(visited_nodes, random_visited_ix)
+            unvisited_nodes = np.insert(unvisited_nodes, np.random.randint(0, len(unvisited_nodes)), random_visited)
+            neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
+        visited_nodes = solution[0:route_len].copy()
+        unvisited_nodes = solution[route_len:].copy()
+        # Operator 3: Swap two visited nodes
         num_count = len(visited_nodes)
         x1, x2 = random.sample(range(num_count), 2)
         visited_nodes[x1], visited_nodes[x2] = visited_nodes[x2], visited_nodes[x1]
         neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
 
-        visited_nodes = solution[0:route_len]
-        unvisited_nodes = solution[route_len:]
-        # Operator 3: Move visited into another visited position
-        random_visited_ix = np.random.choice(range(len(visited_nodes)), 1)
+        visited_nodes = solution[0:route_len].copy()
+        unvisited_nodes = solution[route_len:].copy()
+        # Operator 4: Move visited into another visited position
+        random_visited_ix, new_position_ix = random.sample(range(len(visited_nodes)), 2)
+        # random_visited_ix = np.random.choice(range(len(visited_nodes)), 1)
         random_visited = visited_nodes[random_visited_ix]
         visited_nodes = np.delete(visited_nodes, random_visited_ix)
-        np.insert(visited_nodes, np.random.randint(0, len(visited_nodes)), random_visited)
+        visited_nodes = np.insert(visited_nodes, new_position_ix, random_visited)
+        neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
+
+        # Operator 5: 2-opt (Subroute inversion)
+        visited_nodes = solution[0:route_len].copy()
+        unvisited_nodes = solution[route_len:].copy()
+        point_a, point_b = random.sample(range(len(visited_nodes)), 2)
+        if point_a < point_b:
+            visited_nodes[point_a:point_b] = visited_nodes[point_a:point_b][::-1]
+        else:
+            visited_nodes[point_b:point_a] = visited_nodes[point_b:point_a][::-1]
         neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
     return neighbors
 
@@ -139,27 +161,34 @@ def tabu_algorithm(data):
     init_sol = initial_solution(data)
     route, route_len, _ = solution_to_route(init_sol, data)
     best_sol = init_sol.copy()
-    best_sol_route_len = route_len
+    best_candidate = best_sol.copy()
+    best_candidate_route_len = route_len
     best_distance = fitness_func(data, route)
     tabu_list = [route]
     max_tabu_size = 100
-    for iteration in range(100000):
-        neighbors = generate_neighbors(data, best_sol, best_sol_route_len)
+    for iteration in range(250):
+        # neighbors = generate_neighbors(data, best_sol, best_sol_route_len)
+        neighbors = generate_neighbors(data, best_candidate, best_candidate_route_len)
         best_candidate = neighbors[0]
         best_candidate_route, best_candidate_route_len, _ = solution_to_route(best_candidate, data)
         best_candidate_distance = fitness_func(data, best_candidate_route)
-        for neighbor in neighbors:
+        best_candidate_ix = 0
+        for neighbor_ix, neighbor in enumerate(neighbors):
             neighbor_route, neighbor_route_len, _ = solution_to_route(neighbor, data)
             neighbor_distance = fitness_func(data, neighbor_route)
-            if neighbor_distance < best_candidate_distance and is_in_tabu(route, tabu_list):
+            if neighbor_distance < best_candidate_distance and not is_in_tabu(neighbor_route, tabu_list):
                 best_candidate = neighbor
+                best_candidate_ix = neighbor_ix
                 best_candidate_route, best_candidate_route_len = neighbor_route, neighbor_route_len
                 best_candidate_distance = neighbor_distance
         if best_candidate_distance < best_distance:
             best_sol = best_candidate
             best_distance = best_candidate_distance
-        print("Iteration {0}: {1}".format(iteration, best_distance))
+        print("Iteration {0}: {1} (Best Candidate Distance: {2} [Operator {3}])".format(iteration, best_distance,
+                                                                                        best_candidate_distance,
+                                                                                        best_candidate_ix % 5 + 1))
         tabu_list.append(best_candidate_route)
         if len(tabu_list) > max_tabu_size:
             tabu_list.pop(0)
-    return route, best_distance
+    best_route, _, _ = solution_to_route(best_sol, data)
+    return best_route, best_distance

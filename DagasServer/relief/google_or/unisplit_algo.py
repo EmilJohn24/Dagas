@@ -149,7 +149,8 @@ def unisplit_algo_or(data):
         routing.AddDimensionWithVehicleCapacity(
             demand_callback_index,
             0,
-            list(data['supply_matrix'][:, i]),
+            # list(data['supply_matrix'][:, i]),
+            [int(data['supply_matrix'][i])],
             True,
             data['item_types'][i],
         )
@@ -162,11 +163,11 @@ def unisplit_algo_or(data):
     # Setting first solution heuristic.
     search_parameters = pywrapcp.DefaultRoutingSearchParameters()
     search_parameters.first_solution_strategy = (
-        routing_enums_pb2.FirstSolutionStrategy.SAVINGS)
+        routing_enums_pb2.FirstSolutionStrategy.PATH_CHEAPEST_ARC)
     search_parameters.local_search_metaheuristic = (
-        routing_enums_pb2.LocalSearchMetaheuristic.GUIDED_LOCAL_SEARCH)
-    # search_parameters.time_limit.FromSeconds(120)
-    search_parameters.solution_limit = 5
+        routing_enums_pb2.LocalSearchMetaheuristic.TABU_SEARCH)
+    search_parameters.time_limit.FromSeconds(120)
+    # search_parameters.solution_limit = 5
     # Solve the problem.
     print("Finished initialization. Solving problem...")
     solution = routing.SolveWithParameters(search_parameters)

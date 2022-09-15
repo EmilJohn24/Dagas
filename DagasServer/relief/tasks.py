@@ -543,7 +543,7 @@ def solo_algo_tests(model, donor_ix):
     total_demands = np.sum(data['demand_matrix'], axis=0)
     excess = total_demands - np.sum(data['supply_matrix'], axis=0)
     print("Displaying maximum distributed supplies...")
-    print(np.sum(data['supply_matrix'], axis=0))
+    print(data['supply_matrix'])
     print("Displaying minimum/ideal fulfillment ratios...")
     print(np.divide(excess, total_demands))
     # print("Calculating custom algorithm...")
@@ -562,6 +562,9 @@ def solo_algo_tests(model, donor_ix):
     if model == "or":
         print("Running the Google OR algorithm...")
         or_res = algo_or(data)
+    if model == "or-split":
+        print("Running slow OR split algorithm...")
+        or_res = unisplit_algo_or(data)
     if model == "tabu":
         print("Running the Tabu search")
         tabu_res = tabu_algorithm(data)
