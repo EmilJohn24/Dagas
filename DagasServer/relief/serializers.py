@@ -31,12 +31,12 @@ class SupplySerializer(serializers.ModelSerializer):
         queryset=DonorProfile.objects.all(),
     )
     donation = serializers.PrimaryKeyRelatedField(many=False, required=False,
-                                queryset=Donation.objects.all())
+                                                  queryset=Donation.objects.all())
 
     class Meta:
         model = Supply
-        fields = ('id', 'name', 'type', 'type_str', 'quantity', 'pax', 
-                    'donation', 'available_pax', 'picture', 'donor', 'datetime_added')
+        fields = ('id', 'name', 'type', 'type_str', 'quantity', 'pax',
+                  'donation', 'available_pax', 'picture', 'donor', 'datetime_added')
         read_only = ('available_pax', 'type_str')
 
 
@@ -66,7 +66,7 @@ class DonationSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     current_disaster = serializers.SerializerMethodField(method_name='get_current_disaster')
-    
+
     def get_current_disaster(self, user):
         if user.role == User.BARANGAY:
             barangay: BarangayProfile = user.barangay_profile
@@ -83,7 +83,9 @@ class UserSerializer(serializers.ModelSerializer):
                 return None
         else:
             return None
+
     role_verbose = serializers.SerializerMethodField(method_name='get_role_verbose')
+
     def get_role_verbose(self, user):
         if user.role == User.RESIDENT:
             return "Resident"
@@ -93,6 +95,7 @@ class UserSerializer(serializers.ModelSerializer):
             return "Donor"
         else:
             return None
+
     class Meta:
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email',
@@ -172,9 +175,11 @@ class GovAdminSerializer(serializers.ModelSerializer):
 
 
 class EvacuationCenterSerializer(serializers.ModelSerializer):
+    disaster = serializers.StringRelatedField(source='barangays.current_disaster')
+
     class Meta:
         model = EvacuationCenter
-        fields = ('id', 'name', 'barangays', 'address', 'geolocation')
+        fields = ('id', 'name', 'barangays', 'address', 'geolocation', 'disaster')
 
 
 class EvacuationDetailsSerializer(serializers.ModelSerializer):
@@ -187,10 +192,10 @@ class EvacuationDetailsSerializer(serializers.ModelSerializer):
 class ItemRequestSerializer(serializers.ModelSerializer):
     date_added = serializers.DateTimeField(required=False, default=datetime.now(timezone.utc))
     type_str = serializers.StringRelatedField(source='type')
+
     class Meta:
         model = ItemRequest
         fields = ('id', 'type', 'type_str', 'pax', 'date_added', 'barangay_request')
-
 
 
 # TODO: Include EvacuationDetails
@@ -257,7 +262,7 @@ class TransactionOrderSerializer(serializers.ModelSerializer):
                 current_transaction.delete()
                 raise serializers.ValidationError({
                     "pax": item_supply.name + " has insufficient pax. Deleting transaction..."},
-                        code=status.HTTP_400_BAD_REQUEST)
+                    code=status.HTTP_400_BAD_REQUEST)
 
         type_supplies = supplies.filter(type=item_type)
         all_orders = TransactionOrder.objects.filter(transaction__in=donor_transactions)
@@ -305,8 +310,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     barangay_name = serializers.StringRelatedField(source='barangay_request.barangay', many=False, read_only=True, )
     evac_center_name = serializers.StringRelatedField(source='barangay_request.evacuation_center',
                                                       many=False, read_only=True, )
-    
-   
+
     class Meta:
         model = Transaction
         fields = ('id', 'donor', 'donor_name', 'donor_info', 'barangay_name', 'evac_center_name',

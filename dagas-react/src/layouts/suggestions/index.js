@@ -17,6 +17,7 @@ Coded by www.creative-tim.com
 import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 // Material Dashboard 2 PRO React components
 import MDBox from "components/MDBox";
@@ -51,6 +52,7 @@ import { Avatar, darkScrollbar, Icon } from "@mui/material";
 import { Map, GoogleApiWrapper, InfoWindow, Marker } from 'google-maps-react';
 import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocompleteService";
 import { geocodeByPlaceId } from "react-google-places-autocomplete";
+import icon from "assets/theme/components/icon";
 
 function Suggestions({ google, locations = [] }) {
 
@@ -69,7 +71,9 @@ function Suggestions({ google, locations = [] }) {
   const [clickMarkerCoord, setClickMarkerCoord] = useState(null);
   const [userLatitude, setUserLatitude] = useState(null);
   const [userLongitude, setUserLongitude] = useState(null);
-
+  const driverMarker = new window.google.maps.Marker(
+    
+  )
   const {
       placesService,
       placePredictions,
@@ -211,8 +215,7 @@ function Suggestions({ google, locations = [] }) {
                       {evacMarkerRender}
                       <Marker
                           position={clickMarkerCoord}
-                          draggable={true}
-                          onDragEnd={onClickMarkerDragged}
+                          draggable={false}
                           />
                       <InfoWindow
                           marker={activeMarker}
