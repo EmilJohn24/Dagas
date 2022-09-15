@@ -32,3 +32,10 @@ pymoo
 django-extensions
 django-celery-beat
 django-auto-prefetching
+shapely
+wheel
+pipwin
+# After installing wheel and pipwin: https://stackoverflow.com/questions/54734667/error-installing-geopandas-a-gdal-api-version-must-be-specified-in-anaconda
+# After that, install basemap after
+basemap
+basemap-data-hires

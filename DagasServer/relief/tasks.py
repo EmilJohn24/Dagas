@@ -5,6 +5,7 @@ from datetime import timedelta
 from itertools import islice
 import random
 
+from mpl_toolkits.basemap import Basemap
 from celery import shared_task
 
 # app = Celery('tasks', broker='pyamqp://guest@localhost//')
@@ -17,6 +18,7 @@ from django.core.exceptions import ValidationError
 from django.http import HttpRequest
 from django.utils.datetime_safe import datetime
 from django.utils import timezone
+from matplotlib import pyplot as plt
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 from rest_framework import status
 
@@ -268,6 +270,7 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     evacuation_lats = list(map(lambda request_tuple: request_tuple.lat, evacuation_geolocations))
     evacuation_lons = list(map(lambda request_tuple: request_tuple.lon, evacuation_geolocations))
 
+    # plt.show()
     #   Phase 2: Get Donor Latitudes and Longitudes
     donors = None
     valid_donors = []
@@ -287,8 +290,40 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
             donor_lats.append(solo_donor.user.get_most_recent_location().geolocation.lat)
             donor_lons.append(solo_donor.user.get_most_recent_location().geolocation.lon)
             valid_donors.append(solo_donor)
+
         else:
             raise ValidationError("Your location is unknown", code=status.HTTP_400_BAD_REQUEST, )
+    # Map Plotting
+    # Testing only:
+    # Philippine Bounding Box: 117,5,127,19)),
+    # EPSG: https://spatialreference.org/ref/epsg/?search=Philippines&srtext=Search
+    # https://matplotlib.org/basemap/api/basemap_api.html#mpl_toolkits.basemap.Basemap.arcgisimage
+    ph_map = Basemap(resolution=None,
+                     projection='lcc',
+                     # lat_0=11.9, lon_0=122.5,
+                     epsg='3121',
+                     llcrnrlon=120.3, llcrnrlat=14, urcrnrlon=121.3, urcrnrlat=15)
+    # ph_map.drawcoastlines()
+    # ph_map.drawmapboundary(zorder=0)
+    # ph_map.fillcontinents(color='#ffffff', zorder=1)
+    # ph_map.drawcountries(linewidth=1.5)
+    # ph_map.drawstates()
+    # ph_map.drawcounties(color='darkred')
+    ph_map.arcgisimage(verbose=True)
+
+    for evac_lat, evac_lon in zip(evacuation_lats, evacuation_lons):
+        evac_x, evac_y = ph_map(evac_lon, evac_lat)
+        ph_map.plot(evac_x, evac_y, 'r^', markersize=1)
+    donor_x, donor_y = ph_map(donor_lats[0], donor_lons[0])
+    ph_map.plot(donor_x, donor_y, 'b*', markersize=1)
+    data['map'] = ph_map
+    data['evac_lats'] = evacuation_lats
+    data['evac_lons'] = evacuation_lons
+    data['donor_lat'] = donor_lats
+    data['donor_lon'] = donor_lons
+
+    # End map
+
     #   Phase 3: Append coordinates (for haversine)
     combined_coords = list(zip(evacuation_lats + donor_lats, evacuation_lons + donor_lons))
     combined_coords_len = len(combined_coords)
@@ -556,9 +591,12 @@ def solo_algo_tests(model, donor_ix):
     #     print("Calculating using Google OR algorithm...")
     #     unisplit_algo_or(data)
     #     return
+    route = None
     if model == "ga":
         print("Running the genetic algorithm model...")
-        ga_res = run_solo_ga_algo(data)
+        res, problem = run_solo_ga_algo(data)
+        route, _ = problem.chromosome_to_routes(res.X[0])
+
     if model == "or":
         print("Running the Google OR algorithm...")
         or_res = algo_or(data)
@@ -567,8 +605,22 @@ def solo_algo_tests(model, donor_ix):
         or_res = unisplit_algo_or(data)
     if model == "tabu":
         print("Running the Tabu search")
-        tabu_res = tabu_algorithm(data)
-        print(tabu_res)
+        route, _ = tabu_algorithm(data)
+    if route is not None:
+        ph_map = data['map']
+        donor_x, donor_y = ph_map(data['donor_lon'][0], data['donor_lat'][0])
+        evacs_lats, evacs_lons = data['evac_lats'], data['evac_lons']
+        x = [donor_x]
+        y = [donor_y]
+
+        # ph_map.drawgreatcircle(donor_y, donor_x, evacs_y[0], evacs_x[0], color='c', linewidth=3)
+        for node in route:
+            node_x, node_y = ph_map(evacs_lons[node], evacs_lats[node])
+            x.append(node_x)
+            y.append(node_y)
+            # ph_map.drawgreatcircle(evacs_y[node_a], evacs_y[node_a], evacs_y[node_b], evacs_x[node_b])
+        ph_map.plot(x, y, color='y', linewidth=1, zorder=0)
+        plt.show()
 
 
 def algo_test(model):
