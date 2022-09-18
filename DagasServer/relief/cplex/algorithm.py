@@ -60,7 +60,7 @@ def cplex_algo(data):
             # Constraint 5: If a node is unvisited, its cumulative demand is 0
             mdl.add_if_then(mdl.sum(x[i, j] for i in node_ix if i != j) == 0, cum_demand[j] == 0)
             # Constraint 6: If the previous node of a visited node is the donor node, its cumulative demand
-            #               is just its 
+            #               is just its demand
             mdl.add_if_then(x[donor_ix, j] == 1, cum_demand[j] == actual_demands[j])
 
     mdl.parameters.timelimit = 120
