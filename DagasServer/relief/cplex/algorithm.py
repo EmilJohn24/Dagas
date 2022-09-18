@@ -35,9 +35,10 @@ def cplex_algo(data):
     mdl.add_constraint(mdl.sum(x[i, donor_ix] for i in request_ix if i != donor_ix) == 1)
 
     for j in request_ix:
-        # If a node is visited, it should also be left
+        # Constraint 2: If a node is visited, it should also be left
         mdl.add_if_then(mdl.sum(x[j, i] for i in node_ix if j != i) == 1,
                         mdl.sum(x[i, j] for i in node_ix if j != i) == 1)
+        # Constraint 3: If a node is not visited, it should not be left
         mdl.add_if_then(mdl.sum(x[j, i] for i in node_ix if j != i) == 0,
                         mdl.sum(x[i, j] for i in node_ix if j != i) == 0)
 
@@ -45,15 +46,21 @@ def cplex_algo(data):
         actual_demands = data['demand_matrix'][:, type_ix]
         available_supply = data['supply_matrix'][type_ix]
         # mdl.add_constraint(mdl.sum(demand_var[i] for i in request_ix) >= available_supply)
+        # Constraint 3: The cumulative demand should exceed or be equal to the available supply
         mdl.add_constraint(mdl.max(cum_demand) >= available_supply)
         # mdl.add_indicator_constraints(
         #     mdl.indicator_constraint(x[donor_ix, j], cum_demand[j] == actual_demands[j])
         #     for j in request_ix)
+        # Constraint 4: The cumulative demand of j is equal to the cumulative demand of the previous node
+        #               plus the demand for j
         mdl.add_indicator_constraints(
             mdl.indicator_constraint(x[i, j], cum_demand[i] + actual_demands[j] == cum_demand[j])
             for i, j in arcs if i != donor_ix and j != donor_ix)
         for j in request_ix:
+            # Constraint 5: If a node is unvisited, its cumulative demand is 0
             mdl.add_if_then(mdl.sum(x[i, j] for i in node_ix if i != j) == 0, cum_demand[j] == 0)
+            # Constraint 6: If the previous node of a visited node is the donor node, its cumulative demand
+            #               is just its 
             mdl.add_if_then(x[donor_ix, j] == 1, cum_demand[j] == actual_demands[j])
 
     mdl.parameters.timelimit = 120
