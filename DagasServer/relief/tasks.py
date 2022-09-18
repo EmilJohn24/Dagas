@@ -22,6 +22,7 @@ from matplotlib import pyplot as plt
 from ortools.constraint_solver import pywrapcp, routing_enums_pb2
 from rest_framework import status
 
+from relief.cplex.algorithm import cplex_algo
 from relief.ga.algorithm import run_ga_algo, run_solo_ga_algo
 from relief.google_or.tsp import algo_or
 from relief.google_or.unisplit_algo import unisplit_algo_or
@@ -603,6 +604,9 @@ def solo_algo_tests(model, donor_ix):
     if model == "or-split":
         print("Running slow OR split algorithm...")
         or_res = unisplit_algo_or(data)
+    if model == "cplex":
+        print("Running the CPLEX algo for benchmarking...")
+        cplex_algo(data)
     if model == "tabu":
         print("Running the Tabu search")
         route, _ = tabu_algorithm(data)

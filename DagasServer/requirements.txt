@@ -39,3 +39,6 @@ pipwin
 # After that, install basemap after
 basemap
 basemap-data-hires
+cplex
+docplex
+networkx
