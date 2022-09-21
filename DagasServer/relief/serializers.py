@@ -9,7 +9,8 @@ from django.utils.datetime_safe import datetime
 from django.utils import timezone
 from relief.models import Donation, Supply, User, ResidentProfile, DonorProfile, GovAdminProfile, BarangayProfile, \
     ItemType, ItemRequest, BarangayRequest, EvacuationDetails, Transaction, TransactionImage, EvacuationCenter, \
-    TransactionOrder, UserLocation, Fulfillment, RouteNode, RouteSuggestion, Disaster, TransactionStub, Rating
+    TransactionOrder, UserLocation, Fulfillment, RouteNode, RouteSuggestion, Disaster, TransactionStub, Rating, \
+    AlgorithmExecution
 
 
 class ItemTypeSerializer(serializers.ModelSerializer):
@@ -340,6 +341,26 @@ class RatingSerializer(serializers.ModelSerializer):
         model = Rating
         fields = ('id', 'resident', 'barangay', 'disaster', 'value',)
         read_only_fields = ('resident', 'barangay', 'disaster',)
+
+
+# Algorithm-related
+
+class AlgorithmExecutionSerializer(serializers.ModelSerializer):
+    result = serializers.HyperlinkedRelatedField(
+        required=False,
+        read_only=True,
+        view_name='relief:suggestions-detail')
+    # has_result = serializers.SerializerMethodField()
+    #
+    # def get_has_result(self, obj):
+    #     return obj.
+
+    class Meta:
+        model = AlgorithmExecution
+        fields = ('donor', 'time_started', 'time_modified',
+                  'result')
+        read_only_fields = ('donor', 'time_started', 'time_modified',
+                            'result')
 
 
 class FulfillmentSerializer(serializers.ModelSerializer):

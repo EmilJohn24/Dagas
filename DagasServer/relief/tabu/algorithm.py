@@ -70,10 +70,12 @@ def fitness_func(data, route):
     # unmet_demand_ratio = unmet_demand / np.sum(data['demand_matrix'], axis=0)
 
 
-def solution_to_route(solution, data):
+def solution_to_route(solution, data, is_final=False):
     route = []
 
     working_data = copy.deepcopy(data)
+    if is_final:
+        working_data['fulfillment_matrix'] = np.zeros((working_data['num_requests'], len(working_data['item_types'])))
     for node in solution:
 
         if np.sum(working_data['supply_matrix']) == 0 or np.sum(working_data['demand_matrix']) == 0:
@@ -85,6 +87,8 @@ def solution_to_route(solution, data):
             current_supply = working_data['supply_matrix'][type_index]
             current_demand = working_data['demand_matrix'][node][type_index]
             surplus = current_supply - current_demand
+            if is_final:
+                working_data['fulfillment_matrix'][node, type_index] += abs(surplus)
             if surplus >= 0:
                 working_data['demand_matrix'][node][type_index] = 0
                 working_data['supply_matrix'][type_index] = surplus
@@ -101,7 +105,7 @@ def generate_neighbors(data, solution, route_len):
     unvisited_nodes = solution[route_len:].copy()
     neighbors = []
 
-    for _ in range(100):
+    for _ in range(50):
         # Operator 1: insert unvisited to visited (preferably non-uniform distribution)
         if not len(unvisited_nodes) == 0:
             visited_nodes = solution[0:route_len].copy()
@@ -166,7 +170,7 @@ def tabu_algorithm(data):
     best_distance = fitness_func(data, route)
     tabu_list = [route]
     max_tabu_size = 100
-    for iteration in range(250):
+    for iteration in range(100):
         # neighbors = generate_neighbors(data, best_sol, best_sol_route_len)
         neighbors = generate_neighbors(data, best_candidate, best_candidate_route_len)
         best_candidate = neighbors[0]
@@ -190,5 +194,5 @@ def tabu_algorithm(data):
         tabu_list.append(best_candidate_route)
         if len(tabu_list) > max_tabu_size:
             tabu_list.pop(0)
-    best_route, _, _ = solution_to_route(best_sol, data)
-    return best_route, best_distance
+    best_route, _, final_data = solution_to_route(best_sol, data, is_final=True)
+    return best_route, best_distance, final_data

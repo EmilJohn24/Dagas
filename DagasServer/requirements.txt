@@ -42,3 +42,5 @@ basemap-data-hires
 cplex
 docplex
 networkx
+flower
+eventlet

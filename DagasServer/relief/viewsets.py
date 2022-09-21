@@ -14,19 +14,21 @@ from silk.profiling.profiler import silk_profile
 
 from relief.models import User, ResidentProfile, DonorProfile, Supply, ItemType, ItemRequest, Transaction, \
     BarangayRequest, TransactionImage, BarangayProfile, Donation, EvacuationCenter, TransactionOrder, UserLocation, \
-    RouteSuggestion, RouteNode, Fulfillment, Disaster, TransactionStub, Rating
+    RouteSuggestion, RouteNode, Fulfillment, Disaster, TransactionStub, Rating, AlgorithmExecution
 from relief.pagination import SmallResultsSetPagination
 from relief.permissions import IsOwnerOrReadOnly, IsProfileUserOrReadOnly
 from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializer, SupplySerializer, \
     ItemTypeSerializer, ItemRequestSerializer, TransactionSerializer, BarangayRequestSerializer, BarangaySerializer, \
     DonationSerializer, EvacuationCenterSerializer, TransactionOrderSerializer, UserLocationSerializer, \
     RouteSuggestionSerializer, NotificationSerializer, DisasterSerializer, TransactionStubSerializer, RatingSerializer, \
-    RatingOnlySerializer
-
+    RatingOnlySerializer, AlgorithmExecutionSerializer
 
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
 # Filtering Guide: https://www.django-rest-framework.org/api-guide/filtering/
 # TODO: Add permission classes
+from relief.tasks import solo_algo_tests
+
+
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -185,7 +187,8 @@ class TransactionViewSet(viewsets.ModelViewSet):
                 raise ValidationError(detail="Already received.")
         transaction.save()
         # return Response({"status": "Successful update"}, status=status.HTTP_200_OK)
-        return Response(TransactionSerializer(transaction, context={'request': request}).data, status=status.HTTP_200_OK,)
+        return Response(TransactionSerializer(transaction, context={'request': request}).data,
+                        status=status.HTTP_200_OK, )
 
     @action(detail=True, methods=['patch', 'put'], name='Upload Transaction Picture',
             permission_classes=[IsProfileUserOrReadOnly, IsAuthenticated])
@@ -482,6 +485,39 @@ class TransactionStubViewSet(viewsets.ModelViewSet):
         transaction_stub.save()
         return Response(
             {'message': 'Marked as received', }, status=status.HTTP_200_OK, )
+
+
+class AlgorithmExecutionViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = AlgorithmExecutionSerializer
+
+    @action(methods=['post'], detail=False, name='Execute Algorithm')
+    def execute(self, request, pk=None):
+        user = request.user
+        if not user.is_anonymous and user.role == User.DONOR:
+            user_donor = DonorProfile.objects.get(user=user)
+            algo_exec = AlgorithmExecution.objects.filter(
+                donor=user_donor)
+            algo_exec = algo_exec.filter(result__isnull=True) | algo_exec.filter(result__accepted=False,
+                                                                                 result__expiration_time__gt=
+                                                                                 datetime.now(timezone.utc))
+
+            if not algo_exec:
+                new_algo_exec = AlgorithmExecution.objects.create(donor=user_donor)
+                solo_algo_tests.apply_async(args=['tabu', user_donor.id, new_algo_exec.id])
+                return Response(AlgorithmExecutionSerializer(new_algo_exec).data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(AlgorithmExecutionSerializer(algo_exec, many=True).data,
+                                status=status.HTTP_429_TOO_MANY_REQUESTS)
+        else:
+            raise ValidationError(detail="Not a donor account",
+                                  code=status.HTTP_400_BAD_REQUEST)
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_anonymous:
+            return AlgorithmExecution.objects.filter(donor__user=user)
+        else:
+            return AlgorithmExecution.objects.all()
 
 
 class RouteSuggestionViewSet(viewsets.ReadOnlyModelViewSet):

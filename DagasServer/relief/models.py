@@ -344,7 +344,7 @@ class BarangayRequest(models.Model):
         # Unaccepted route nodes: Filters out accepted suggestions to
         # prevent calculation conflict with calculate_untransacted_pax
         # This also filters out expired requests
-        request_nodes = RouteNode.objects.filter(request=self).filter(suggestion__accepted=False)\
+        request_nodes = RouteNode.objects.filter(request=self).filter(suggestion__accepted=False) \
             .filter(suggestion__expiration_time__gte=datetime.now(timezone.utc))
         item_fulfillments = Fulfillment.objects.filter(node__in=request_nodes).filter(type=item_type)
         if len(item_fulfillments) > 0:
@@ -465,13 +465,23 @@ class Rating(models.Model):
 
 
 # Algorithm-related models
+class AlgorithmExecution(models.Model):
+    donor = models.ForeignKey(to=DonorProfile, on_delete=models.CASCADE, related_name='requesting_donor')
+    time_started = models.DateTimeField(auto_now_add=True)
+    time_modified = models.DateTimeField(auto_now=True)
+    result = models.ForeignKey(to='RouteSuggestion', on_delete=models.CASCADE, related_name='suggestion', null=True)
+
+    def has_result(self):
+        return self.result is not None
+
+
 class RouteSuggestion(models.Model):
     # TODO: Add date/time?
     donor = models.ForeignKey(to=DonorProfile, on_delete=models.CASCADE,
                               related_name='route_donor', )
     accepted = models.BooleanField(default=False)
     # Reserve for 15 minutes only
-    expiration_time = models.DateTimeField(editable=False, null=True, blank=True,)
+    expiration_time = models.DateTimeField(editable=False, null=True, blank=True, )
 
     def is_expired(self):
         return datetime.now(timezone.utc) > self.expiration_time and not self.accepted

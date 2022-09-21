@@ -28,7 +28,7 @@ from relief.google_or.tsp import algo_or
 from relief.google_or.unisplit_algo import unisplit_algo_or
 from relief.models import DonorProfile, BarangayRequest, User, ItemType, Supply, ResidentProfile, Donation, \
     UserLocation, ItemRequest, Transaction, TransactionOrder, EvacuationCenter, BarangayProfile, Fulfillment, RouteNode, \
-    RouteSuggestion
+    RouteSuggestion, AlgorithmExecution
 
 # Algorithm section
 # Algorithm-related imports
@@ -386,6 +386,7 @@ def generate_data(donor_count=10, evacuation_center_count=10,
                   min_demand=100, max_demand=1000,
                   min_supply=1000, max_supply=10000):
     # Clear dataset
+    random.seed(1)
     warnings.filterwarnings('ignore', 'DateTimeField*')
 
     def polygon_random_points(poly, num_points):
@@ -520,9 +521,9 @@ def generate_tree(evacuation_centers, geolocations):
 
 # Output
 def routes_to_db(input_data, algo_data):
-    Fulfillment.objects.all().delete()
-    RouteSuggestion.objects.all().delete()
-    RouteNode.objects.all().delete()
+    # Fulfillment.objects.all().delete()
+    # RouteSuggestion.objects.all().delete()
+    # RouteNode.objects.all().delete()
 
     def distance_n2n(src_node, dst_node):
         return input_data['distance_matrix'][src_node][dst_node]
@@ -570,10 +571,48 @@ def routes_to_db(input_data, algo_data):
                 )
 
 
-def solo_algo_tests(model, donor_ix):
-    donors = DonorProfile.objects.all()
+def result_to_db(donor, route, final_data):
+    requests = final_data['request_objs']
+    fulfillments = final_data['fulfillment_matrix']
+    suggestion = RouteSuggestion.objects.create(
+        donor=donor,
+    )
+    for position, request_index in enumerate(route):
+        request_object = requests[request_index]
+        route_node = None
+        if position == 0:
+            distance_from_prev = final_data['distance_matrix'][final_data['starts'][0]][request_index]
+            route_node = RouteNode.objects.create(
+                request=request_object,
+                distance_from_prev=distance_from_prev,
+                suggestion=suggestion,
+            )
+        else:
+            distance_from_prev = final_data['distance_matrix'][route[position - 1]][route[position]]
+            route_node = RouteNode.objects.create(
+                request=request_object,
+                distance_from_prev=distance_from_prev,
+                suggestion=suggestion,
+            )
+
+        for item_type_index, item_count in enumerate(list(fulfillments[request_index])):
+            # Create new fulfillment
+            item_type = ItemType.objects.all()[item_type_index]
+            Fulfillment.objects.create(
+                node=route_node,
+                type=item_type,
+                pax=item_count,
+            )
+    return suggestion
+
+
+@shared_task()
+def solo_algo_tests(model, donor_ix, algo_exec_id):
+    # donors = DonorProfile.objects.all()
     # donor = donors[random.randint(0, len(donors) - 1)]
-    donor = donors[donor_ix]
+    # donor = donors[donor_ix]
+    algo_execution = AlgorithmExecution.objects.get(id=algo_exec_id)
+    donor = DonorProfile.objects.get(pk=donor_ix)
     print("Generating data model from database...")
     data = generate_data_model_from_db(solo_mode=True, solo_donor=donor)
     total_demands = np.sum(data['demand_matrix'], axis=0)
@@ -609,22 +648,25 @@ def solo_algo_tests(model, donor_ix):
         cplex_algo(data)
     if model == "tabu":
         print("Running the Tabu search")
-        route, _ = tabu_algorithm(data)
-    if route is not None:
-        ph_map = data['map']
-        donor_x, donor_y = ph_map(data['donor_lon'][0], data['donor_lat'][0])
-        evacs_lats, evacs_lons = data['evac_lats'], data['evac_lons']
-        x = [donor_x]
-        y = [donor_y]
-
-        # ph_map.drawgreatcircle(donor_y, donor_x, evacs_y[0], evacs_x[0], color='c', linewidth=3)
-        for node in route:
-            node_x, node_y = ph_map(evacs_lons[node], evacs_lats[node])
-            x.append(node_x)
-            y.append(node_y)
-            # ph_map.drawgreatcircle(evacs_y[node_a], evacs_y[node_a], evacs_y[node_b], evacs_x[node_b])
-        ph_map.plot(x, y, color='y', linewidth=1, zorder=0)
-        plt.show()
+        route, _, final_data = tabu_algorithm(data)
+        suggestion = result_to_db(donor, route, final_data)
+        algo_execution.result = suggestion
+        algo_execution.save()
+    # if route is not None:
+    #     ph_map = data['map']
+    #     donor_x, donor_y = ph_map(data['donor_lon'][0], data['donor_lat'][0])
+    #     evacs_lats, evacs_lons = data['evac_lats'], data['evac_lons']
+    #     x = [donor_x]
+    #     y = [donor_y]
+    #
+    #     # ph_map.drawgreatcircle(donor_y, donor_x, evacs_y[0], evacs_x[0], color='c', linewidth=3)
+    #     for node in route:
+    #         node_x, node_y = ph_map(evacs_lons[node], evacs_lats[node])
+    #         x.append(node_x)
+    #         y.append(node_y)
+    #         # ph_map.drawgreatcircle(evacs_y[node_a], evacs_y[node_a], evacs_y[node_b], evacs_x[node_b])
+    #     ph_map.plot(x, y, color='y', linewidth=1, zorder=0)
+    #     plt.show()
 
 
 def algo_test(model):
