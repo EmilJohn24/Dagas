@@ -73,29 +73,35 @@ def fitness_func(data, route):
 def solution_to_route(solution, data, is_final=False):
     route = []
 
-    working_data = copy.deepcopy(data)
+    # working_data = copy.deepcopy(data)
+    working_data = data
+    total_demands = np.sum(working_data['demand_matrix'], axis=0)
+    supplied_demands = np.zeros(len(working_data['item_types']))
     if is_final:
         working_data['fulfillment_matrix'] = np.zeros((working_data['num_requests'], len(working_data['item_types'])))
     for node in solution:
-
-        if np.sum(working_data['supply_matrix']) == 0 or np.sum(working_data['demand_matrix']) == 0:
+        remaining_supplies = working_data['supply_matrix'] - supplied_demands
+        remaining_demands = total_demands - supplied_demands
+        if np.sum(remaining_supplies) == 0 or np.sum(remaining_demands) == 0:
             break
-        if np.sum(working_data['supply_matrix']) == 0 \
-                or np.sum(working_data['demand_matrix'][node]) == 0:
-            continue
+
+        # if np.sum(working_data['supply_matrix']) == 0 \
+        #         or np.sum(working_data['demand_matrix'][node]) == 0:
+        #     continue
         for type_index in range(len(working_data['item_types'])):
-            current_supply = working_data['supply_matrix'][type_index]
+            current_supply = remaining_supplies[type_index]
             current_demand = working_data['demand_matrix'][node][type_index]
             surplus = current_supply - current_demand
-            if is_final:
-                working_data['fulfillment_matrix'][node, type_index] += abs(surplus)
+
             if surplus >= 0:
-                working_data['demand_matrix'][node][type_index] = 0
-                working_data['supply_matrix'][type_index] = surplus
+                supplied_demands[type_index] += current_demand
+                if is_final:
+                    working_data['fulfillment_matrix'][node, type_index] += current_demand
 
             else:
-                working_data['demand_matrix'][node][type_index] = abs(surplus)
-                working_data['supply_matrix'][type_index] = 0
+                supplied_demands[type_index] += current_supply
+                if is_final:
+                    working_data['fulfillment_matrix'][node, type_index] += current_supply
         route.append(node)
     return np.array(route), len(route), working_data
 
@@ -105,7 +111,7 @@ def generate_neighbors(data, solution, route_len):
     unvisited_nodes = solution[route_len:].copy()
     neighbors = []
 
-    for _ in range(50):
+    for _ in range(100):
         # Operator 1: insert unvisited to visited (preferably non-uniform distribution)
         if not len(unvisited_nodes) == 0:
             visited_nodes = solution[0:route_len].copy()

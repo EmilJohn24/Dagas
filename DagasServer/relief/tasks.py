@@ -299,11 +299,12 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     # Philippine Bounding Box: 117,5,127,19)),
     # EPSG: https://spatialreference.org/ref/epsg/?search=Philippines&srtext=Search
     # https://matplotlib.org/basemap/api/basemap_api.html#mpl_toolkits.basemap.Basemap.arcgisimage
+    # Manila: Box 120.693515,14.437993,121.318281,14.875347
     ph_map = Basemap(resolution=None,
                      projection='lcc',
                      # lat_0=11.9, lon_0=122.5,
                      epsg='3121',
-                     llcrnrlon=120.3, llcrnrlat=14, urcrnrlon=121.3, urcrnrlat=15)
+                     llcrnrlon=120.693515, llcrnrlat=14.437993, urcrnrlon=121.318281, urcrnrlat=14.875347)
     # ph_map.drawcoastlines()
     # ph_map.drawmapboundary(zorder=0)
     # ph_map.fillcontinents(color='#ffffff', zorder=1)
@@ -314,9 +315,9 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
 
     for evac_lat, evac_lon in zip(evacuation_lats, evacuation_lons):
         evac_x, evac_y = ph_map(evac_lon, evac_lat)
-        ph_map.plot(evac_x, evac_y, 'r^', markersize=1)
-    donor_x, donor_y = ph_map(donor_lats[0], donor_lons[0])
-    ph_map.plot(donor_x, donor_y, 'b*', markersize=1)
+        ph_map.plot(evac_x, evac_y, 'r^', markersize=2)
+    donor_x, donor_y = ph_map(donor_lons[0], donor_lats[0])
+    ph_map.plot(donor_x, donor_y, 'b^', markersize=2)
     data['map'] = ph_map
     data['evac_lats'] = evacuation_lats
     data['evac_lons'] = evacuation_lons
@@ -611,7 +612,9 @@ def solo_algo_tests(model, donor_ix, algo_exec_id):
     # donors = DonorProfile.objects.all()
     # donor = donors[random.randint(0, len(donors) - 1)]
     # donor = donors[donor_ix]
-    algo_execution = AlgorithmExecution.objects.get(id=algo_exec_id)
+    algo_execution = None
+    if algo_exec_id is not None:
+        algo_execution = AlgorithmExecution.objects.get(id=algo_exec_id)
     donor = DonorProfile.objects.get(pk=donor_ix)
     print("Generating data model from database...")
     data = generate_data_model_from_db(solo_mode=True, solo_donor=donor)
@@ -649,24 +652,28 @@ def solo_algo_tests(model, donor_ix, algo_exec_id):
     if model == "tabu":
         print("Running the Tabu search")
         route, _, final_data = tabu_algorithm(data)
-        suggestion = result_to_db(donor, route, final_data)
-        algo_execution.result = suggestion
-        algo_execution.save()
-    # if route is not None:
-    #     ph_map = data['map']
-    #     donor_x, donor_y = ph_map(data['donor_lon'][0], data['donor_lat'][0])
-    #     evacs_lats, evacs_lons = data['evac_lats'], data['evac_lons']
-    #     x = [donor_x]
-    #     y = [donor_y]
-    #
-    #     # ph_map.drawgreatcircle(donor_y, donor_x, evacs_y[0], evacs_x[0], color='c', linewidth=3)
-    #     for node in route:
-    #         node_x, node_y = ph_map(evacs_lons[node], evacs_lats[node])
-    #         x.append(node_x)
-    #         y.append(node_y)
-    #         # ph_map.drawgreatcircle(evacs_y[node_a], evacs_y[node_a], evacs_y[node_b], evacs_x[node_b])
-    #     ph_map.plot(x, y, color='y', linewidth=1, zorder=0)
-    #     plt.show()
+        if algo_execution is not None:
+            suggestion = result_to_db(donor, route, final_data)
+            algo_execution.result = suggestion
+            algo_execution.save()
+    if route is not None:
+        ph_map = data['map']
+        donor_x, donor_y = ph_map(data['donor_lon'][0], data['donor_lat'][0])
+        evacs_lats, evacs_lons = data['evac_lats'], data['evac_lons']
+        x = [donor_x]
+        y = [donor_y]
+
+        # ph_map.drawgreatcircle(donor_y, donor_x, evacs_y[0], evacs_x[0], color='c', linewidth=3)
+        for node in route:
+            node_x, node_y = ph_map(evacs_lons[node], evacs_lats[node])
+            x.append(node_x)
+            y.append(node_y)
+            # ph_map.drawgreatcircle(evacs_y[node_a], evacs_y[node_a], evacs_y[node_b], evacs_x[node_b])
+
+        x.append(donor_x)
+        y.append(donor_y)
+        ph_map.plot(x, y, color='y', linewidth=1, zorder=0)
+        plt.show()
 
 
 def algo_test(model):
