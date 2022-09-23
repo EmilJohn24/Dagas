@@ -53,10 +53,11 @@ function RequestList() {
   const cache = new LRU({max: 10})
   configure({axiosConfig, cache});
   const [{data, loading, error}, refetch] = useAxios("/relief/api/requests/");
+  const [{data: userData, loading: userLoading, error: userError}, userRefetch] = useAxios("/relief/api/users/current_user/");
   const [isAcceptingRequest, setAcceptingRequest] = useState(() => false);
   const [requestId, setRequestId] = useState(() => null);
-  if (loading) return;
-  if (error) return <Navigate to="/login"/>
+  if (loading||userLoading) return;
+  if (error||userError) return <Navigate to="/login"/>
    var dataTableData = {
       columns: [
         {
@@ -70,19 +71,28 @@ function RequestList() {
           Header: "evacuation_center",
           accessor: "evacuation_center_serialized",
           Cell: ({row}) => {
-            // console.log(row.values.evacuation_center_serialized.name);
             return (
               <DefaultCell value={row.values.evacuation_center_serialized.name}></DefaultCell>
             );
           } 
         },
         {
+          Header: "expected_date",
+          accessor: "expected_date",
+          Cell: ({value}) => {
+            // console.log(row.values.evacuation_center_serialized.name);
+            return (
+              <DefaultCell value={value}></DefaultCell>
+            );
+          } 
+        },
+        (userData.role_verbose == "Donor")?{
           Header: "action", 
           align: "center",
           accessor: "id",
           width: "20%",
           Cell: ({value}) => {
-            return (
+              return (
               <MDButton onClick={
                 (event) => {
                   console.log(`Setting request ID to: ${value}`);
@@ -92,6 +102,22 @@ function RequestList() {
               } variant="gradient" color="info">Accept</MDButton>
             )
           }
+        }:{
+          Header: "action", 
+          align: "center",
+          accessor: "id",
+          width: "10%",
+          Cell: ({value}) => {
+            return (
+            <MDButton onClick={
+              (event) => {
+                console.log(`Setting request ID to: ${value}`);
+                setRequestId(value);
+                setAcceptingRequest(true);
+              }
+            } disabled="true" variant="gradient" color="info">Accept</MDButton>
+          )
+        }
         },
       ],
     };
