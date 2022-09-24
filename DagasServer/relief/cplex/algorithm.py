@@ -63,7 +63,7 @@ def cplex_algo(data):
             #               is just its demand
             mdl.add_if_then(x[donor_ix, j] == 1, cum_demand[j] == actual_demands[j])
 
-    mdl.parameters.timelimit = 240
+    mdl.parameters.timelimit = 1000
     solution = mdl.solve(log_output=True)
     print(solution)
     print(solution.solve_status)

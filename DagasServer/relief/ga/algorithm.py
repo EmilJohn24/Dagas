@@ -110,28 +110,34 @@ class DagasSoloProblemParalellizedWrapper(DagasProblemParalellizedWrapper):
                          xl=lower_bound, xu=upper_bound, **kwargs)
 
     def chromosome_to_routes(self, chromosome) -> object:
-        global metadata
+        # global metadata
+        # route = []
         route = []
 
-        working_data = copy.deepcopy(self.algo_data)
-        for gene in chromosome:
-
-            if np.sum(working_data['supply_matrix']) == 0 or np.sum(working_data['demand_matrix']) == 0:
+        # working_data = copy.deepcopy(data)
+        working_data = self.algo_data
+        total_demands = np.sum(working_data['demand_matrix'], axis=0)
+        supplied_demands = np.zeros(len(working_data['item_types']))
+        for node in chromosome:
+            remaining_supplies = working_data['supply_matrix'] - supplied_demands
+            remaining_demands = total_demands - supplied_demands
+            if np.sum(remaining_supplies) == 0 or np.sum(remaining_demands) == 0:
                 break
-            if np.sum(working_data['demand_matrix'][gene]) == 0:
-                continue
+
+            # if np.sum(working_data['supply_matrix']) == 0 \
+            #         or np.sum(working_data['demand_matrix'][node]) == 0:
+            #     continue
             for type_index in range(len(working_data['item_types'])):
-                current_supply = working_data['supply_matrix'][type_index]
-                current_demand = working_data['demand_matrix'][gene][type_index]
+                current_supply = remaining_supplies[type_index]
+                current_demand = working_data['demand_matrix'][node][type_index]
                 surplus = current_supply - current_demand
+
                 if surplus >= 0:
-                    working_data['demand_matrix'][gene][type_index] = 0
-                    working_data['supply_matrix'][type_index] = surplus
+                    supplied_demands[type_index] += current_demand
 
                 else:
-                    working_data['demand_matrix'][gene][type_index] = abs(surplus)
-                    working_data['supply_matrix'][type_index] = 0
-            route.append(gene)
+                    supplied_demands[type_index] += current_supply
+            route.append(node)
         return route, working_data
 
     def fitness_func(self, route, working_data):
