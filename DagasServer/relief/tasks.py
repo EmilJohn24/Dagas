@@ -26,6 +26,7 @@ from relief.cplex.algorithm import cplex_algo
 from relief.ga.algorithm import run_ga_algo, run_solo_ga_algo
 from relief.google_or.tsp import algo_or
 from relief.google_or.unisplit_algo import unisplit_algo_or
+from relief.lnnh.algorithm import lnnh
 from relief.models import DonorProfile, BarangayRequest, User, ItemType, Supply, ResidentProfile, Donation, \
     UserLocation, ItemRequest, Transaction, TransactionOrder, EvacuationCenter, BarangayProfile, Fulfillment, RouteNode, \
     RouteSuggestion, AlgorithmExecution
@@ -42,7 +43,7 @@ from relief.serializers import UserSerializer, EvacuationCenterSerializer, UserL
     CustomRegisterSerializer
 from shapely.geometry import Polygon, Point
 
-from relief.tabu.algorithm import tabu_algorithm
+from relief.tabu.algorithm import tabu_algorithm, fitness_func
 
 
 def window(seq, n=2):
@@ -649,6 +650,11 @@ def solo_algo_tests(model, donor_ix, algo_exec_id):
     if model == "cplex":
         print("Running the CPLEX algo for benchmarking...")
         cplex_algo(data)
+    if model == "lnnh":
+        print("Running the LNNH algorithm")
+        route, working_data = lnnh(data, n_neighbors=5)
+        distance = fitness_func(data, route)
+        print("Distance covered: {}".format(distance))
     if model == "tabu":
         print("Running the Tabu search")
         route, _, final_data = tabu_algorithm(data)
