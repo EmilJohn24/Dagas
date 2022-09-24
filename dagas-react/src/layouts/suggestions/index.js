@@ -71,6 +71,7 @@ function Suggestions({ google, locations = [] }) {
   const [clickMarkerCoord, setClickMarkerCoord] = useState(null);
   const [userLatitude, setUserLatitude] = useState(null);
   const [userLongitude, setUserLongitude] = useState(null);
+  const [donorSup, setDonorSup] = useState("");
   const driverMarker = new window.google.maps.Marker(
     
   )
@@ -131,7 +132,22 @@ function Suggestions({ google, locations = [] }) {
 
   useEffect(() => {
     getLocation();
-  }, []);
+    if (suppliesError) return;
+    else if (!suppliesLoading && suppliesData) {
+      console.log(suppliesData);
+      const suppliesList = suppliesData.map(type => type.type_str);
+      const suppliesQty = suppliesData.map(type => type.available_pax);
+      console.log(suppliesList);
+      console.log(suppliesQty.length);
+      var str = "";
+      for (let i = 0; i < suppliesList.length; i++) {
+        str += `${suppliesList[i]}: ${suppliesQty[i]} `
+      }
+      setDonorSup(str);
+
+      //setDonorSup(...donorSup, `${suppliesList[i]}: ${suppliesQty[i]}`);
+    }
+  }, [suppliesLoading,suppliesData,suppliesError]);
 
   const mapStyles = {
       position: "relative",
@@ -160,8 +176,8 @@ function Suggestions({ google, locations = [] }) {
         <MDTypography component="p" variant="button" color="text">
           Donor Supplies:
         </MDTypography>
-        <MDTypography component="p" variant="button" fontWeight="regular" color="text">
-          List donor supplies here
+        <MDTypography component="p" variant="h6" fontWeight="regular" color="text">
+          {donorSup}
         </MDTypography>
       </MDBox>
       <MDButton variant="gradient" color="dark" >
@@ -232,8 +248,8 @@ function Suggestions({ google, locations = [] }) {
   </MDBox>
   ) 
 
-  if (loading) return;
-  if (error) return <Navigate to="/login"/>;
+  if (loading||suppliesLoading) return;
+  if (error||suppliesError) return <Navigate to="/login"/>;
   return (
     <DashboardLayout>
       <DashboardNavbar />

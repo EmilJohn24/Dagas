@@ -34,7 +34,7 @@ function OrdersOverview({transactionId, status}) {
     (
       <TimelineItem
             color="secondary"
-            icon="truck"
+            icon="local_shipping"
             title="Order in transit"
             // dateTime="22 DEC 8:10 AM"
       />
