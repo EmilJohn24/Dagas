@@ -1,6 +1,7 @@
 package com.cnil.dagas;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,9 +13,16 @@ import androidx.cardview.widget.CardView;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cnil.dagas.data.CurrentUserThread;
+import com.cnil.dagas.ui.home.HomeActivity;
+
+import org.json.JSONException;
+
 import java.util.ArrayList;
 
 public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHolder>{
+    private static final String TAG = RequestsAdapter.class.getName();
+    private static String role_verbose;
     public static class BarangayRequest{
         private final String barangayName;
         private final String evacuationCenterName;
@@ -72,6 +80,18 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.card_request, parent, false);
+        CurrentUserThread currentUserThread = new CurrentUserThread();
+        currentUserThread.start();
+        try {
+            currentUserThread.join();
+        } catch (InterruptedException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        try {
+            role_verbose = currentUserThread.getUser().getString("role_verbose");
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+        }
         return new ViewHolder(view);
     }
 
@@ -87,6 +107,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         barangayNameTextView.setText(barangayRequest.getBarangayName());
         evacuationCenterNameTextView.setText(barangayRequest.getEvacuationCenterName());
 //        requestListTextView.setText()
+        if(role_verbose.equals("Barangay")) acceptButton.setVisibility(View.INVISIBLE);
         distanceTextView.setText(String.valueOf(Math.round(barangayRequest.getEvacuationCenterDistance() / 1000)) + " km away");
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
