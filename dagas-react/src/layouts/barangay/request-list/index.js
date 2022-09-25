@@ -77,6 +77,21 @@ function RequestList() {
           } 
         },
         {
+          Header: "requested_supplies",
+          accessor: "item_requests_serialized",
+          Cell: ({row}) => {
+            const reqType = row.values.item_requests_serialized.map(type => type.type_str);
+            const reqQty = row.values.item_requests_serialized.map(qty => qty.pax);
+            var str = "";
+            for (let i = 0; i < reqType.length; i++) {
+              str += `${reqType[i]}: ${reqQty[i]} | `
+            }
+            return (
+              <DefaultCell value={str}></DefaultCell>
+            );  
+          } 
+        },
+        {
           Header: "expected_date",
           accessor: "expected_date",
           Cell: ({value}) => {
