@@ -46,6 +46,30 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/evacuationCenterNameTextView" />
 
+            <TextView
+                android:id="@+id/foodTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Food: 0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/requestListTextView" />
+
+            <TextView
+                android:id="@+id/waterTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Water: 0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/foodTextView" />
+
+            <TextView
+                android:id="@+id/clothesTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clothes: 0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/waterTextView" />
+
             <Button
                 android:id="@+id/acceptButton"
                 android:layout_width="wrap_content"
@@ -53,7 +77,8 @@
 
                 android:text="Accept"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

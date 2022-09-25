@@ -15,6 +15,7 @@
         android:layout_height="350dp"
         android:layout_marginStart="1dp"
         android:layout_marginEnd="1dp"
+        android:paddingBottom="?attr/actionBarSize"
         app:layout_constraintBottom_toBottomOf="@id/transactionTable"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"

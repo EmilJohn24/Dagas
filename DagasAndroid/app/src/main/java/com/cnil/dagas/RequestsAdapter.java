@@ -19,6 +19,9 @@ import com.cnil.dagas.ui.home.HomeActivity;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHolder>{
     private static final String TAG = RequestsAdapter.class.getName();
@@ -29,12 +32,14 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         private final double evacuationCenterDistance;
         private final String acceptURL;
         private final int id;
-        public BarangayRequest(String barangayName, String evacuationCenterName, double evacuationCenterDistance, String acceptURL, int id) {
+        private final HashMap itemRequestMap;
+        public BarangayRequest(String barangayName, String evacuationCenterName, double evacuationCenterDistance, String acceptURL, int id, HashMap itemRequest) {
             this.barangayName = barangayName;
             this.evacuationCenterName = evacuationCenterName;
             this.acceptURL = acceptURL;
             this.evacuationCenterDistance = evacuationCenterDistance;
             this.id = id;
+            this.itemRequestMap = itemRequest;
         }
 
 
@@ -57,6 +62,8 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         public double getEvacuationCenterDistance() {
             return evacuationCenterDistance;
         }
+
+        public HashMap<String, Integer> getItemRequestMap(){ return itemRequestMap; }
     }
     final private ArrayList<BarangayRequest> barangayRequests;
 
@@ -102,10 +109,21 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         final TextView barangayNameTextView = requestCard.findViewById(R.id.barangayNameTextView);
         final TextView evacuationCenterNameTextView = requestCard.findViewById(R.id.evacuationCenterNameTextView);
         final TextView distanceTextView = requestCard.findViewById(R.id.requestListTextView);
+        final TextView foodTextView = requestCard.findViewById(R.id.foodTextView);
+        final TextView waterTextView = requestCard.findViewById(R.id.waterTextView);
+        final TextView clothesTextView = requestCard.findViewById(R.id.clothesTextView);
         final Button acceptButton = requestCard.findViewById(R.id.acceptButton);
         final BarangayRequest barangayRequest = barangayRequests.get(position);
         barangayNameTextView.setText(barangayRequest.getBarangayName());
         evacuationCenterNameTextView.setText(barangayRequest.getEvacuationCenterName());
+        HashMap<String, Integer> itemRequestMap = barangayRequest.getItemRequestMap();
+        for (Map.Entry<String, Integer> entry: itemRequestMap.entrySet()){
+            if(entry.getKey().equals("food")){
+                foodTextView.setText("Food: " + entry.getValue().toString());
+            } else if (entry.getKey().equals("water")){
+                waterTextView.setText("Water: " + entry.getValue().toString());
+            } else clothesTextView.setText("Clothes: " + entry.getValue().toString());
+        }
 //        requestListTextView.setText()
         if(role_verbose.equals("Barangay")) acceptButton.setVisibility(View.INVISIBLE);
         distanceTextView.setText(String.valueOf(Math.round(barangayRequest.getEvacuationCenterDistance() / 1000)) + " km away");

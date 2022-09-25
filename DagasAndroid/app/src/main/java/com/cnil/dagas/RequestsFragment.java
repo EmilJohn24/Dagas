@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -93,6 +94,12 @@ public class RequestsFragment extends Fragment {
                 String barangayName = barangayJSON.getString("user");
                 JSONObject evacCenterJSON = requestJSONObject.getJSONObject("evacuation_center_serialized");
                 String evacCenterName = evacCenterJSON.getString("name");
+                JSONArray itemRequestJSONArray = requestJSONObject.getJSONArray("item_requests_serialized");
+                HashMap<String, Integer> itemRequestMap = new HashMap<String, Integer>();
+                for (int innerIndex = 0; innerIndex < itemRequestJSONArray.length(); innerIndex++) {
+                    JSONObject itemRequestJSONObject = itemRequestJSONArray.getJSONObject(innerIndex);
+                    itemRequestMap.put(itemRequestJSONObject.getString("type_str"), itemRequestJSONObject.getInt("pax"));
+                }
                 String coord = evacCenterJSON.getString("geolocation");
                 String[] splitCoord = coord.split(",");
                 double latitude = Float.parseFloat(splitCoord[0]);
@@ -103,7 +110,7 @@ public class RequestsFragment extends Fragment {
                 double evacuationCenterDistance = userLocation.distanceTo(evacLocation);
                 this.adapter.add(new RequestsAdapter.BarangayRequest(barangayName, evacCenterName,
                                         evacuationCenterDistance, REQUESTS_URL + requestJSONObject.getInt("id") + "/",
-                                        requestJSONObject.getInt("id")));
+                                        requestJSONObject.getInt("id"), itemRequestMap));
 
             }
 
