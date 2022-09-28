@@ -37,6 +37,7 @@ import TrackOrder from "layouts/suggestions/components/TrackOrder";
 import PaymentDetails from "layouts/suggestions/components/PaymentDetails";
 import BillingInformation from "layouts/suggestions/components/BillingInformation";
 import OrderSummary from "layouts/suggestions/components/OrderSummary";
+import MapDirectionsRenderer from "./components/MapDirections";
 
 //React
 import { useEffect, useState } from "react";
@@ -60,21 +61,32 @@ function Suggestions({ google, locations = [] }) {
   configure({axiosConfig, cache});
   // Loading item types
   const [{data, loading, error}, refetch] = useAxios("/relief/api/evacuation-center/");
-  const [{data:suggestionData, loading:suggestionLoading, error:suggestionError}, suggestionRefetch] = useAxios("/relief/api/suggestions/");
   const [{data:suppliesData, loading:suppliesLoading, error:suppliesError}, suppliesRefetch] = useAxios("/relief/api/supplies/current_supplies/");
+  const [{data: postExecuteAlgo, loading: loadExecuteAlgo, error: errorExecuteAlgo}, algoExecutePost] = useAxios({
+    url: "/relief/api/algorithm/execute/",
+    method: "POST"
+}, {  manual: false  });
+const [{data: dataReco, loading: loadReco, error: errorReco}, recoRun] = useAxios({
+  url: "",
+  method: "GET"
+}, {  manual: true  });
   const [disasterForm, setDisasterForm] = useState(() => {
     return "Loading...";
   });
   const [showingInfoWindow, setShowingInfoWindow] = useState(false);
+  const [algoId, setalgoId] = useState();
   const [activeMarker, setActiveMarker] = useState({});
   const [selectedPlace, setSelectedPlace] = useState({});
   const [clickMarkerCoord, setClickMarkerCoord] = useState(null);
   const [userLatitude, setUserLatitude] = useState(null);
   const [userLongitude, setUserLongitude] = useState(null);
   const [donorSup, setDonorSup] = useState("");
+  const [didPost, setDidPost] = useState(() => true);
+  const [timeLineItemRender, settimeLineItemRender] = useState(null);
   const driverMarker = new window.google.maps.Marker(
     
   )
+  
   const {
       placesService,
       placePredictions,
@@ -90,9 +102,9 @@ function Suggestions({ google, locations = [] }) {
       }
       
   })
-  console.log(clickMarkerCoord);
-  console.log(placePredictions);
-  console.log(data);
+  // console.log(clickMarkerCoord);
+  // console.log(placePredictions);
+  // console.log(data);
   const [{data: disasterArray, loading: disasterLoading, error: disasterError}, refetchTypes] = useAxios("/relief/api/disasters/");
 
   const onMarkerClick = (props, marker, e) =>{
@@ -132,6 +144,10 @@ function Suggestions({ google, locations = [] }) {
 
   useEffect(() => {
     getLocation();
+    //if (errorExecuteAlgo) return;
+    if (!loadExecuteAlgo){
+      setalgoId(`/relief/api/algorithm/${postExecuteAlgo.id}`);
+    }
     if (suppliesError) return;
     else if (!suppliesLoading && suppliesData) {
       console.log(suppliesData);
@@ -144,25 +160,49 @@ function Suggestions({ google, locations = [] }) {
         str += `${suppliesList[i]}: ${suppliesQty[i]} `
       }
       setDonorSup(str);
-
       //setDonorSup(...donorSup, `${suppliesList[i]}: ${suppliesQty[i]}`);
     }
-  }, [suppliesLoading,suppliesData,suppliesError]);
+  }, [errorExecuteAlgo, loadExecuteAlgo, postExecuteAlgo, suppliesLoading,suppliesData,suppliesError]);
+
+  useEffect(() => {
+    console.log("dsfasdfasdfasd");
+    if (didPost && algoId){
+      console.log("line 1");
+      setDidPost(false);
+      recoRun({url: algoId});
+      return;
+    }
+    else if (!loadReco && dataReco){
+      console.log(algoId);
+      if (dataReco.result == null){
+        console.log("line 3");
+        console.log(dataReco);
+        console.log(loadReco);
+        recoRun({url: algoId});
+      }
+    }
+  }, [algoId, dataReco, loadReco,loadExecuteAlgo, errorReco, postExecuteAlgo]);
 
   const mapStyles = {
       position: "relative",
       width: '100%',
       height: '100%'
   };
-  const evacMarkerRender = data?.map((evac_data) => {
-      const [lat, lng]= evac_data.geolocation.split(',');
-      const geoloc = {lat: lat, lng, lng};
+  var evacMarkerRender = null;
+  var geoLocArr = [];
+   if (dataReco && dataReco.result != null){
+    evacMarkerRender = dataReco.result.route_nodes?.map((evac_data) => {
+      const [lat, lng]= evac_data.evacuation_center_geolocation.split(',');
+      const geoloc = {lat: lat, lng: lng};
+      geoLocArr.push(geoloc);
+      console.log(geoloc);
       return <Marker
-                  onClick={onMarkerClick}
-                  name={evac_data.name}
-                  position={geoloc}
-                  />
-  });
+                    onClick={onMarkerClick}
+                    name={evac_data.evacuation_center_name}
+                    position={geoloc}
+                    />
+    })
+   }
 
 
   const renderHeader = (
@@ -186,26 +226,42 @@ function Suggestions({ google, locations = [] }) {
     </MDBox>
   )
 
+  
+  const renderEvacDetails = () =>{
+    if (dataReco && dataReco.result != null){
+      return dataReco.result.route_nodes?.map((evac_data) => {
+        var str = "";
+        console.log(evac_data);
+        const goodsType = evac_data.fulfillments?.map((evac_data2) => {
+          console.log(evac_data2);
+          str += `${evac_data2.type_name}: ${evac_data2.pax} | `;
+          console.log(str);
+            // for (let i = 0; i < evac_data2.length; i++) {
+            //   str += `${evac_data2[i].type_name}: ${evac_data2[i].pax} | `;
+            // }
+        });
+        return (
+          <TimelineItem
+          color="info"
+          icon="local_shipping"
+          title={`Evacuation Center: ${evac_data.evacuation_center_name}`}
+          description={str}
+          dateTime="22 DEC 7:20 PM" // Deadline of delivery?
+        />
+        )
+      });
+     }
+  }
+    
+  
+
   const renderSuggestedEvacs = (
     <>
       <MDTypography variant="h6" fontWeight="medium">
         Donations To Make
       </MDTypography>
       <MDBox mt={2}>
-        <TimelineItem
-          color="info"
-          icon="local_shipping"
-          title="Evacuation Center: Mall of Asia"
-          description="Food: 1000 Water: 2000 Clothes: 100"
-          dateTime="22 DEC 7:20 PM" // Deadline of delivery?
-        />
-        <TimelineItem
-          color="info"
-          icon="local_shipping"
-          title="Evacuation Center: NAIA 3"
-          description="Food: 200 Water: 100 Clothes: 10"
-          dateTime="22 DEC 7:20 PM" // Deadline of delivery?
-        />
+        {renderEvacDetails()}
       </MDBox>
     </>
   )
@@ -228,6 +284,7 @@ function Suggestions({ google, locations = [] }) {
                           }
                       }
                   >
+                      {/* <MapDirectionsRenderer places={geoLocArr} travelMode={google.maps.TravelMode.DRIVING}></MapDirectionsRenderer> */}
                       {evacMarkerRender}
                       <Marker
                           position={clickMarkerCoord}

@@ -506,8 +506,8 @@ class AlgorithmExecutionViewSet(viewsets.ReadOnlyModelViewSet):
                 solo_algo_tests.apply_async(args=['tabu', user_donor.id, new_algo_exec.id])
                 return Response(AlgorithmExecutionSerializer(new_algo_exec).data, status=status.HTTP_201_CREATED)
             else:
-                return Response(AlgorithmExecutionSerializer(algo_exec, many=True).data,
-                                status=status.HTTP_429_TOO_MANY_REQUESTS)
+                return Response(AlgorithmExecutionSerializer(algo_exec[0], context={'request': request}, many=False).data,
+                                status=status.HTTP_200_OK)
         else:
             raise ValidationError(detail="Not a donor account",
                                   code=status.HTTP_400_BAD_REQUEST)

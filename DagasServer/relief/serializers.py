@@ -345,24 +345,6 @@ class RatingSerializer(serializers.ModelSerializer):
 
 # Algorithm-related
 
-class AlgorithmExecutionSerializer(serializers.ModelSerializer):
-    result = serializers.HyperlinkedRelatedField(
-        required=False,
-        read_only=True,
-        view_name='relief:suggestions-detail')
-    # has_result = serializers.SerializerMethodField()
-    #
-    # def get_has_result(self, obj):
-    #     return obj.
-
-    class Meta:
-        model = AlgorithmExecution
-        fields = ('donor', 'time_started', 'time_modified',
-                  'result')
-        read_only_fields = ('donor', 'time_started', 'time_modified',
-                            'result')
-
-
 class FulfillmentSerializer(serializers.ModelSerializer):
     type_name = serializers.StringRelatedField(
         read_only=True,
@@ -408,12 +390,12 @@ class RouteNodeSerializer(serializers.ModelSerializer):
 
 
 class RouteSuggestionSerializer(serializers.ModelSerializer):
-    donor = serializers.HyperlinkedRelatedField(
-        required=False,
-        view_name='relief:donor_details',
-        read_only=False,
-        queryset=DonorProfile.objects.all(),
-    )
+    # donor = serializers.HyperlinkedRelatedField(
+    #     required=False,
+    #     view_name='relief:donor_details',
+    #     read_only=False,
+    #     queryset=DonorProfile.objects.all(),
+    # )
     donor_name = serializers.StringRelatedField(
         required=False,
         read_only=True,
@@ -425,6 +407,28 @@ class RouteSuggestionSerializer(serializers.ModelSerializer):
         model = RouteSuggestion
         fields = ('id', 'donor', 'donor_name', 'route_nodes')
         read_only_fields = ('id', 'donor', 'donor_name', 'route_nodes')
+
+
+class AlgorithmExecutionSerializer(serializers.ModelSerializer):
+    # result = serializers.HyperlinkedRelatedField(
+    #     required=False,
+    #     read_only=True,
+    #     view_name='relief:suggestions-detail')
+    # has_result = serializers.SerializerMethodField()
+    #
+    # def get_has_result(self, obj):
+    #     return obj.
+    result = RouteSuggestionSerializer(
+        required=False,
+        read_only=True,
+        many=False, )
+
+    class Meta:
+        model = AlgorithmExecution
+        fields = ('id', 'donor', 'time_started', 'time_modified',
+                  'result')
+        read_only_fields = ('id', 'donor', 'time_started', 'time_modified',
+                            'result')
 
 
 # Based on: https://stackoverflow.com/questions/62291394/django-rest-auth-dj-rest-auth-custom-user-registration
