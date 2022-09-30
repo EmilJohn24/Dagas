@@ -24,6 +24,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -45,9 +46,11 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -57,6 +60,7 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
     private static String TAG = SuggestionNodeFragment.class.getName();
     private MapView suggestionMapView;
     private GoogleMap map;
+    private static int algoID;
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -67,6 +71,8 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         map = googleMap;
+//        googleMap.clear();
+        map.clear();
 
         TransactionReceiptFragment.RetrieveGeolocation geolocationThread = new TransactionReceiptFragment
                                                             .RetrieveGeolocation(TransactionReceiptFragment
@@ -82,10 +88,11 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(donorGeolocation, 15));
         Marker donorMarker = map.addMarker(new MarkerOptions()
                 .position(donorGeolocation)
-                .title("Donor Position"));
+                .title("Donor Position")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
                 //Create dummy node from donor
         Suggestion.SuggestionNode previousNode = new Suggestion.SuggestionNode(
-                "-1", "Donor", "Donor", donorGeolocation);
+                "-1", "Donor", "Donor", donorGeolocation, 1); //1 is just a placeholder in this case
         GeoApiContext context = new GeoApiContext.Builder()
                 .apiKey("AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM")
                 .build();
@@ -107,7 +114,6 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
                 e.printStackTrace();
                 Log.e(TAG, e.getMessage());
             }
-
 
             //Loop through legs and steps to get encoded polylines of each step
             if (res.routes != null && res.routes.length > 0) {
@@ -165,9 +171,69 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
         }
     }
 
-    public static class GrabSuggestionNodes extends Thread {
-        private static final String SUGGESTION_URL = "/relief/api/suggestions/";
+//    public static class GrabSuggestionNodes extends Thread {
+//        private static final String SUGGESTION_URL = "/relief/api/suggestions/";
+//
+//        private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+//
+//
+//
+//        public void run() {
+//            try {
+//                grabSuggestions();
+//            } catch (IOException | JSONException e) {
+//                Log.e(TAG, e.getMessage());
+//            }
+//        }
+//        private void grabSuggestions() throws IOException, JSONException {
+//            OkHttpSingleton client = OkHttpSingleton.getInstance();
+////            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
+//            Request request = client.builderFromBaseUrl(SUGGESTION_URL)
+//                    .get()
+//                    .build();
+//            Response response = client.newCall(request).execute();
+//            //TODO: Add success check
+//            JSONArray suggestionJSONArray = new JSONArray(response.body().string());
+//            for (int index = 0; index < suggestionJSONArray.length(); index++) {
+//                String donorName = suggestionJSONArray.getJSONObject(index).getString("donor_name");
+//                JSONArray routeNodes = suggestionJSONArray.getJSONObject(index).getJSONArray("route_nodes");
+//                for (int nodeIndex = 0; nodeIndex < routeNodes.length(); nodeIndex++){
+//                    JSONObject currentNode = routeNodes.getJSONObject(nodeIndex);
+//                    String id = currentNode.getString("id");
+//                    String barangayName = currentNode.getString("barangay_name");
+//                    String evacuationCenterName = currentNode.getString("evacuation_center_name");
+//
+//                    // Parse geolocation
+//                    String geolocationString = currentNode.getString("evacuation_center_geolocation");
+//                    String[] splitCoord = geolocationString.split(",");
+//                    double latitude = Float.parseFloat(splitCoord[0]);
+//                    double longtitude = Float.parseFloat(splitCoord[1]);
+//                    LatLng evacCoordinate = new LatLng(latitude, longtitude);
+//
+//                    Suggestion.SuggestionNode node = new Suggestion.SuggestionNode(id, barangayName,
+//                                evacuationCenterName, evacCoordinate);
+//                    JSONArray fufillments = currentNode.getJSONArray("fulfillments");
+//
+//                    for (int fIndex = 0; fIndex < fufillments.length(); fIndex++){
+//                        JSONObject fulfillment = fufillments.getJSONObject(fIndex);
+//                        String itemType = fulfillment.getString("type_name");
+//                        Integer amount = fulfillment.getInt("pax");
+//                        node.addFulfillment(itemType, amount);
+//
+//                    }
+//
+//                    Suggestion.ITEMS.add(node);
+//                }
+//            }
+//
+//            //TODO: Check for errors
+//
+//        }
+//    }
 
+    public static class CreateSuggestion extends Thread {
+        private static final String ALGORITHM_URL = "/relief/api/algorithm/execute/";
+        private static final String SPECIFIC_ALGORITHM_URL = "/relief/api/algorithm/%d/";
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
 
@@ -175,55 +241,70 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
         public void run() {
             try {
                 grabSuggestions();
-            } catch (IOException | JSONException e) {
+            } catch (IOException | JSONException | InterruptedException e) {
                 Log.e(TAG, e.getMessage());
             }
         }
-        private void grabSuggestions() throws IOException, JSONException {
+        private void grabSuggestions() throws IOException, JSONException, InterruptedException {
             OkHttpSingleton client = OkHttpSingleton.getInstance();
-//            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
-            Request request = client.builderFromBaseUrl(SUGGESTION_URL)
-                    .get()
+            RequestBody body = RequestBody.create(null, new byte[]{});
+            Request request = client.builderFromBaseUrl(ALGORITHM_URL)
+                    .post(body)
                     .build();
             Response response = client.newCall(request).execute();
-            //TODO: Add success check
-            JSONArray suggestionJSONArray = new JSONArray(response.body().string());
-            for (int index = 0; index < suggestionJSONArray.length(); index++) {
-                String donorName = suggestionJSONArray.getJSONObject(index).getString("donor_name");
-                JSONArray routeNodes = suggestionJSONArray.getJSONObject(index).getJSONArray("route_nodes");
-                for (int nodeIndex = 0; nodeIndex < routeNodes.length(); nodeIndex++){
-                    JSONObject currentNode = routeNodes.getJSONObject(nodeIndex);
-                    String id = currentNode.getString("id");
-                    String barangayName = currentNode.getString("barangay_name");
-                    String evacuationCenterName = currentNode.getString("evacuation_center_name");
-
-                    // Parse geolocation
-                    String geolocationString = currentNode.getString("evacuation_center_geolocation");
-                    String[] splitCoord = geolocationString.split(",");
-                    double latitude = Float.parseFloat(splitCoord[0]);
-                    double longtitude = Float.parseFloat(splitCoord[1]);
-                    LatLng evacCoordinate = new LatLng(latitude, longtitude);
-
-                    Suggestion.SuggestionNode node = new Suggestion.SuggestionNode(id, barangayName,
-                                evacuationCenterName, evacCoordinate);
-                    JSONArray fufillments = currentNode.getJSONArray("fulfillments");
-
-                    for (int fIndex = 0; fIndex < fufillments.length(); fIndex++){
-                        JSONObject fulfillment = fufillments.getJSONObject(fIndex);
-                        String itemType = fulfillment.getString("type_name");
-                        Integer amount = fulfillment.getInt("pax");
-                        node.addFulfillment(itemType, amount);
-
-                    }
-
-                    Suggestion.ITEMS.add(node);
-                }
+            JSONObject createSuggestionResponse = new JSONObject(response.body().string());
+            algoID = createSuggestionResponse.getInt("id");
+            //TODO: ADD SUCESS CHECK
+            Request suggestionRequest = client.builderFromBaseUrl(
+                    String.format(SPECIFIC_ALGORITHM_URL, algoID))
+                    .get()
+                    .build();
+            Response itemTypeResponse = client.newCall(suggestionRequest).execute();
+            JSONObject requestJSONArray =  new JSONObject(itemTypeResponse.body().string());
+//            Log.i("MyApp",requestJSONArray.optJSONArray("result").toString());
+            while(requestJSONArray.optJSONObject("result") == null){
+                TimeUnit.SECONDS.sleep(1);
+                suggestionRequest = client.builderFromBaseUrl(
+                        String.format(SPECIFIC_ALGORITHM_URL, algoID))
+                        .get()
+                        .build();
+                itemTypeResponse = client.newCall(suggestionRequest).execute();
+                requestJSONArray =  new JSONObject(itemTypeResponse.body().string());
             }
+            JSONArray routeNodes = requestJSONArray.getJSONObject("result").getJSONArray("route_nodes");
+            for (int nodeIndex = 0; nodeIndex < routeNodes.length(); nodeIndex++){
+                JSONObject currentNode = routeNodes.getJSONObject(nodeIndex);
+                String id = currentNode.getString("id");
+                String barangayName = currentNode.getString("barangay_name");
+                String evacuationCenterName = currentNode.getString("evacuation_center_name");
 
-            //TODO: Check for errors
+                // Parse geolocation
+                String geolocationString = currentNode.getString("evacuation_center_geolocation");
+                String[] splitCoord = geolocationString.split(",");
+                double latitude = Float.parseFloat(splitCoord[0]);
+                double longtitude = Float.parseFloat(splitCoord[1]);
+                LatLng evacCoordinate = new LatLng(latitude, longtitude);
 
+                // Parse distance from previous location
+                double distanceFromPrevious = currentNode.getInt("distance_from_prev");
+
+                Suggestion.SuggestionNode node = new Suggestion.SuggestionNode(id, barangayName,
+                        evacuationCenterName, evacCoordinate, distanceFromPrevious);
+                JSONArray fufillments = currentNode.getJSONArray("fulfillments");
+
+                for (int fIndex = 0; fIndex < fufillments.length(); fIndex++){
+                    JSONObject fulfillment = fufillments.getJSONObject(fIndex);
+                    String itemType = fulfillment.getString("type_name");
+                    Integer amount = fulfillment.getInt("pax");
+                    node.addFulfillment(itemType, amount);
+
+                }
+
+                Suggestion.ITEMS.add(node);
+            }
         }
     }
+
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
@@ -264,10 +345,13 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_card_suggestions, container, false);
         suggestionMapView = view.findViewById(R.id.suggestionMapView);
-        GrabSuggestionNodes suggestionThread = new GrabSuggestionNodes();
-        suggestionThread.start();
+//        GrabSuggestionNodes suggestionThread = new GrabSuggestionNodes();
+        CreateSuggestion createSuggestionThread = new CreateSuggestion();
+//        suggestionThread.start();
+        createSuggestionThread.start();
         try {
-            suggestionThread.join();
+//            suggestionThread.join();
+            createSuggestionThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
