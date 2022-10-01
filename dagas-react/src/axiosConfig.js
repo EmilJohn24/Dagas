@@ -18,7 +18,7 @@ const instance = axios.create({
 axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 // instance.defaults.headers.common['Authorization'] = 'AUTH TOKEN FROM INSTANCE';
 
-const cache = new LRU({ max: 10 })
+const cache = new LRU({ max: 10 });
 
 configure({ instance, cache }); 
 
