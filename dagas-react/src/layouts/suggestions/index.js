@@ -44,10 +44,8 @@ import { useEffect, useState } from "react";
 
 
 //AXIOS and navigation
-import axiosConfig from "axiosConfig";
-import LRU from 'lru-cache';
-import {configure} from 'axios-hooks';
-import useAxios from 'axios-hooks';
+import { useAxios } from 'axiosConfig';
+
 import { Navigate } from "react-router-dom";
 import { Avatar, darkScrollbar, Icon } from "@mui/material";
 import { Map, GoogleApiWrapper, InfoWindow, Marker } from 'google-maps-react';
@@ -56,9 +54,6 @@ import { geocodeByPlaceId } from "react-google-places-autocomplete";
 import icon from "assets/theme/components/icon";
 
 function Suggestions({ google, locations = [] }) {
-
-  const cache = new LRU({max: 10})
-  configure({axiosConfig, cache});
   // Loading item types
   const [{data, loading, error}, refetch] = useAxios("/relief/api/evacuation-center/");
   const [{data:suppliesData, loading:suppliesLoading, error:suppliesError}, suppliesRefetch] = useAxios("/relief/api/supplies/current_supplies/");

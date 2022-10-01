@@ -234,10 +234,12 @@ GOOGLE_MAPS_API_KEY = "AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM";
 CORS_ALLOWED_ORIGINS = [
     'http://192.168.100.2:3000',
     'http://localhost:3000',
+    'https://dagas-web.herokuapp.com',
 ]
 CSRF_TRUSTED_ORIGINS = [
     'http://192.168.100.2:3000',
     'http://localhost:3000',
+    'https://dagas-web.herokuapp.com',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -278,6 +280,7 @@ SIMPLE_JWT = {
 # Celery
 # CELERY_BROKER_URL = 'redis://localhost:6379'
 # CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_BROKER_URL = os.environ.get('CLOUDAMQP_URL')
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

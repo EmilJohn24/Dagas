@@ -71,8 +71,6 @@ const pageRoutes = [
             name: "pricing page",
             route: "/pages/pricing-page",
           },
-          { name: "RTL", route: "/pages/rtl" },
-          { name: "widgets", route: "/pages/widgets" },
           { name: "charts", route: "/pages/charts" },
           {
             name: "notfications",
@@ -97,10 +95,6 @@ const pageRoutes = [
           {
             name: "settings",
             route: "/pages/account/setting",
-          },
-          {
-            name: "billing",
-            route: "/pages/account/billing",
           },
           {
             name: "invoice",

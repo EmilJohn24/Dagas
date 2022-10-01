@@ -39,19 +39,13 @@ import burceMars from "assets/images/bruce-mars.jpg";
 import backgroundImage from "assets/images/bg-profile.jpeg";
 
 //AXIOS
-import axiosConfig from "axiosConfig";
-import LRU from 'lru-cache';
-import {configure} from 'axios-hooks';
-import useAxios from 'axios-hooks';
+import { useAxios } from 'axiosConfig';
 import { Navigate } from "react-router-dom";
 import { FormControl } from "@mui/material";
 
 function Header({ children }) {
   const [tabsOrientation, setTabsOrientation] = useState("horizontal");
   const [tabValue, setTabValue] = useState(0);
-
-  const cache = new LRU({max: 10})
-  configure({axiosConfig, cache});
   const [{data, loading, error}, refetch] = useAxios("/relief/api/users/current_user/");
   
 

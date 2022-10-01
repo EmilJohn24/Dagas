@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.cnil.dagas.placeholder.Suggestion.SuggestionNode;
@@ -34,10 +35,14 @@ public class SuggestionNodeRecyclerViewAdapter extends RecyclerView.Adapter<Sugg
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.mItem = mValues.get(position);
-        holder.suggestedBarangayName.setText(mValues.get(position).suggestedBarangayName);
-        holder.suggestedEvacuationCenterName.setText(mValues.get(position).suggestedEvacuationCenterName);
-        holder.suggestedBarangayName.setText(mValues.get(position).suggestedBarangayName);
-        //TODO: Load in fulfillments here to TableLayout contentTable
+        holder.suggestedBarangayName.setText("Barangay: " + mValues.get(position).suggestedBarangayName);
+        holder.suggestedEvacuationCenterName.setText("Evacuation Center Name: " + mValues.get(position).suggestedEvacuationCenterName);
+//        holder.suggestedBarangayName.setText(mValues.get(position).suggestedBarangayName);
+        //TODO: Consider converting the table to dynamic
+        holder.foodAmount.setText(mValues.get(position).fulfillments.get("food").toString());
+        holder.waterAmount.setText(mValues.get(position).fulfillments.get("water").toString());
+        holder.clothesAmount.setText(mValues.get(position).fulfillments.get("clothes").toString());
+
     }
 
     @Override
@@ -49,6 +54,9 @@ public class SuggestionNodeRecyclerViewAdapter extends RecyclerView.Adapter<Sugg
         public final TextView suggestedBarangayName;
         public final TextView suggestedEvacuationCenterName;
         public final TableLayout contentTable;
+        public final TextView foodAmount;
+        public final TextView waterAmount;
+        public final TextView clothesAmount;
         public SuggestionNode mItem;
 
         public ViewHolder(CardSuggestionNodeBinding binding) {
@@ -56,6 +64,9 @@ public class SuggestionNodeRecyclerViewAdapter extends RecyclerView.Adapter<Sugg
             suggestedBarangayName = binding.suggestedBarangayName;
             suggestedEvacuationCenterName = binding.suggestedEvacuationCenterName;
             contentTable = binding.contentTable;
+            foodAmount = binding.foodAmount;
+            waterAmount = binding.waterAmount;
+            clothesAmount = binding.clothesAmount;
         }
 
         @Override

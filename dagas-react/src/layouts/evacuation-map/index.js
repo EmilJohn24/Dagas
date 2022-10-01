@@ -18,9 +18,8 @@ import Footer from "examples/Footer";
 
 //AXIOS and navigation
 import axiosConfig from "axiosConfig";
-import LRU from 'lru-cache';
-import {configure} from 'axios-hooks';
-import useAxios from 'axios-hooks';
+import { useAxios } from 'axiosConfig';
+
 import { Navigate } from "react-router-dom";
 import { Avatar, darkScrollbar, Icon, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, TextField } from "@mui/material";
 
@@ -37,8 +36,6 @@ function EvacuationMap({ google, locations = [] }){
         const [activeMarker, setActiveMarker] = useState({});
         const [selectedPlace, setSelectedPlace] = useState({});
         const [clickMarkerCoord, setClickMarkerCoord] = useState(null);
-        const cache = new LRU({max: 10})
-        configure({axiosConfig, cache});
         const [{data, loading, error}, refetch] = useAxios("/relief/api/evacuation-center/");
         const [{data: profileData, loading: profileLoading, error: profileError}, refetchProfile] = useAxios("/relief/api/users/current_user/");
         const {

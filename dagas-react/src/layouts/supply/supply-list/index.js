@@ -48,10 +48,8 @@ import { Formik, useFormik } from "formik";
 import * as Yup from 'yup';
 
 //AXIOS and navigation
-import axiosConfig from "axiosConfig";
-import LRU from 'lru-cache';
-import {configure} from 'axios-hooks';
-import useAxios from 'axios-hooks';
+import { useAxios } from 'axiosConfig';
+
 import logo from 'logo.svg';
 import { Navigate } from "react-router-dom";
 import { Icon } from "@mui/material";
@@ -60,9 +58,6 @@ function SupplyList() {
   const [supplyForm, setSupplyForm] = useState(() => {
     return "Loading...";
   });
-
-  const cache = new LRU({max: 10})
-  configure({axiosConfig, cache});
   const [{data, loading, error}, refetch] = useAxios("/relief/api/supplies/current_supplies/");
     // Loading item types
   const [{data: typeArray, loading: typeLoading, error: typeError}, refetchTypes] = useAxios("/relief/api/item-type/");

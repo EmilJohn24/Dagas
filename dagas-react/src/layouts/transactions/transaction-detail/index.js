@@ -35,10 +35,8 @@ import BillingInformation from "./components/BillingInformation";
 import OrderSummary from "./components/OrderSummary";
 
 //AXIOS
-import axiosConfig from "axiosConfig";
-import LRU from 'lru-cache';
-import {configure} from 'axios-hooks';
-import useAxios from 'axios-hooks';
+import { useAxios } from 'axiosConfig';
+
 import { Navigate } from "react-router-dom";
 
 //react 
@@ -48,8 +46,6 @@ import * as React from 'react';
 function TransactionDetail({details}) {
   const [roleCheck, setRole] = useState();
 
-  const cache = new LRU({max: 10})
-  configure({axiosConfig, cache});
   const [{data, loading, error}, refetch] = useAxios("/relief/api/users/current_user/");
   
 

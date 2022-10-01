@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client';
 import 'bootstrap/dist/css/bootstrap.css'; //Bootstrap
 import './index.css';
 import App from './App';
+//AXIOS and navigation
+import axiosConfig from "axiosConfig";
+import LRU from 'lru-cache';
+import {configure} from 'axios-hooks';
 
 import { BrowserRouter } from "react-router-dom";
 import reportWebVitals from './reportWebVitals';

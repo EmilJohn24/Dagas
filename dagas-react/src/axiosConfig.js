@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { configure, makeUseAxios } from 'axios-hooks';
+import LRU from 'lru-cache';
 import { applyAuthTokenInterceptor, resolve } from 'axios-jwt';
 
 const instance = axios.create({
@@ -17,10 +19,12 @@ const instance = axios.create({
 axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 // instance.defaults.headers.common['Authorization'] = 'AUTH TOKEN FROM INSTANCE';
 
+export const useAxios = makeUseAxios({axios: instance});
+// configure({ instance, cache }); 
 
 //Token Refresh Function
 const requestRefresh = async (refresh) => {
-    const response = await axios.post(`/api/token/refresh/`, { refresh })
+    const response = await instance.post(`/api/token/refresh/`, { refresh })
       .then(response => response.data.access);
     console.log(response);
     return response;

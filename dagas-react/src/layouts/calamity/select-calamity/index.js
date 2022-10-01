@@ -39,10 +39,8 @@ import Carousel from 'react-material-ui-carousel'
 import { CImage } from '@coreui/react'
 
 //AXIOS and navigation
-import axiosConfig from "axiosConfig";
-import LRU from 'lru-cache';
-import {configure} from 'axios-hooks';
-import useAxios from 'axios-hooks';
+import { useAxios } from 'axiosConfig';
+
 import logo from 'logo.svg';
 import { Navigate } from "react-router-dom";
 import { Avatar, darkScrollbar, Icon } from "@mui/material";
@@ -69,8 +67,6 @@ function Calamities({ google, locations = [] }) {
   const [selectedPlace, setSelectedPlace] = useState({});
   const [clickMarkerCoord, setClickMarkerCoord] = useState(null);
 
-  const cache = new LRU({max: 10})
-  configure({axiosConfig, cache});
   // Loading item types
   const [{data, loading, error}, refetch] = useAxios("/relief/api/evacuation-center/");
   const [chosenDisaster, setChosenDisaster] = useState(null);
