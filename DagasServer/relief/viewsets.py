@@ -1,4 +1,5 @@
 from django.db.models import Sum, QuerySet
+from django.db import transaction
 from django.utils.datetime_safe import datetime
 from django.utils import timezone
 from django_auto_prefetching import AutoPrefetchViewSetMixin
@@ -206,40 +207,6 @@ class TransactionViewSet(viewsets.ModelViewSet):
         barangay_request: BarangayRequest = current_transaction.barangay_request
         serializer = EvacuationCenterSerializer(barangay_request.evacuation_center)
         return Response(serializer.data)
-
-    @action(detail=False, methods=['post'], name='Convert suggestion into transactions',
-            permission_classes=[IsProfileUserOrReadOnly])
-    def transactions_from_suggestion(self, request, pk=None):
-        # TODO: Consider moving to DonorViewSet
-        donor = DonorProfile.objects.filter(user=request.user)[0]
-        suggestion = RouteSuggestion.objects.filter(donor__user=request.user)[0]
-        route_nodes = RouteNode.objects.filter(suggestion=suggestion)
-        created_transactions = []
-        supplies = Supply.objects.filter(donation__donor=donor)
-        for route_node in route_nodes:
-            fulfillments = Fulfillment.objects.filter(node=route_node)
-            created_transaction = Transaction.objects.create(donor=donor, received=Transaction.PACKAGING,
-                                                             barangay_request=route_node.request, )
-            created_transactions.append(created_transaction)
-            for fulfillment in fulfillments:
-                remaining_fulfillment_pax = fulfillment.pax
-                for supply in supplies:
-                    if remaining_fulfillment_pax == 0:
-                        break
-                    available_pax = supply.calculate_available_pax()
-                    if available_pax >= remaining_fulfillment_pax:
-                        TransactionOrder.objects.create(pax=remaining_fulfillment_pax, supply=supply,
-                                                        transaction=created_transaction, )
-                        remaining_fulfillment_pax = 0
-                    else:
-                        TransactionOrder.objects.create(pax=available_pax, supply=supply,
-                                                        transaction=created_transaction, )
-                        remaining_fulfillment_pax = remaining_fulfillment_pax - available_pax
-
-        # serializer = EvacuationCenterSerializer(barangay_request.evacuation_center)
-        return Response(TransactionSerializer(created_transactions,
-                                              many=True,
-                                              context={'request': request}).data, status=201)
 
     def perform_create(self, serializer):
         current_donor = DonorProfile.objects.get(user=self.request.user)
@@ -489,8 +456,45 @@ class TransactionStubViewSet(viewsets.ModelViewSet):
 
 class AlgorithmExecutionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AlgorithmExecutionSerializer
+    @action(detail=True, methods=['post'], name='Accept Suggestion',
+            permission_classes=[IsProfileUserOrReadOnly])
+    @transaction.atomic
+    def accept(self, request, pk=None):
+        # TODO: Consider moving to DonorViewSet
+        algo_exec = self.get_object()
+        donor = algo_exec.donor
+        suggestion = algo_exec.result
+        route_nodes = RouteNode.objects.filter(suggestion=suggestion)
+        created_transactions = []
+        supplies = Supply.objects.filter(donation__donor=donor)
+        for route_node in route_nodes:
+            fulfillments = Fulfillment.objects.filter(node=route_node)
+            created_transaction = Transaction.objects.create(donor=donor, received=Transaction.PACKAGING,
+                                                             barangay_request=route_node.request, )
+            created_transactions.append(created_transaction)
+            for fulfillment in fulfillments:
+                remaining_fulfillment_pax = fulfillment.pax
+                for supply in supplies:
+                    if remaining_fulfillment_pax == 0:
+                        break
+                    available_pax = supply.calculate_available_pax()
+                    if available_pax >= remaining_fulfillment_pax:
+                        TransactionOrder.objects.create(pax=remaining_fulfillment_pax, supply=supply,
+                                                        transaction=created_transaction, )
+                        remaining_fulfillment_pax = 0
+                    else:
+                        TransactionOrder.objects.create(pax=available_pax, supply=supply,
+                                                        transaction=created_transaction, )
+                        remaining_fulfillment_pax = remaining_fulfillment_pax - available_pax
 
+        # serializer = EvacuationCenterSerializer(barangay_request.evacuation_center)
+        suggestion.accepted = True
+        suggestion.save()
+        return Response(TransactionSerializer(created_transactions,
+                                              many=True,
+                                              context={'request': request}).data, status=201)
     @action(methods=['post'], detail=False, name='Execute Algorithm')
+    @transaction.atomic
     def execute(self, request, pk=None):
         if request.data['geolocation']:
             UserLocation.objects.create(geolocation=request.data['geolocation'], 
