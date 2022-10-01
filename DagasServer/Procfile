@@ -1,2 +1,2 @@
 web: gunicorn DagasServer.wsgi
-celery: celery worker -A DagasServer --loglevel=INFO --concurrency 1
+celery: celery -A DagasServer worker --loglevel=INFO --concurrency 1
