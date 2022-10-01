@@ -56,11 +56,18 @@ import icon from "assets/theme/components/icon";
 function Suggestions({ google, locations = [] }) {
   // Loading item types
   const [{data, loading, error}, refetch] = useAxios("/relief/api/evacuation-center/");
-  const [{data:suppliesData, loading:suppliesLoading, error:suppliesError}, suppliesRefetch] = useAxios("/relief/api/supplies/current_supplies/");
+  const [{data:suppliesData, loading:suppliesLoading, error:suppliesError}, suppliesRefetch] = useAxios(
+    "/relief/api/supplies/current_supplies/", {autoCancel: false});
+  const [userLatitude, setUserLatitude] = useState(null);
+  const [userLongitude, setUserLongitude] = useState(null);
+  console.log(userLatitude);
   const [{data: postExecuteAlgo, loading: loadExecuteAlgo, error: errorExecuteAlgo}, algoExecutePost] = useAxios({
     url: "/relief/api/algorithm/execute/",
-    method: "POST"
-}, {  manual: true  });
+    method: "POST",
+    data: {
+      geolocation: `${userLatitude},${userLongitude}`
+    }
+}, {  manual: true, autoCancel: false  });
 const [{data: dataReco, loading: loadReco, error: errorReco}, recoRun] = useAxios({
   url: "",
   method: "GET"
@@ -77,8 +84,7 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
   const [activeMarker, setActiveMarker] = useState({});
   const [selectedPlace, setSelectedPlace] = useState({});
   const [clickMarkerCoord, setClickMarkerCoord] = useState(null);
-  const [userLatitude, setUserLatitude] = useState(null);
-  const [userLongitude, setUserLongitude] = useState(null);
+
   const [donorSup, setDonorSup] = useState("");
   const [didPost, setDidPost] = useState(() => true);
   const [timeLineItemRender, settimeLineItemRender] = useState(null);
@@ -128,27 +134,31 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
 // Get user position
   function getLocation() {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(runAlgorithm);
+      navigator.geolocation.getCurrentPosition(showPosition);
     } else {
       alert("Geolocation is not supported by this browser.");
     }
   }
   
-  function runAlgorithm(position) {
+  function showPosition(position) {
     setUserLatitude(position.coords.latitude);
     setUserLongitude(position.coords.longitude);
-    algoExecutePost({
-      data: {
-        geolocation: `${position.coords.latitude},${position.coords.longitude}`
-      }
-    })
-    console.log(userLatitude);
-    console.log(userLongitude);
+    setClickMarkerCoord({
+      lat: position.coords.latitude,
+      lng: position.coords.longitude
+    });
   }
- 
+
   useEffect(() => {
+    
     //if (errorExecuteAlgo) return;
-    if (!loadExecuteAlgo){
+    if (userLatitude != null && userLongitude != null && !loadExecuteAlgo && !postExecuteAlgo){
+      if (suppliesLoading && !suppliesData) return;
+      algoExecutePost();
+   } else {
+    getLocation();
+   }
+    if (!loadExecuteAlgo && postExecuteAlgo){
       setalgoId(`/relief/api/algorithm/${postExecuteAlgo.id}`);
     }
     if (suppliesError) return;
@@ -165,7 +175,7 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
       setDonorSup(str);
       //setDonorSup(...donorSup, `${suppliesList[i]}: ${suppliesQty[i]}`);
     }
-  }, [errorExecuteAlgo, loadExecuteAlgo, postExecuteAlgo, suppliesLoading,suppliesData,suppliesError]);
+  }, [userLatitude, userLongitude, errorExecuteAlgo, loadExecuteAlgo, postExecuteAlgo, suppliesLoading,suppliesData,suppliesError]);
 
   useEffect(() => {
     console.log("dsfasdfasdfasd");
@@ -185,10 +195,8 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
       }
     }
   }, [algoId, dataReco, loadReco,loadExecuteAlgo, errorReco, postExecuteAlgo]);
-  if (!postExecuteAlgo && !loadExecuteAlgo){
-    getLocation();
-  }
-  const mapStyles = { 
+
+  const mapStyles = {
       position: "relative",
       width: '100%',
       height: '100%'
@@ -210,7 +218,7 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
    }
    
    if (dataAccept && !loadAccept) return <Navigate to="/transaction"/>;
-
+   
   const renderHeader = (
     <MDBox display="flex" justifyContent="space-between" alignItems="center">
       <MDBox>
@@ -315,8 +323,8 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
   </MDBox>
   ) 
 
-  if (loading||suppliesLoading) return;
-  if (error||suppliesError) return <Navigate to="/login"/>;
+  // if (loading||suppliesLoading) return;
+  // if (error||suppliesError) return <Navigate to="/login"/>;
   return (
     <DashboardLayout>
       <DashboardNavbar />
