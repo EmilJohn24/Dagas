@@ -69,11 +69,10 @@ import useAxios from 'axios-hooks';
 import { Navigate } from "react-router-dom";
 import { FormControl } from "@mui/material";
 
-const cache = new LRU({max: 10})
-configure({axiosConfig, cache});
-
 function Overview() {
   const [evacCenter, setEvacCenter] = useState('');
+  const cache = new LRU({max: 10})
+  configure({axiosConfig, cache});
   const [{data, loading, error}, refetch] = useAxios("/relief/api/users/current_user/");
   const [{data: evacData, loading: evacLoading, error: evacError}, refetchEvac] = useAxios("/relief/api/evacuation-center/");
   const [isEvacChosen, setEvacChosen] = useState(() => false);
