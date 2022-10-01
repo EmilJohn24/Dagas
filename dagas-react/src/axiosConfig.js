@@ -24,7 +24,7 @@ export const useAxios = makeUseAxios({axios: instance});
 
 //Token Refresh Function
 const requestRefresh = async (refresh) => {
-    const response = await axios.post(`/api/token/refresh/`, { refresh })
+    const response = await instance.post(`/api/token/refresh/`, { refresh })
       .then(response => response.data.access);
     console.log(response);
     return response;
