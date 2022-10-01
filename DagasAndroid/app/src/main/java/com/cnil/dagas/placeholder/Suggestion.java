@@ -60,16 +60,18 @@ public class Suggestion {
         public final String suggestedBarangayName;
         public final String suggestedEvacuationCenterName;
         public final Map<String, Integer> fulfillments;
+        public final double distancefromprevious;
         private final LatLng evacCoordinate;
 
         public void addFulfillment(String itemType, Integer amount){
             fulfillments.put(itemType, amount);
         }
-        public SuggestionNode(String id, String suggestedBarangayName, String suggestedEvacuationCenterName, LatLng evacCoordinate) {
+        public SuggestionNode(String id, String suggestedBarangayName, String suggestedEvacuationCenterName, LatLng evacCoordinate, double distance) {
             this.id = id;
             this.suggestedBarangayName = suggestedBarangayName;
             this.suggestedEvacuationCenterName = suggestedEvacuationCenterName;
             this.evacCoordinate = evacCoordinate;
+            this.distancefromprevious = distance;
             fulfillments = new HashMap<>();
         }
 

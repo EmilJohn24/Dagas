@@ -18,59 +18,191 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/suggestionContent"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="197dp">
+
             <TextView
                 android:id="@+id/suggestedBarangayName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Barangay"
-                app:layout_constraintStart_toStartOf="parent"
                 android:layout_margin="@dimen/text_margin"
+                android:text="Barangay"
                 android:textAppearance="?attr/textAppearanceListItem"
+                android:textSize="12dp"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/suggestedEvacuationCenterName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Evacuation Center"
                 android:layout_margin="@dimen/text_margin"
+                android:text="Evacuation Center"
                 android:textAppearance="?attr/textAppearanceListItem"
+                android:textSize="12dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/suggestedBarangayName" />
 
-            <Button
-                android:id="@+id/checkButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Check"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <!--            <Button-->
+            <!--                android:id="@+id/checkButton"-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:text="Check"-->
+            <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--                app:layout_constraintEnd_toEndOf="parent"-->
+            <!--                app:layout_constraintTop_toTopOf="parent" />-->
 
             <TableLayout
                 android:id="@+id/contentTable"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" >
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/suggestedEvacuationCenterName">
+                <!-- first row of the table layout-->
+                <TableRow
 
-                <!--        <TableRow-->
-                <!--            android:layout_width="match_parent"-->
-                <!--            android:layout_height="match_parent" />-->
+                    android:id="@+id/firstRow"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/createtransactionsearch">
 
-                <!--        <TableRow-->
-                <!--            android:layout_width="match_parent"-->
-                <!--            android:layout_height="match_parent" />-->
 
-                <!--        <TableRow-->
-                <!--            android:layout_width="match_parent"-->
-                <!--            android:layout_height="match_parent" />-->
+                    <TextView
 
-                <!--        <TableRow-->
-                <!--            android:layout_width="match_parent"-->
-                <!--            android:layout_height="match_parent" />-->
+                        android:id="@+id/itemType"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/createtransactionsearch"
+                        android:gravity="center"
+                        android:padding="6dip"
+                        android:text="Item Type"
+                        android:textColor="#000"
+                        android:textSize="12dp" />
+
+                    <TextView
+                        android:id="@+id/Amount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/createtransactionsearch"
+                        android:gravity="center"
+                        android:padding="6dip"
+                        android:text="Amount"
+                        android:textColor="#000"
+                        android:textSize="12dp" />
+
+                </TableRow>
+
+                <TableRow
+
+                    android:id="@+id/secondRow"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content">
+
+
+                    <TextView
+
+                        android:id="@+id/foodType"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/createtransactionsearch"
+                        android:gravity="center"
+                        android:padding="6dip"
+                        android:text="Food"
+                        android:textColor="#000"
+                        android:textSize="12dp" />
+
+                    <TextView
+                        android:id="@+id/foodAmount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/createtransactionsearch"
+                        android:gravity="center"
+                        android:padding="6dip"
+                        android:text="Amount"
+                        android:textColor="#000"
+                        android:textSize="12dp" />
+
+                </TableRow>
+
+                <TableRow
+
+                    android:id="@+id/thirdRow"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content">
+
+
+                    <TextView
+
+                        android:id="@+id/waterType"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/createtransactionsearch"
+                        android:gravity="center"
+                        android:padding="6dip"
+                        android:text="Water"
+                        android:textColor="#000"
+                        android:textSize="12dp" />
+
+                    <TextView
+                        android:id="@+id/waterAmount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/createtransactionsearch"
+                        android:gravity="center"
+                        android:padding="6dip"
+                        android:text="Amount"
+                        android:textColor="#000"
+                        android:textSize="12dp" />
+
+                </TableRow>
+
+                <TableRow
+
+                    android:id="@+id/fourthRow"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content">
+
+
+                    <TextView
+
+                        android:id="@+id/clothesType"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/createtransactionsearch"
+                        android:gravity="center"
+                        android:padding="6dip"
+                        android:text="Clothes"
+                        android:textColor="#000"
+                        android:textSize="12dp" />
+
+                    <TextView
+                        android:id="@+id/clothesAmount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/createtransactionsearch"
+                        android:gravity="center"
+                        android:padding="6dip"
+                        android:text="Amount"
+                        android:textColor="#000"
+                        android:textSize="12dp" />
+
+                </TableRow>
+                <!--                        <TableRow-->
+                <!--                            android:layout_width="match_parent"-->
+                <!--                            android:layout_height="match_parent" />-->
+
+                <!--                        <TableRow-->
+                <!--                            android:layout_width="match_parent"-->
+                <!--                            android:layout_height="match_parent" />-->
+
+                <!--                        <TableRow-->
+                <!--                            android:layout_width="match_parent"-->
+                <!--                            android:layout_height="match_parent" />-->
+
+                <!--                        <TableRow-->
+                <!--                            android:layout_width="match_parent"-->
+                <!--                            android:layout_height="match_parent" />-->
             </TableLayout>
 
 
