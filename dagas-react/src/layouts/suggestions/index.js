@@ -236,7 +236,7 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
       </MDBox>
       <MDButton onClick={
                 (event) => {
-                  AcceptPost({url: `${algoId}/accept`});
+                  AcceptPost({url: `${algoId}/accept/`});
                 }
             }variant="gradient" color="dark" >
         Accept
