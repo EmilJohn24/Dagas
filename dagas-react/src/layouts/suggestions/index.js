@@ -59,11 +59,8 @@ function Suggestions({ google, locations = [] }) {
   const [{data:suppliesData, loading:suppliesLoading, error:suppliesError}, suppliesRefetch] = useAxios("/relief/api/supplies/current_supplies/");
   const [{data: postExecuteAlgo, loading: loadExecuteAlgo, error: errorExecuteAlgo}, algoExecutePost] = useAxios({
     url: "/relief/api/algorithm/execute/",
-    method: "POST",
-    data: {
-      geolocation: `${userLatitude},${userLongitude}`
-    }
-}, {  manual: false  });
+    method: "POST"
+}, {  manual: true  });
 const [{data: dataReco, loading: loadReco, error: errorReco}, recoRun] = useAxios({
   url: "",
   method: "GET"
@@ -131,21 +128,25 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
 // Get user position
   function getLocation() {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(showPosition);
+      navigator.geolocation.getCurrentPosition(runAlgorithm);
     } else {
       alert("Geolocation is not supported by this browser.");
     }
   }
   
-  function showPosition(position) {
+  function runAlgorithm(position) {
     setUserLatitude(position.coords.latitude);
     setUserLongitude(position.coords.longitude);
+    algoExecutePost({
+      data: {
+        geolocation: `${position.coords.latitude},${position.coords.longitude}`
+      }
+    })
     console.log(userLatitude);
     console.log(userLongitude);
   }
-
+ 
   useEffect(() => {
-    getLocation();
     //if (errorExecuteAlgo) return;
     if (!loadExecuteAlgo){
       setalgoId(`/relief/api/algorithm/${postExecuteAlgo.id}`);
@@ -184,7 +185,9 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
       }
     }
   }, [algoId, dataReco, loadReco,loadExecuteAlgo, errorReco, postExecuteAlgo]);
-
+  if (!postExecuteAlgo && !loadExecuteAlgo){
+    getLocation();
+  }
   const mapStyles = {
       position: "relative",
       width: '100%',
