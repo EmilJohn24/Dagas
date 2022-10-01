@@ -188,7 +188,7 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
   if (!postExecuteAlgo && !loadExecuteAlgo){
     getLocation();
   }
-  const mapStyles = {
+  const mapStyles = { 
       position: "relative",
       width: '100%',
       height: '100%'
