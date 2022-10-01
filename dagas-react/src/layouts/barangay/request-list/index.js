@@ -31,9 +31,8 @@ import CustomerCell from "./components/CustomerCell";
 
 //AXIOS
 import axiosConfig from "axiosConfig";
-import LRU from 'lru-cache';
-import {configure} from 'axios-hooks';
-import useAxios from 'axios-hooks';
+import { useAxios } from 'axiosConfig';
+
 import { Navigate } from "react-router-dom";
 
 // Material Dashboard 2 PRO React components
@@ -50,8 +49,7 @@ import AcceptRequest from "layouts/request/accept-request";
 
 function RequestList() {
      //Guide: https://www.npmjs.com/package/axios-hooks#manual-requests
-  const cache = new LRU({max: 10})
-  configure({axiosConfig, cache});
+
   const [{data, loading, error}, refetch] = useAxios("/relief/api/requests/");
   const [{data: userData, loading: userLoading, error: userError}, userRefetch] = useAxios("/relief/api/users/current_user/");
   const [isAcceptingRequest, setAcceptingRequest] = useState(() => false);

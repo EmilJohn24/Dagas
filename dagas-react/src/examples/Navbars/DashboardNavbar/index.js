@@ -57,10 +57,7 @@ import {
 
 
 //AXIOS
-import axiosConfig from "axiosConfig";
-import LRU from 'lru-cache';
-import {configure} from 'axios-hooks';
-import useAxios from 'axios-hooks';
+import { useAxios } from "axiosConfig";
 import { Navigate } from "react-router-dom";
 
 
@@ -72,8 +69,6 @@ function DashboardNavbar({ absolute, light, isMini }) {
   const route = useLocation().pathname.split("/").slice(1);
 
   //Guide: https://www.npmjs.com/package/axios-hooks#manual-requests
-  const cache = new LRU({max: 10})
-  configure({axiosConfig, cache});
   const [{data: notificationData, 
           loading: notificationLoading, 
           error: notificationError}, refetch] = useAxios("/relief/api/notifications/");

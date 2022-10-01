@@ -32,9 +32,8 @@ import CheckroomIcon from '@mui/icons-material/Checkroom';
 
 //AXIOS and navigation
 import axiosConfig from "axiosConfig";
-import LRU from 'lru-cache';
-import {configure} from 'axios-hooks';
-import useAxios from 'axios-hooks';
+import { useAxios } from 'axiosConfig';
+
 import { Navigate } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { darkScrollbar } from "@mui/material";
@@ -49,8 +48,6 @@ function BarangayRequest(props) {
  
   const [evacCenter, setEvacCenter] = React.useState('');
 
-  const cache = new LRU({max: 10})
-  configure({axiosConfig, cache});
   const [{data, loading, error}, refetch] = useAxios("/relief/api/evacuation-center/current_evac/");
 
   const [{data: postRequest, loading: postLoading, error: postError}, executeRequestPost] = useAxios({

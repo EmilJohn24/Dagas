@@ -30,16 +30,10 @@ import * as Yup from 'yup';
 import React from "react";
 
 //AXIOS and navigation
-import axiosConfig from "axiosConfig";
-import LRU from 'lru-cache';
-import {configure} from 'axios-hooks';
-import useAxios from 'axios-hooks';
+import { useAxios } from 'axiosConfig';
 import { Navigate } from "react-router-dom";
 
 function OrderInfo({orderID, qrImage, status, received, isExpired, checkRole}) {
-
-  const cache = new LRU({max: 10})
-  configure({axiosConfig, cache});
   const [{data: putTransaction, loading: transactionPutLoading, error: transactionPutError}, executeTransactionPut] = useAxios({
     url: `/relief/api/transactions/${orderID}/quick_update_status/`,
     method: "PUT"

@@ -62,17 +62,12 @@ import team3 from "assets/images/team-3.jpg";
 import team4 from "assets/images/team-4.jpg";
 
 //AXIOS
-import axiosConfig from "axiosConfig";
-import LRU from 'lru-cache';
-import {configure} from 'axios-hooks';
-import useAxios from 'axios-hooks';
+import { useAxios } from 'axiosConfig';
 import { Navigate } from "react-router-dom";
 import { FormControl } from "@mui/material";
 
 function Overview() {
   const [evacCenter, setEvacCenter] = useState('');
-  const cache = new LRU({max: 10})
-  configure({axiosConfig, cache});
   const [{data, loading, error}, refetch] = useAxios("/relief/api/users/current_user/");
   const [{data: evacData, loading: evacLoading, error: evacError}, refetchEvac] = useAxios("/relief/api/evacuation-center/");
   const [isEvacChosen, setEvacChosen] = useState(() => false);

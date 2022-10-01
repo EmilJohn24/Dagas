@@ -61,7 +61,6 @@ import Icon from "@mui/material/Icon";
 // Images
 import profilePicture from "assets/images/team-3.jpg";
 import Registration from "components/Registration";
-import {getCurrentUser} from "components/Utility"
 import EvacuationMap from "layouts/evacuation-map";
 // const currentUser = getCurrentUser();
 if (!currentUser){

@@ -30,10 +30,8 @@ import StatusCell from "./components/StatusCell";
 import CustomerCell from "./components/CustomerCell";
 
 //AXIOS
-import axiosConfig from "axiosConfig";
-import LRU from 'lru-cache';
-import {configure} from 'axios-hooks';
-import useAxios from 'axios-hooks';
+import { useAxios } from 'axiosConfig';
+
 import { Navigate } from "react-router-dom";
 
 // Material Dashboard 2 PRO React components
@@ -174,8 +172,6 @@ function TransactionList() {
     };
 
     //Guide: https://www.npmjs.com/package/axios-hooks#manual-requests
-    const cache = new LRU({max: 10})
-    configure({axiosConfig, cache});
     const [{data, loading, error}, refetch] = useAxios("/relief/api/transactions/");
     
     if (loading) return;

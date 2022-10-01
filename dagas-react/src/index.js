@@ -21,8 +21,6 @@ import reportWebVitals from './reportWebVitals';
 // Material Dashboard 2 PRO React Context Provider
 import { MaterialUIControllerProvider } from "context";
 // https://stackoverflow.com/questions/51794553/how-do-i-create-configuration-for-axios-for-default-request-headers-in-every-htt
-const cache = new LRU({max: 10})
-configure({axiosConfig, cache});
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

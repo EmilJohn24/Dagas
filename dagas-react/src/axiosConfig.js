@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { configure } from 'axios-hooks';
+import { configure, makeUseAxios } from 'axios-hooks';
 import LRU from 'lru-cache';
 import { applyAuthTokenInterceptor, resolve } from 'axios-jwt';
 
 const instance = axios.create({
     // baseURL: 'http://192.168.100.2:8000',
-    baseURL: 'https://dagas.herokuapp.com',
+    baseURL: 'http://dagas.herokuapp.com',
     withCredentials: true,
     credentials: "include",
     headers: {
@@ -19,9 +19,8 @@ const instance = axios.create({
 axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 // instance.defaults.headers.common['Authorization'] = 'AUTH TOKEN FROM INSTANCE';
 
-const cache = new LRU({ max: 10 });
-
-configure({ instance, cache }); 
+export const useAxios = makeUseAxios({axios: instance});
+// configure({ instance, cache }); 
 
 //Token Refresh Function
 const requestRefresh = async (refresh) => {
