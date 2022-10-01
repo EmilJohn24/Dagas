@@ -496,7 +496,8 @@ class AlgorithmExecutionViewSet(viewsets.ReadOnlyModelViewSet):
     @action(methods=['post'], detail=False, name='Execute Algorithm')
     @transaction.atomic
     def execute(self, request, pk=None):
-        if request.data['geolocation']:
+        # if request.data['geolocation']:
+        if 'geolocation' in request.data:
             UserLocation.objects.create(geolocation=request.data['geolocation'], 
                                 user=request.user, 
                                 time=datetime.now())
