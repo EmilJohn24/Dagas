@@ -327,7 +327,6 @@ const routes = [
         component: <PricingPage />,
       },
       { name: "RTL", key: "rtl", route: "/pages/rtl", component: <RTL /> },
-      { name: "Widgets", key: "widgets", route: "/pages/widgets", component: <Widgets /> },
       { name: "Charts", key: "charts", route: "/pages/charts", component: <Charts /> },
       {
         name: "Notfications",
