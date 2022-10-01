@@ -46,7 +46,6 @@ import Billing from "layouts/pages/account/billing";
 import Invoice from "layouts/pages/account/invoice";
 import Timeline from "layouts/pages/projects/timeline";
 import PricingPage from "layouts/pages/pricing-page";
-import Widgets from "layouts/pages/widgets";
 import RTL from "layouts/pages/rtl";
 import Charts from "layouts/pages/charts";
 import Notifications from "layouts/pages/notifications";
