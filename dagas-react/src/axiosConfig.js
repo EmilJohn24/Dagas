@@ -5,7 +5,7 @@ import { applyAuthTokenInterceptor, resolve } from 'axios-jwt';
 
 const instance = axios.create({
     // baseURL: 'http://192.168.100.2:8000',
-    baseURL: 'http://dagas.herokuapp.com',
+    baseURL: 'https://dagas.herokuapp.com',
     withCredentials: true,
     credentials: "include",
     headers: {
