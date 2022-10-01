@@ -64,11 +64,18 @@ function Suggestions({ google, locations = [] }) {
   const [{data:suppliesData, loading:suppliesLoading, error:suppliesError}, suppliesRefetch] = useAxios("/relief/api/supplies/current_supplies/");
   const [{data: postExecuteAlgo, loading: loadExecuteAlgo, error: errorExecuteAlgo}, algoExecutePost] = useAxios({
     url: "/relief/api/algorithm/execute/",
-    method: "POST"
+    method: "POST",
+    data: {
+      geolocation: `${userLatitude},${userLongitude}`
+    }
 }, {  manual: false  });
 const [{data: dataReco, loading: loadReco, error: errorReco}, recoRun] = useAxios({
   url: "",
   method: "GET"
+}, {  manual: true  });
+const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] = useAxios({
+  url: "",
+  method: "POST"
 }, {  manual: true  });
   const [disasterForm, setDisasterForm] = useState(() => {
     return "Loading...";
@@ -203,7 +210,8 @@ const [{data: dataReco, loading: loadReco, error: errorReco}, recoRun] = useAxio
                     />
     })
    }
-
+   
+   if (dataAccept && !loadAccept) return <Navigate to="/transaction"/>;
 
   const renderHeader = (
     <MDBox display="flex" justifyContent="space-between" alignItems="center">
@@ -220,7 +228,11 @@ const [{data: dataReco, loading: loadReco, error: errorReco}, recoRun] = useAxio
           {donorSup}
         </MDTypography>
       </MDBox>
-      <MDButton variant="gradient" color="dark" >
+      <MDButton onClick={
+                (event) => {
+                  AcceptPost({url: `${algoId}/accept`});
+                }
+            }variant="gradient" color="dark" >
         Accept
       </MDButton>
     </MDBox>
