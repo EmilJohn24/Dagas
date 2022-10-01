@@ -97,10 +97,6 @@ const pageRoutes = [
             route: "/pages/account/setting",
           },
           {
-            name: "billing",
-            route: "/pages/account/billing",
-          },
-          {
             name: "invoice",
             route: "/pages/account/invoice",
           },
