@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { configure } from 'axios-hooks';
+import LRU from 'lru-cache';
 import { applyAuthTokenInterceptor, resolve } from 'axios-jwt';
 
 const instance = axios.create({
