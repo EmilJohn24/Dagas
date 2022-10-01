@@ -492,6 +492,10 @@ class AlgorithmExecutionViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(methods=['post'], detail=False, name='Execute Algorithm')
     def execute(self, request, pk=None):
+        if request.data['geolocation']:
+            UserLocation.objects.create(geolocation=request.data['geolocation'], 
+                                user=request.user, 
+                                time=datetime.now())
         user = request.user
         if not user.is_anonymous and user.role == User.DONOR:
             user_donor = DonorProfile.objects.get(user=user)
