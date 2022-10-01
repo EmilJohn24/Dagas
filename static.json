@@ -1,6 +1,0 @@
-{
-    "root": "dagas-react/",
-    "routes": {
-      "/**": "index.html"
-    }
-  }
