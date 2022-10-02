@@ -77,9 +77,7 @@ function Registration(props){
             var baseSite = packageJson.proxy;
             console.log(baseSite);
             result = await axiosConfig
-                .post('/api/rest-auth/registration', JSON.stringify(values), {
-                    "headers": {'Content-Type': 'application/json'}
-                })
+                .post('/api/rest-auth/registration/', JSON.stringify(values))
                 .then((res) => {
                     result = res.data
                     alert("Registration Successful!");
