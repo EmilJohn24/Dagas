@@ -71,9 +71,9 @@ function Registration(props){
                 last_name: '',
                 role: '',
             }}
-            onSubmit={async (values) => {
+            onSubmit={(values) => {
             console.log(JSON.stringify(values));
-            const result = await axiosConfig
+            const result = axiosConfig
                 .post('/api/rest-auth/registration/', JSON.stringify(values))
                 .then((res) => {
                     alert("Registration Successful!");
