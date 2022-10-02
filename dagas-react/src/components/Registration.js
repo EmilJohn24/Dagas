@@ -73,28 +73,14 @@ function Registration(props){
             }}
             onSubmit={async (values) => {
             console.log(JSON.stringify(values));
-            var result;
-            var baseSite = packageJson.proxy;
-            console.log(baseSite);
-            result = await axiosConfig
+            const result = await axiosConfig
                 .post('/api/rest-auth/registration/', JSON.stringify(values))
                 .then((res) => {
-                    result = res.data
                     alert("Registration Successful!");
                     navigation('/login');
                 })
-                .catch((error) => console.log(error));
-        console.log(result);
-        //     const data = await fetch('/api/rest-auth/registration', {
-        //       method: 'POST',
-        //       headers: {
-        //           'Content-Type': 'application/json'
-        //       },
-        //       body: JSON.stringify(values)
-        //   });
-        //   const {result} = await data.json();
-          return result;                     
-        }}
+                .catch((error) => console.log(error));                  
+            }}
         validationSchema={Yup.object({
             username: Yup.string()
                          .max(15, 'Your username is too long')
