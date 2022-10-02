@@ -116,7 +116,7 @@ function Registration(props){
             role: Yup.number("Something went wrong")
             })}
 
-        render={({ errors, status, touched, getFieldProps }) => (
+        render={({ errors, status, touched, getFieldProps, handleSubmit }) => (
         <section className="vh-100 bg-image">
           <div className="color-overlay">
             <div className="container py-5 h-100">
@@ -231,7 +231,7 @@ function Registration(props){
                                     </div>
 
                                     <div className="mt-4 pt-2">
-                                      <button className="btn btn-primary  gradient-custom" type="submit">Register</button>
+                                      <button className="btn btn-primary  gradient-custom" onclick={handleSubmit}>Register</button>
                                     </div>
                                 </Form>
                             </div>
