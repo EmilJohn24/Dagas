@@ -125,7 +125,6 @@ function Registration(props){
                         <div className="card shadow-2-strong card-registration">
                             <div className="card-body p-4 p-md-5">
                                 <h3 className="mb-4 pb-2 pb-md-0 mb-md-5">Registration Form</h3>
-                                <Form> 
                                     <div className="row">
                                         <div className="col-md-6 mb-4">
 
@@ -233,7 +232,6 @@ function Registration(props){
                                     <div className="mt-4 pt-2">
                                       <button className="btn btn-primary  gradient-custom" onclick={handleSubmit}>Register</button>
                                     </div>
-                                </Form>
                             </div>
                         </div>
                     </div>
