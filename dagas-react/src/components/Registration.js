@@ -72,7 +72,7 @@ function Registration(props){
             var result;
             var baseSite = packageJson.proxy;
             console.log(baseSite);
-            axiosConfig
+            result = await axiosConfig
                 .post('/api/rest-auth/registration', JSON.stringify(values), {
                     "headers": {'Content-Type': 'application/json'}
                 })
