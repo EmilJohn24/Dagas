@@ -133,30 +133,31 @@ def generate_neighbors(data, solution, route_len):
         visited_nodes = solution[0:route_len].copy()
         unvisited_nodes = solution[route_len:].copy()
         # Operator 3: Swap two visited nodes
-        num_count = len(visited_nodes)
-        x1, x2 = random.sample(range(num_count), 2)
-        visited_nodes[x1], visited_nodes[x2] = visited_nodes[x2], visited_nodes[x1]
-        neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
+        if (len(visited_nodes) > 1):
+            num_count = len(visited_nodes)
+            x1, x2 = random.sample(range(num_count), 2)
+            visited_nodes[x1], visited_nodes[x2] = visited_nodes[x2], visited_nodes[x1]
+            neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
 
-        visited_nodes = solution[0:route_len].copy()
-        unvisited_nodes = solution[route_len:].copy()
-        # Operator 4: Move visited into another visited position
-        random_visited_ix, new_position_ix = random.sample(range(len(visited_nodes)), 2)
-        # random_visited_ix = np.random.choice(range(len(visited_nodes)), 1)
-        random_visited = visited_nodes[random_visited_ix]
-        visited_nodes = np.delete(visited_nodes, random_visited_ix)
-        visited_nodes = np.insert(visited_nodes, new_position_ix, random_visited)
-        neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
+            visited_nodes = solution[0:route_len].copy()
+            unvisited_nodes = solution[route_len:].copy()
+            # Operator 4: Move visited into another visited position
+            random_visited_ix, new_position_ix = random.sample(range(len(visited_nodes)), 2)
+            # random_visited_ix = np.random.choice(range(len(visited_nodes)), 1)
+            random_visited = visited_nodes[random_visited_ix]
+            visited_nodes = np.delete(visited_nodes, random_visited_ix)
+            visited_nodes = np.insert(visited_nodes, new_position_ix, random_visited)
+            neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
 
-        # Operator 5: 2-opt (Subroute inversion)
-        visited_nodes = solution[0:route_len].copy()
-        unvisited_nodes = solution[route_len:].copy()
-        point_a, point_b = random.sample(range(len(visited_nodes)), 2)
-        if point_a < point_b:
-            visited_nodes[point_a:point_b] = visited_nodes[point_a:point_b][::-1]
-        else:
-            visited_nodes[point_b:point_a] = visited_nodes[point_b:point_a][::-1]
-        neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
+            # Operator 5: 2-opt (Subroute inversion)
+            visited_nodes = solution[0:route_len].copy()
+            unvisited_nodes = solution[route_len:].copy()
+            point_a, point_b = random.sample(range(len(visited_nodes)), 2)
+            if point_a < point_b:
+                visited_nodes[point_a:point_b] = visited_nodes[point_a:point_b][::-1]
+            else:
+                visited_nodes[point_b:point_a] = visited_nodes[point_b:point_a][::-1]
+            neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
     return neighbors
 
 
