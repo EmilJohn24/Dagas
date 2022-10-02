@@ -130,10 +130,11 @@ def generate_neighbors(data, solution, route_len):
             visited_nodes = np.delete(visited_nodes, random_visited_ix)
             unvisited_nodes = np.insert(unvisited_nodes, np.random.randint(0, len(unvisited_nodes)), random_visited)
             neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
-        visited_nodes = solution[0:route_len].copy()
-        unvisited_nodes = solution[route_len:].copy()
+        
         # Operator 3: Swap two visited nodes
         if (len(visited_nodes) > 1):
+            visited_nodes = solution[0:route_len].copy()
+            unvisited_nodes = solution[route_len:].copy()
             num_count = len(visited_nodes)
             x1, x2 = random.sample(range(num_count), 2)
             visited_nodes[x1], visited_nodes[x2] = visited_nodes[x2], visited_nodes[x1]
