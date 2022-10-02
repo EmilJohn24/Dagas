@@ -57,17 +57,21 @@ function Registration(props){
         }
       }
     //Formik Handling
-    const registrationForm = useFormik({
-        initialValues: {
-            username: '',
-            email: '',
-            password1: '',
-            password2: '',
-            first_name: '',
-            last_name: '',
-            role: '',
-        },
-        onSubmit: async values => {
+  
+
+    return (
+        <>
+        <Formik 
+            initialValues={{
+                username: '',
+                email: '',
+                password1: '',
+                password2: '',
+                first_name: '',
+                last_name: '',
+                role: '',
+            }}
+            onSubmit={async (values) => {
             console.log(JSON.stringify(values));
             var result;
             var baseSite = packageJson.proxy;
@@ -92,9 +96,8 @@ function Registration(props){
         //   });
         //   const {result} = await data.json();
           return result;                     
-        },
-
-        validationSchema: Yup.object({
+        }}
+        validationSchema={Yup.object({
             username: Yup.string()
                          .max(15, 'Your username is too long')
                          .required('This field is required'),
@@ -110,13 +113,10 @@ function Registration(props){
                             .required('This field is required'),
             last_name: Yup.string()
                           .required('This field is required'),
-            role: Yup.number("Something went wrong"),
-                      
-        })
-    });
+            role: Yup.number("Something went wrong")
+            })}
 
-    return (
-
+        render={({ errors, status, touched, getFieldProps }) => (
         <section className="vh-100 bg-image">
           <div className="color-overlay">
             <div className="container py-5 h-100">
@@ -125,8 +125,7 @@ function Registration(props){
                         <div className="card shadow-2-strong card-registration">
                             <div className="card-body p-4 p-md-5">
                                 <h3 className="mb-4 pb-2 pb-md-0 mb-md-5">Registration Form</h3>
-                                <Form onSubmit={registrationForm.handleSubmit}>
-                                    
+                                <Form> 
                                     <div className="row">
                                         <div className="col-md-6 mb-4">
 
@@ -136,8 +135,7 @@ function Registration(props){
                                             className="form-control form-control-sm" 
                                             placeholder="First Name" 
                                             id="first_name" 
-                                            value={registrationForm.values.first_name}
-                                            onChange={registrationForm.handleChange}/>
+                                            {...getFieldProps('first_name')}/>
                                             
                                         </div>
 
@@ -151,8 +149,7 @@ function Registration(props){
                                             className="form-control form-control-sm" 
                                             placeholder="Last Name" 
                                             id="last_name" 
-                                            value={registrationForm.values.last_name}
-                                            onChange={registrationForm.handleChange}/>
+                                            {...getFieldProps('last_name')}/>
                                             
                                         </div>
 
@@ -168,8 +165,7 @@ function Registration(props){
                                             className="form-control form-control-sm" 
                                             placeholder="Email" 
                                             id="email" 
-                                            value={registrationForm.values.email}
-                                            onChange={registrationForm.handleChange}/>
+                                            {...getFieldProps('email')}/>
                                             
                                         </div>
 
@@ -182,8 +178,7 @@ function Registration(props){
                                             className="form-control form-control-sm" 
                                             placeholder="Username" 
                                             id="username" 
-                                            value={registrationForm.values.username}
-                                            onChange={registrationForm.handleChange}/>
+                                            {...getFieldProps('username')}/>
                                             
                                         </div>
 
@@ -200,8 +195,7 @@ function Registration(props){
                                             className="form-control form-control-sm" 
                                             placeholder="Password" 
                                             id="password1" 
-                                            value={registrationForm.values.password1}
-                                            onChange={registrationForm.handleChange}/>
+                                            {...getFieldProps('password1')}/>
                                             
                                         </div>
 
@@ -214,8 +208,7 @@ function Registration(props){
                                             className="form-control form-control-sm" 
                                             placeholder="Confirm Password" 
                                             id="password2" 
-                                            value={registrationForm.values.password2}
-                                            onChange={registrationForm.handleChange}/>
+                                            {...getFieldProps('password2')}/>
                                             
                                         </div>
 
@@ -228,8 +221,7 @@ function Registration(props){
                                         <label class="form-label select-label">Choose Role</label>
                                           <select className="select form-control" id="role"
                                             type="number"
-                                            value={registrationForm.values.role}
-                                            onChange={registrationForm.handleChange} >
+                                            {...getFieldProps('role')} >
                                             <option value="0" disabled>Choose option</option>
                                             <option value="1">Resident</option>
                                             <option value="2">Donor</option>
@@ -248,9 +240,9 @@ function Registration(props){
                 </div>
             </div>
           </div>
-        </section>
-
-    )
+        </section>)}/>
+        </>
+    );
   }
 export default function(props) {
     const navigation = useNavigate();
