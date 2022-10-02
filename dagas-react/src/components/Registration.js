@@ -230,7 +230,7 @@ function Registration(props){
                                     </div>
 
                                     <div className="mt-4 pt-2">
-                                      <button className="btn btn-primary  gradient-custom" onclick={handleSubmit}>Register</button>
+                                      <button className="btn btn-primary  gradient-custom" onClick={handleSubmit}>Register</button>
                                     </div>
                             </div>
                         </div>
