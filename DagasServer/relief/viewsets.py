@@ -467,7 +467,7 @@ class AlgorithmExecutionViewSet(viewsets.ReadOnlyModelViewSet):
         suggestion = algo_exec.result
         route_nodes = RouteNode.objects.filter(suggestion=suggestion)
         created_transactions = []
-        supplies = Supply.objects.filter(donation__donor=donor)
+        supplies = Supply.objects.filter(donation__donor=donor) | Supply.objects.filter(donor=donor)
         for route_node in route_nodes:
             fulfillments = Fulfillment.objects.filter(node=route_node)
             created_transaction = Transaction.objects.create(donor=donor, received=Transaction.PACKAGING,
