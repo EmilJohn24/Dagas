@@ -480,6 +480,8 @@ class AlgorithmExecutionViewSet(viewsets.ReadOnlyModelViewSet):
                     if remaining_fulfillment_pax == 0:
                         break
                     available_pax = supply.calculate_available_pax()
+                    if available_pax == 0:
+                        continue
                     if available_pax >= remaining_fulfillment_pax:
                         TransactionOrder.objects.create(pax=remaining_fulfillment_pax, supply=supply,
                                                         transaction=created_transaction, )
