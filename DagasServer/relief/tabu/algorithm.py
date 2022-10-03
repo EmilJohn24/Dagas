@@ -109,6 +109,7 @@ def solution_to_route(solution, data, is_final=False):
 def generate_neighbors(data, solution, route_len):
     visited_nodes = solution[0:route_len].copy()
     unvisited_nodes = solution[route_len:].copy()
+    unvisited_count = len(unvisited_nodes)
     neighbors = []
 
     for _ in range(100):
@@ -119,13 +120,13 @@ def generate_neighbors(data, solution, route_len):
             random_unvisited_ix = np.random.choice(range(len(unvisited_nodes)), 1)
             random_unvisited = unvisited_nodes[random_unvisited_ix]
             unvisited_nodes = np.delete(unvisited_nodes, random_unvisited_ix)
-            if (len(visited_nodes) > 1):
+            if (route_len > 1):
                 visited_nodes = np.insert(visited_nodes, np.random.randint(0, len(visited_nodes)), random_unvisited)
             else:
                 visited_nodes = np.insert(visited_nodes, 0, random_unvisited)
             neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
         # Operator 2: remove visited
-        if not len(unvisited_nodes) == 0 and len(visited_nodes) >= 1:
+        if not unvisited_count == 0 and route_len >= 1:
             visited_nodes = solution[0:route_len].copy()
             unvisited_nodes = solution[route_len:].copy()
             random_visited_ix = 0
@@ -137,7 +138,7 @@ def generate_neighbors(data, solution, route_len):
             neighbors.append(np.concatenate([visited_nodes, unvisited_nodes]))
         
         # Operator 3: Swap two visited nodes
-        if (len(visited_nodes) > 1):
+        if (route_len > 1):
             visited_nodes = solution[0:route_len].copy()
             unvisited_nodes = solution[route_len:].copy()
             num_count = len(visited_nodes)
