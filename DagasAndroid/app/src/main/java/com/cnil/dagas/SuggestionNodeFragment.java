@@ -60,6 +60,9 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
     private static String TAG = SuggestionNodeFragment.class.getName();
     private MapView suggestionMapView;
     private GoogleMap map;
+    private static final String ALGORITHM_URL = "/relief/api/algorithm/execute/";
+    private static final String SPECIFIC_ALGORITHM_URL = "/relief/api/algorithm/%d/";
+    private static final String ACCEPT_SUGGESTION_URL = "/relief/api/algorithm/%d/accept/";
     private static int algoID;
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -232,8 +235,6 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
 //    }
 
     public static class CreateSuggestion extends Thread {
-        private static final String ALGORITHM_URL = "/relief/api/algorithm/execute/";
-        private static final String SPECIFIC_ALGORITHM_URL = "/relief/api/algorithm/%d/";
         private final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
 
@@ -375,8 +376,9 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
             public void onClick(View buttonView) {
                 // /relief/api/transactions/transactions_from_suggestion/
                 try {
-                    DagasJSONServer.post("/relief/api/transactions/transactions_from_suggestion/", new JSONObject());
+                    DagasJSONServer.post(String.format(ACCEPT_SUGGESTION_URL,algoID), new JSONObject());
                     //action_nav_suggestions_to_nav_transactions
+                    TimeUnit.SECONDS.sleep(1);
                     Navigation.findNavController(view)
                             .navigate(R.id.action_nav_suggestions_to_nav_transactions);
                 } catch (Exception e) {

@@ -27,7 +27,7 @@ from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializ
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
 # Filtering Guide: https://www.django-rest-framework.org/api-guide/filtering/
 # TODO: Add permission classes
-from relief.tasks import solo_algo_tests
+from relief.tasks import solo_algo_tests, algo_error_handler
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -456,6 +456,7 @@ class TransactionStubViewSet(viewsets.ModelViewSet):
 
 class AlgorithmExecutionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AlgorithmExecutionSerializer
+
     @action(detail=True, methods=['post'], name='Accept Suggestion',
             permission_classes=[IsProfileUserOrReadOnly])
     @transaction.atomic
@@ -493,13 +494,15 @@ class AlgorithmExecutionViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(TransactionSerializer(created_transactions,
                                               many=True,
                                               context={'request': request}).data, status=201)
+
     @action(methods=['post'], detail=False, name='Execute Algorithm')
     @transaction.atomic
     def execute(self, request, pk=None):
-        if request.data['geolocation']:
-            UserLocation.objects.create(geolocation=request.data['geolocation'], 
-                                user=request.user, 
-                                time=datetime.now())
+        # if request.data['geolocation']:
+        if 'geolocation' in request.data:
+            UserLocation.objects.create(geolocation=request.data['geolocation'],
+                                        user=request.user,
+                                        time=datetime.now())
         user = request.user
         if not user.is_anonymous and user.role == User.DONOR:
             user_donor = DonorProfile.objects.get(user=user)
@@ -514,8 +517,9 @@ class AlgorithmExecutionViewSet(viewsets.ReadOnlyModelViewSet):
                 solo_algo_tests.apply_async(args=['tabu', user_donor.id, new_algo_exec.id])
                 return Response(AlgorithmExecutionSerializer(new_algo_exec).data, status=status.HTTP_201_CREATED)
             else:
-                return Response(AlgorithmExecutionSerializer(algo_exec[0], context={'request': request}, many=False).data,
-                                status=status.HTTP_200_OK)
+                return Response(
+                    AlgorithmExecutionSerializer(algo_exec[0], context={'request': request}, many=False).data,
+                    status=status.HTTP_200_OK)
         else:
             raise ValidationError(detail="Not a donor account",
                                   code=status.HTTP_400_BAD_REQUEST)

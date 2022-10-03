@@ -373,7 +373,8 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
                 data['supply_matrix'][donor_ix][type_index] = total_supply
         else:
             total_supply = 0
-            supplies = Supply.objects.filter(donation__donor=solo_donor, type=item_type)
+            supplies = Supply.objects.filter(donation__donor=solo_donor, type=item_type) | Supply.objects.filter(
+                donor=solo_donor, type=item_type)
             for supply in supplies:
                 total_supply += supply.calculate_available_pax()
             data[supply_type_name].append(total_supply)
@@ -609,6 +610,11 @@ def result_to_db(donor, route, final_data):
 
 
 @shared_task()
+def algo_error_handler(request, exc, traceback, **kwargs):
+    AlgorithmExecution.objects.get(id=kwargs['algo_exec_id']).delete()
+
+
+@shared_task()
 def solo_algo_tests(model, donor_ix, algo_exec_id):
     # donors = DonorProfile.objects.all()
     # donor = donors[random.randint(0, len(donors) - 1)]
@@ -616,70 +622,74 @@ def solo_algo_tests(model, donor_ix, algo_exec_id):
     algo_execution = None
     if algo_exec_id is not None:
         algo_execution = AlgorithmExecution.objects.get(id=algo_exec_id)
-    donor = DonorProfile.objects.get(pk=donor_ix)
-    print("Generating data model from database...")
-    data = generate_data_model_from_db(solo_mode=True, solo_donor=donor)
-    total_demands = np.sum(data['demand_matrix'], axis=0)
-    excess = total_demands - np.sum(data['supply_matrix'], axis=0)
-    print("Displaying maximum distributed supplies...")
-    print(data['supply_matrix'])
-    print("Displaying minimum/ideal fulfillment ratios...")
-    print(np.divide(excess, total_demands))
-    # print("Calculating custom algorithm...")
-    # results, manipulated_data = algo_main(data)
-    res = None
-    # if model == "standard":
-    #     print("Running the greedy simple algorithm")
-    #     return algo_v1(data)
-    # elif model == "google-or":
-    #     print("Calculating using Google OR algorithm...")
-    #     unisplit_algo_or(data)
-    #     return
-    route = None
-    if model == "ga":
-        print("Running the genetic algorithm model...")
-        res, problem = run_solo_ga_algo(data)
-        route, _ = problem.chromosome_to_routes(res.X[0])
+    try:
+        donor = DonorProfile.objects.get(pk=donor_ix)
+        print("Generating data model from database...")
+        data = generate_data_model_from_db(solo_mode=True, solo_donor=donor)
+        total_demands = np.sum(data['demand_matrix'], axis=0)
+        excess = total_demands - np.sum(data['supply_matrix'], axis=0)
+        print("Displaying maximum distributed supplies...")
+        print(data['supply_matrix'])
+        print("Displaying minimum/ideal fulfillment ratios...")
+        print(np.divide(excess, total_demands))
+        # print("Calculating custom algorithm...")
+        # results, manipulated_data = algo_main(data)
+        res = None
+        # if model == "standard":
+        #     print("Running the greedy simple algorithm")
+        #     return algo_v1(data)
+        # elif model == "google-or":
+        #     print("Calculating using Google OR algorithm...")
+        #     unisplit_algo_or(data)
+        #     return
+        route = None
+        if model == "ga":
+            print("Running the genetic algorithm model...")
+            res, problem = run_solo_ga_algo(data)
+            route, _ = problem.chromosome_to_routes(res.X[0])
 
-    if model == "or":
-        print("Running the Google OR algorithm...")
-        or_res = algo_or(data)
-    if model == "or-split":
-        print("Running slow OR split algorithm...")
-        or_res = unisplit_algo_or(data)
-    if model == "cplex":
-        print("Running the CPLEX algo for benchmarking...")
-        cplex_algo(data)
-    if model == "lnnh":
-        print("Running the LNNH algorithm")
-        route, working_data = lnnh(data, n_neighbors=5)
-        distance = fitness_func(data, route)
-        print("Distance covered: {}".format(distance))
-    if model == "tabu":
-        print("Running the Tabu search")
-        route, _, final_data = tabu_algorithm(data)
-        if algo_execution is not None:
-            suggestion = result_to_db(donor, route, final_data)
-            algo_execution.result = suggestion
-            algo_execution.save()
-    if route is not None:
-        ph_map = data['map']
-        donor_x, donor_y = ph_map(data['donor_lon'][0], data['donor_lat'][0])
-        evacs_lats, evacs_lons = data['evac_lats'], data['evac_lons']
-        x = [donor_x]
-        y = [donor_y]
+        if model == "or":
+            print("Running the Google OR algorithm...")
+            or_res = algo_or(data)
+        if model == "or-split":
+            print("Running slow OR split algorithm...")
+            or_res = unisplit_algo_or(data)
+        if model == "cplex":
+            print("Running the CPLEX algo for benchmarking...")
+            cplex_algo(data)
+        if model == "lnnh":
+            print("Running the LNNH algorithm")
+            route, working_data = lnnh(data, n_neighbors=5)
+            distance = fitness_func(data, route)
+            print("Distance covered: {}".format(distance))
+        if model == "tabu":
+            print("Running the Tabu search")
+            route, _, final_data = tabu_algorithm(data)
+            if algo_execution is not None:
+                suggestion = result_to_db(donor, route, final_data)
+                algo_execution.result = suggestion
+                algo_execution.save()
+        if route is not None:
+            ph_map = data['map']
+            donor_x, donor_y = ph_map(data['donor_lon'][0], data['donor_lat'][0])
+            evacs_lats, evacs_lons = data['evac_lats'], data['evac_lons']
+            x = [donor_x]
+            y = [donor_y]
 
-        # ph_map.drawgreatcircle(donor_y, donor_x, evacs_y[0], evacs_x[0], color='c', linewidth=3)
-        for node in route:
-            node_x, node_y = ph_map(evacs_lons[node], evacs_lats[node])
-            x.append(node_x)
-            y.append(node_y)
-            # ph_map.drawgreatcircle(evacs_y[node_a], evacs_y[node_a], evacs_y[node_b], evacs_x[node_b])
+            # ph_map.drawgreatcircle(donor_y, donor_x, evacs_y[0], evacs_x[0], color='c', linewidth=3)
+            for node in route:
+                node_x, node_y = ph_map(evacs_lons[node], evacs_lats[node])
+                x.append(node_x)
+                y.append(node_y)
+                # ph_map.drawgreatcircle(evacs_y[node_a], evacs_y[node_a], evacs_y[node_b], evacs_x[node_b])
 
-        x.append(donor_x)
-        y.append(donor_y)
-        ph_map.plot(x, y, color='y', linewidth=1, zorder=0)
-        plt.show()
+            x.append(donor_x)
+            y.append(donor_y)
+            ph_map.plot(x, y, color='y', linewidth=1, zorder=0)
+            plt.show()
+    except Exception as exc:
+        # Delete execution if it fails
+        algo_execution.delete()
 
 
 def algo_test(model):
@@ -692,7 +702,7 @@ def algo_test(model):
     total_demands = np.sum(data['demand_matrix'], axis=0)
     excess = total_demands - np.sum(data['supply_matrix'], axis=0)
     print("Displaying maximum distributed supplies...")
-    print(np.sum(data['supply_matrix'], axis=0))
+    print(data['supply_matrix'])
     print("Displaying minimum/ideal fulfillment ratios...")
     print(np.divide(excess, total_demands))
     # print("Calculating custom algorithm...")
