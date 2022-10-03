@@ -217,7 +217,7 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
     })
    }
    
-   if (dataAccept && !loadAccept) return <Navigate to="/transaction"/>;
+   if (dataAccept && !loadAccept) return <Navigate to="/transactions"/>;
    
   const renderHeader = (
     <MDBox display="flex" justifyContent="space-between" alignItems="center">
