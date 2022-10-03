@@ -373,7 +373,8 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
                 data['supply_matrix'][donor_ix][type_index] = total_supply
         else:
             total_supply = 0
-            supplies = Supply.objects.filter(donation__donor=solo_donor, type=item_type)
+            supplies = Supply.objects.filter(donation__donor=solo_donor, type=item_type) | Supply.objects.filter(
+                donor=solo_donor, type=item_type)
             for supply in supplies:
                 total_supply += supply.calculate_available_pax()
             data[supply_type_name].append(total_supply)
@@ -607,9 +608,10 @@ def result_to_db(donor, route, final_data):
             )
     return suggestion
 
+
 @shared_task()
-def algo_error_handler(algo_exec_id):
-    AlgorithmExecution.objects.get(id=algo_exec_id).delete()
+def algo_error_handler(request, exc, traceback, **kwargs):
+    AlgorithmExecution.objects.get(id=kwargs['algo_exec_id']).delete()
 
 
 @shared_task()
@@ -696,7 +698,7 @@ def algo_test(model):
     total_demands = np.sum(data['demand_matrix'], axis=0)
     excess = total_demands - np.sum(data['supply_matrix'], axis=0)
     print("Displaying maximum distributed supplies...")
-    print(np.sum(data['supply_matrix'], axis=0))
+    print(data['supply_matrix'])
     print("Displaying minimum/ideal fulfillment ratios...")
     print(np.divide(excess, total_demands))
     # print("Calculating custom algorithm...")

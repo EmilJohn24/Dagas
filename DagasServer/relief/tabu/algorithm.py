@@ -111,7 +111,6 @@ def generate_neighbors(data, solution, route_len):
     unvisited_nodes = solution[route_len:].copy()
     unvisited_count = len(unvisited_nodes)
     neighbors = []
-
     for _ in range(100):
         # Operator 1: insert unvisited to visited (preferably non-uniform distribution)
         if not len(unvisited_nodes) == 0:
