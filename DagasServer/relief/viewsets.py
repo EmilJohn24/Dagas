@@ -27,7 +27,7 @@ from relief.serializers import UserSerializer, ResidentSerializer, DonorSerializ
 # Guide: https://www.django-rest-framework.org/api-guide/viewsets/
 # Filtering Guide: https://www.django-rest-framework.org/api-guide/filtering/
 # TODO: Add permission classes
-from relief.tasks import solo_algo_tests
+from relief.tasks import solo_algo_tests, algo_error_handler
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -512,7 +512,7 @@ class AlgorithmExecutionViewSet(viewsets.ReadOnlyModelViewSet):
 
             if not algo_exec:
                 new_algo_exec = AlgorithmExecution.objects.create(donor=user_donor)
-                solo_algo_tests.apply_async(args=['tabu', user_donor.id, new_algo_exec.id])
+                solo_algo_tests.apply_async(args=['tabu', user_donor.id, new_algo_exec.id], link_error=algo_error_handler.s(new_algo_exec.id))
                 return Response(AlgorithmExecutionSerializer(new_algo_exec).data, status=status.HTTP_201_CREATED)
             else:
                 return Response(AlgorithmExecutionSerializer(algo_exec[0], context={'request': request}, many=False).data,

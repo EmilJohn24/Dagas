@@ -607,6 +607,10 @@ def result_to_db(donor, route, final_data):
             )
     return suggestion
 
+@shared_task()
+def algo_error_handler(algo_exec_id):
+    AlgorithmExecution.objects.get(id=algo_exec_id).delete()
+
 
 @shared_task()
 def solo_algo_tests(model, donor_ix, algo_exec_id):
