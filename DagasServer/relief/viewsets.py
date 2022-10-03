@@ -475,7 +475,8 @@ class AlgorithmExecutionViewSet(viewsets.ReadOnlyModelViewSet):
             created_transactions.append(created_transaction)
             for fulfillment in fulfillments:
                 remaining_fulfillment_pax = fulfillment.pax
-                for supply in supplies:
+                item_type = fulfillment.type
+                for supply in supplies.filter(type=item_type):
                     if remaining_fulfillment_pax == 0:
                         break
                     available_pax = supply.calculate_available_pax()
