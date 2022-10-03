@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django_google_maps import widgets as map_widgets
 from django_google_maps import fields as map_fields
-from relief.models import AlgorithmExecution, User, Transaction, EvacuationCenter, BarangayProfile, DonorProfile, Donation, Supply, \
+from relief.models import AlgorithmExecution, TransactionOrder, User, Transaction, EvacuationCenter, BarangayProfile, DonorProfile, Donation, Supply, \
     BarangayRequest, ItemRequest, RouteNode, RouteSuggestion, Fulfillment, Disaster, ResidentProfile, TransactionStub, AlgorithmExecution
 
 # Guide: https://docs.djangoproject.com/en/4.0/ref/contrib/admin/
@@ -34,6 +34,7 @@ class SupplyAdmin(admin.ModelAdmin):
 admin.site.register(AlgorithmExecution)
 admin.site.register(TransactionStub)
 admin.site.register(Transaction)
+admin.site.register(TransactionOrder)
 admin.site.register(BarangayProfile)
 admin.site.register(DonorProfile, DonorAdmin)
 admin.site.register(ResidentProfile)
