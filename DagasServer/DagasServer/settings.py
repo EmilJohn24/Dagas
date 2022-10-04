@@ -87,7 +87,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'silk.middleware.SilkyMiddleware',
+    # Temporarily disabled for load testing; uncomment to re-enable Silk
+    # 'silk.middleware.SilkyMiddleware',
 ]
 
 ROOT_URLCONF = 'DagasServer.urls'
