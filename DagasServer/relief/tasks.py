@@ -306,7 +306,7 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     ph_map = Basemap(resolution=None,
                      projection='lcc',
                      # lat_0=11.9, lon_0=122.5,
-                    #  epsg='3121',
+                     epsg='3121',
                      llcrnrlon=120.693515, llcrnrlat=14.437993, urcrnrlon=121.318281, urcrnrlat=14.875347)
     # ph_map.drawcoastlines()
     # ph_map.drawmapboundary(zorder=0)
@@ -314,7 +314,7 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     # ph_map.drawcountries(linewidth=1.5)
     # ph_map.drawstates()
     # ph_map.drawcounties(color='darkred')
-    # ph_map.arcgisimage(verbose=True)
+    ph_map.arcgisimage(verbose=True)
 
     for evac_lat, evac_lon in zip(evacuation_lats, evacuation_lons):
         evac_x, evac_y = ph_map(evac_lon, evac_lat)
