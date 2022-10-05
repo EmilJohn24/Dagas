@@ -84,25 +84,33 @@ def solution_to_route(solution, data, is_final=False):
         remaining_demands = total_demands - supplied_demands
         if np.sum(remaining_supplies) == 0 or np.sum(remaining_demands) == 0:
             break
-
+        
         # if np.sum(working_data['supply_matrix']) == 0 \
         #         or np.sum(working_data['demand_matrix'][node]) == 0:
         #     continue
+        is_supplied = False
         for type_index in range(len(working_data['item_types'])):
             current_supply = remaining_supplies[type_index]
             current_demand = working_data['demand_matrix'][node][type_index]
             surplus = current_supply - current_demand
-
+            
             if surplus >= 0:
+                if current_demand == 0:
+                    continue
+                is_supplied = True
                 supplied_demands[type_index] += current_demand
                 if is_final:
                     working_data['fulfillment_matrix'][node, type_index] += current_demand
 
             else:
+                if current_supply == 0:
+                    continue
+                is_supplied = True
                 supplied_demands[type_index] += current_supply
                 if is_final:
                     working_data['fulfillment_matrix'][node, type_index] += current_supply
-        route.append(node)
+        if is_supplied:
+            route.append(node)
     return np.array(route), len(route), working_data
 
 
