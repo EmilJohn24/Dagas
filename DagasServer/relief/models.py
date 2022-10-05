@@ -339,6 +339,12 @@ class BarangayRequest(models.Model):
         else:
             return 0
 
+    def is_finished(self):
+        for item_type in ItemType.objects.all():
+            if self.calculate_suggested_pax(item_type) > 0:
+                return False
+        return True
+
     def calculate_suggested_pax(self, item_type: ItemType):
         """Returns the number of pax for item_type that has been suggested to others"""
         # Unaccepted route nodes: Filters out accepted suggestions to

@@ -341,6 +341,7 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
 
     # Demand and supply load
     barangay_requests = BarangayRequest.objects.all()
+    barangay_requests = [barangay_request for barangay_request in barangay_requests if not barangay_request.is_finished()]
     data['item_types'] = []
     data['demand_types'] = []
     data['supply_types'] = []
