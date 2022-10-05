@@ -268,7 +268,9 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     data = {}
     # Distance Matrix (Heaviside in meters)
     #   Phase 1: Get Evacuation Latitudes and Longitudes
-    evacuation_geolocations = list(BarangayRequest.objects.values_list('evacuation_center__geolocation', flat=True))
+    barangay_requests = BarangayRequest.objects.all()
+    barangay_requests = [barangay_request for barangay_request in barangay_requests if not barangay_request.is_finished()]
+    evacuation_geolocations = list(barangay_requests.values_list('evacuation_center__geolocation', flat=True))
     evacuation_lats = list(map(lambda request_tuple: request_tuple.lat, evacuation_geolocations))
     evacuation_lons = list(map(lambda request_tuple: request_tuple.lon, evacuation_geolocations))
 
@@ -340,8 +342,7 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     data['ends'] = data['starts']
 
     # Demand and supply load
-    barangay_requests = BarangayRequest.objects.all()
-    barangay_requests = [barangay_request for barangay_request in barangay_requests if not barangay_request.is_finished()]
+   
     data['item_types'] = []
     data['demand_types'] = []
     data['supply_types'] = []
