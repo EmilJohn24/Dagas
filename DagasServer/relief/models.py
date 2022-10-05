@@ -341,7 +341,7 @@ class BarangayRequest(models.Model):
 
     def is_finished(self):
         for item_type in ItemType.objects.all():
-            if self.calculate_suggested_pax(item_type) > 0:
+            if self.calculate_untransacted_pax(item_type) > 0:
                 return False
         return True
 
