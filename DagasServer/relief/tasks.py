@@ -268,8 +268,8 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     data = {}
     # Distance Matrix (Heaviside in meters)
     #   Phase 1: Get Evacuation Latitudes and Longitudes
-    barangay_requests = BarangayRequest.objects.all()
-    barangay_requests = [barangay_request for barangay_request in barangay_requests if not barangay_request.is_finished()]
+    barangay_request_ids = [barangay_request.id for barangay_request in BarangayRequest.objects.all() if not barangay_request.is_finished()]
+    barangay_requests = BarangayRequest.objects.filter(id__in=barangay_request_ids)
     evacuation_geolocations = list(barangay_requests.values_list('evacuation_center__geolocation', flat=True))
     evacuation_lats = list(map(lambda request_tuple: request_tuple.lat, evacuation_geolocations))
     evacuation_lons = list(map(lambda request_tuple: request_tuple.lon, evacuation_geolocations))
