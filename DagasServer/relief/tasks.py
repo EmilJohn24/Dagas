@@ -268,7 +268,7 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     data = {}
     # Distance Matrix (Heaviside in meters)
     #   Phase 1: Get Evacuation Latitudes and Longitudes
-    barangay_request_ids = [barangay_request.id for barangay_request in BarangayRequest.objects.all() if not barangay_request.is_finished()]
+    barangay_request_ids = [barangay_request.id for barangay_request in BarangayRequest.objects.all() if not barangay_request.is_handled()]
     barangay_requests = BarangayRequest.objects.filter(id__in=barangay_request_ids)
     evacuation_geolocations = list(barangay_requests.values_list('evacuation_center__geolocation', flat=True))
     evacuation_lats = list(map(lambda request_tuple: request_tuple.lat, evacuation_geolocations))
@@ -306,7 +306,7 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     ph_map = Basemap(resolution=None,
                      projection='lcc',
                      # lat_0=11.9, lon_0=122.5,
-                     epsg='3121',
+                    #  epsg='3121',
                      llcrnrlon=120.693515, llcrnrlat=14.437993, urcrnrlon=121.318281, urcrnrlat=14.875347)
     # ph_map.drawcoastlines()
     # ph_map.drawmapboundary(zorder=0)
@@ -314,7 +314,7 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     # ph_map.drawcountries(linewidth=1.5)
     # ph_map.drawstates()
     # ph_map.drawcounties(color='darkred')
-    ph_map.arcgisimage(verbose=True)
+    # ph_map.arcgisimage(verbose=True)
 
     for evac_lat, evac_lon in zip(evacuation_lats, evacuation_lons):
         evac_x, evac_y = ph_map(evac_lon, evac_lat)
