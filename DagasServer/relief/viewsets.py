@@ -151,6 +151,7 @@ class TransactionOrderViewSet(viewsets.ModelViewSet):
 class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
+    pagination_class = SmallResultsSetPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, ]
     filterset_fields = ['donor', 'barangay_request', 'received', ]
     search_fields = ['donor__user__username', 'barangay_request__barangay__user__username',
@@ -353,7 +354,8 @@ class EvacuationCenterViewSet(viewsets.ModelViewSet):
 class SupplyViewSet(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
     queryset = Supply.objects.all()
     serializer_class = SupplySerializer
-
+    pagination_class = SmallResultsSetPagination
+    
     def perform_create(self, serializer):
         serializer.save(datetime_added=datetime.now(timezone.utc),
                         donor=DonorProfile.objects.get(user=self.request.user),
