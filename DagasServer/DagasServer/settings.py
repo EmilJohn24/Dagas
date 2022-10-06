@@ -79,6 +79,14 @@ INSTALLED_APPS = [
 
 ]
 
+# Daphne and Channels
+ASGI_APPLICATION = "DagasServer.asgi.application"
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
