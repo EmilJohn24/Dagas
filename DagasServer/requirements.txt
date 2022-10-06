@@ -45,5 +45,5 @@ networkx
 flower
 eventlet
 djangochannelsrestframework
-uvicorn
-channels
+# uvicorn
+# channels
