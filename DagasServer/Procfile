@@ -1,2 +1,4 @@
-web: daphne -b 0.0.0.0 -p $PORT DagasServer.asgi:application
+web: gunicorn DagasServer.wsgi --timeout 10
 celery: celery -A DagasServer worker --loglevel=INFO --concurrency 1
+# ASGI Configuration:
+# web: daphne -b 0.0.0.0 -p $PORT DagasServer.asgi:application
