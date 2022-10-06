@@ -44,3 +44,4 @@ docplex
 networkx
 flower
 eventlet
+djangochannelsrestframework
