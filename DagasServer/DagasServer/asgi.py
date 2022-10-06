@@ -9,18 +9,20 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/asgi/
 
 import os
 
-from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 
 import relief.routing as routing
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DagasServer.settings')
+asgi_application = get_asgi_application()
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'DagasServer.settings')
+#
+# django.setup()
 
 application = ProtocolTypeRouter(
     {
-        "http": get_asgi_application(),
-        "https": get_asgi_application(),
+        "http": asgi_application,
+        "https": asgi_application,
         "websocket": AuthMiddlewareStack(
                 URLRouter(
                     routing.websocket_urlpatterns
@@ -28,3 +30,4 @@ application = ProtocolTypeRouter(
             ),
     }
 )
+
