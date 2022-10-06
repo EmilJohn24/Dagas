@@ -45,3 +45,4 @@ networkx
 flower
 eventlet
 djangochannelsrestframework
+uvicorn

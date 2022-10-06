@@ -1,2 +1,2 @@
-web: gunicorn DagasServer.wsgi --timeout 10
+web: gunicorn -w 4 -k uvicorn.workers.UvicornWorker DagasServer:app
 celery: celery -A DagasServer worker --loglevel=INFO --concurrency 1
