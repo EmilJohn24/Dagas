@@ -10,8 +10,10 @@ https://docs.djangoproject.com/en/3.2/howto/deployment/asgi/
 import os
 
 from django.core.asgi import get_asgi_application
+from django.urls import re_path
 
-import relief.routing as routing
+from relief import consumers
+
 asgi_application = get_asgi_application()
 from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
@@ -25,7 +27,9 @@ application = ProtocolTypeRouter(
         "https": asgi_application,
         "websocket": AuthMiddlewareStack(
                 URLRouter(
-                    routing.websocket_urlpatterns
+                    [
+                        re_path(r"^algorithm/$", consumers.AlgorithmConsumer.as_asgi())
+                    ]
                 )
             ),
     }
