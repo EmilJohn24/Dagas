@@ -46,3 +46,4 @@ flower
 eventlet
 djangochannelsrestframework
 uvicorn
+channels
