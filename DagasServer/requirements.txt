@@ -44,3 +44,7 @@ docplex
 networkx
 flower
 eventlet
+djangochannelsrestframework
+# ASGI libraries:
+# uvicorn
+# channels
