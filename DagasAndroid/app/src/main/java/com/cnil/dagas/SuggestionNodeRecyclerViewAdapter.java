@@ -1,15 +1,14 @@
 package com.cnil.dagas;
 
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.cnil.dagas.placeholder.Suggestion.SuggestionNode;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.cnil.dagas.databinding.CardSuggestionNodeBinding;
+import com.cnil.dagas.placeholder.Suggestion.SuggestionNode;
 
 import java.util.List;
 
@@ -39,9 +38,9 @@ public class SuggestionNodeRecyclerViewAdapter extends RecyclerView.Adapter<Sugg
         holder.suggestedEvacuationCenterName.setText("Evacuation Center Name: " + mValues.get(position).suggestedEvacuationCenterName);
 //        holder.suggestedBarangayName.setText(mValues.get(position).suggestedBarangayName);
         //TODO: Consider converting the table to dynamic
-        holder.foodAmount.setText(mValues.get(position).fulfillments.get("food").toString());
-        holder.waterAmount.setText(mValues.get(position).fulfillments.get("water").toString());
-        holder.clothesAmount.setText(mValues.get(position).fulfillments.get("clothes").toString());
+        holder.foodAmount.setText(mValues.get(position).fulfillments.get("Food").toString());
+        holder.waterAmount.setText(mValues.get(position).fulfillments.get("Water").toString());
+        holder.clothesAmount.setText(mValues.get(position).fulfillments.get("Clothes").toString());
 
     }
 
