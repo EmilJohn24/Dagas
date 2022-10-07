@@ -45,5 +45,6 @@ networkx
 flower
 eventlet
 djangochannelsrestframework
-uvicorn
-channels
+# ASGI libraries:
+# uvicorn
+# channels
