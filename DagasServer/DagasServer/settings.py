@@ -313,7 +313,7 @@ GS_BUCKET_NAME = 'dagas_bucket'
 STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 # Fallback
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    "key/dagas-338907-a529af43275.json"
+    "key/dagas-338907-a5296af43275.json"
 )
 
 django_heroku.settings(locals())
