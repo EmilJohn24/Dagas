@@ -45,6 +45,9 @@ networkx
 flower
 eventlet
 djangochannelsrestframework
+whitenoise
+django-storages[google]
+django-storages
 # ASGI libraries:
 # uvicorn
 # channels

@@ -23,6 +23,9 @@ import django_heroku
 # Run the following to deploy to Heroku specifically: git subtree push --prefix DagasServer heroku master
 # To run python manage.py commands on Heroku deployment: heroku run python manage.py
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from google.oauth2 import service_account
+
+IS_HEROKU = "DYNO" in os.environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -303,5 +306,14 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 GRAPH_MODELS = {
   'app_labels': ["relief"],
 }
+
+# Media files
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'dagas_bucket'
+STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+# Fallback
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+    "key/dagas-338907-a529af43275.json"
+)
 
 django_heroku.settings(locals())
