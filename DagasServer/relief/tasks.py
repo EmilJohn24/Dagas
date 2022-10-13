@@ -692,6 +692,7 @@ def solo_algo_tests(model, donor_ix, algo_exec_id):
     except Exception as exc:
         # Delete execution if it fails
         algo_execution.delete()
+        raise exc
 
 
 def algo_test(model):
