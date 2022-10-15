@@ -1,5 +1,5 @@
 # Dagas
- 
+[![Heroku](https://heroku-badge.herokuapp.com/?app=dagas&root=relief/api/users)]
 Welcome to the repo for the Dagas Project. Some of the things that are needed to work on this project are outlined in this short guide. Read them carefully before attempting to make changes into this repository
 
 ## Git guide
@@ -34,4 +34,9 @@ To transfer between branches, you can use
 ```bash
 git checkout <name>
 ```
- 
+
+### Components
+This project has three primary components:
+1. <b>[DagasServer](./DagasServer/)</b>: This contains the backend server code for Dagas written in Python Django and DRF.
+2. <b>[DagasAndroid](./DagasAndroid/)</b>: This contains the code for the Android client
+1. <b>[dagas-react](./dagas-react/)</b>: This contains the code for the Dagas React server, which will serve HTML content to the user
