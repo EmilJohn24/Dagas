@@ -17,7 +17,10 @@ class EvacuationCenterAdmin(admin.ModelAdmin):
     formfield_overrides = {
         map_fields.AddressField: {'widget': map_widgets.GoogleMapsAddressWidget},
     }
+    list_display = ('name', 'barangays', 'address')
 
+class BarangayRequestAdmin(admin.ModelAdmin):
+    list_display = ('id', 'barangay', 'evacuation_center',)
 
 class ProfileAdmin(UserAdmin):
     list_filter = ('role', 'is_staff',)
@@ -40,7 +43,7 @@ admin.site.register(DonorProfile, DonorAdmin)
 admin.site.register(ResidentProfile)
 admin.site.register(Donation)
 admin.site.register(Supply, SupplyAdmin)
-admin.site.register(BarangayRequest)
+admin.site.register(BarangayRequest, BarangayRequestAdmin)
 admin.site.register(ItemRequest)
 admin.site.register(RouteNode)
 admin.site.register(RouteSuggestion)
