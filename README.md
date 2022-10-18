@@ -5,7 +5,7 @@ Welcome to the repo for the Dagas Project. Some of the things that are needed to
 The development of Dagas required the use of many open-source libraries, all of which are listed in the following files:
 * [DagasServer/requirements.txt](./DagasServer/requirements.txt)
 * [dagas-react/package.json](./dagas-react/package.json)
-* [build.gradle](./app/build.gradle)
+* [build.gradle](./DagasAndroid/app/build.gradle)
 
 Finally, we would especially like to thank [Creative Tim Official](https://github.com/creativetimofficial) for the [React Material Dashboard](https://github.com/creativetimofficial/material-dashboard-react), which provides ready-to-use React UI components for the development of our web user interface and the routing system of our React client. Proper acknowledgements can be found in the React code.
 
