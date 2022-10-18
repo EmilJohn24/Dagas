@@ -15,7 +15,7 @@ This project has three primary components:
 3. <b>[dagas-react](./dagas-react/)</b>: This contains the code for the Dagas React server, which will serve HTML content to the user
 
 ## Environments
-[Heroku](https://heroku-badge.herokuapp.com/?app=dagas&root=relief/api/users)
+![Heroku](https://heroku-badge.herokuapp.com/?app=dagas&root=relief/api/users)
 The Heroku deployments can be found in the following URLs:
 * [Dagas Server API](https://dagas.herokuapp.com)
 * [Dagas React Client](https://dagas-web.herokuapp.com)
