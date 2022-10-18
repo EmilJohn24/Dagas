@@ -1,5 +1,4 @@
 # Dagas
-[![Heroku](https://heroku-badge.herokuapp.com/?app=dagas&root=relief/api/users)]
 Welcome to the repo for the Dagas Project. Some of the things that are needed to work on this project are outlined in this short guide. Read them carefully before attempting to make changes into this repository
 ## Special thanks
 The development of Dagas required the use of many open-source libraries, all of which are listed in the following files:
@@ -8,6 +7,19 @@ The development of Dagas required the use of many open-source libraries, all of 
 * [build.gradle](./DagasAndroid/app/build.gradle)
 
 Finally, we would especially like to thank [Creative Tim Official](https://github.com/creativetimofficial) for the [React Material Dashboard](https://github.com/creativetimofficial/material-dashboard-react), which provides ready-to-use React UI components for the development of our web user interface and the routing system of our React client. Proper acknowledgements can be found in the React code.
+
+## Components
+This project has three primary components:
+1. <b>[DagasServer](./DagasServer/)</b>: This contains the backend server code for Dagas written in Python Django and DRF.
+2. <b>[DagasAndroid](./DagasAndroid/)</b>: This contains the code for the Android client
+3. <b>[dagas-react](./dagas-react/)</b>: This contains the code for the Dagas React server, which will serve HTML content to the user
+
+## Environments
+[Heroku](https://heroku-badge.herokuapp.com/?app=dagas&root=relief/api/users)
+The Heroku deployments can be found in the following URLs:
+* [Dagas Server API](https://dagas.herokuapp.com)
+* [Dagas React Client](https://dagas-web.herokuapp.com)
+
 
 ## Git guide
 Before everything else, you should have <a href="https://git-scm.com/downloads">Git Bash</a> installed on your system. After you have finished installing, you may continue reading on.
@@ -42,8 +54,3 @@ To transfer between branches, you can use
 git checkout <name>
 ```
 
-### Components
-This project has three primary components:
-1. <b>[DagasServer](./DagasServer/)</b>: This contains the backend server code for Dagas written in Python Django and DRF.
-2. <b>[DagasAndroid](./DagasAndroid/)</b>: This contains the code for the Android client
-3. <b>[dagas-react](./dagas-react/)</b>: This contains the code for the Dagas React server, which will serve HTML content to the user
