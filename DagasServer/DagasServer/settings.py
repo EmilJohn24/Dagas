@@ -242,7 +242,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 
 
 # Django Google Maps
-GOOGLE_MAPS_API_KEY = "AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM";
+GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_MAPS_API_KEY")
 
 # Cors settings
 # Based on: https://www.digitalocean.com/community/tutorials/build-a-to-do-application-using-django-and-react
