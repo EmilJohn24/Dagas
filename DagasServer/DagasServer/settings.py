@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+import json
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -312,8 +313,12 @@ DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'dagas_bucket'
 STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 # Fallback
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    "key/dagas-338907-a5296af43275.json"
-)
+if IS_HEROKU:
+    service_acc = json.loads(os.environ.get('GCS_SERVICE_API_KEY'))
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_info(service_acc)
+else:
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+        "key/dagas-338907-a5296af43275.json"
+    )
 
 django_heroku.settings(locals())
