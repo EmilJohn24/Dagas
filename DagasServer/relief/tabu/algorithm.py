@@ -75,14 +75,17 @@ def solution_to_route(solution, data, is_final=False):
 
     # working_data = copy.deepcopy(data)
     working_data = data
-    total_demands = np.sum(working_data['demand_matrix'], axis=0)
+    total_demands = working_data['total_demands']
+    total_remaining_supplies = working_data['total_supplies']
+    complete_total_demands = working_data['complete_total_demands']
+    # total_demands = np.sum(working_data['demand_matrix'], axis=0)
     supplied_demands = np.zeros(len(working_data['item_types']))
     if is_final:
         working_data['fulfillment_matrix'] = np.zeros((working_data['num_requests'], len(working_data['item_types'])))
     for node in solution:
         remaining_supplies = working_data['supply_matrix'] - supplied_demands
-        remaining_demands = total_demands - supplied_demands
-        if np.sum(remaining_supplies) == 0 or np.sum(remaining_demands) == 0:
+        # remaining_demands = total_demands - supplied_demands
+        if total_remaining_supplies == 0 or complete_total_demands == 0:
             break
         
         # if np.sum(working_data['supply_matrix']) == 0 \
@@ -99,6 +102,8 @@ def solution_to_route(solution, data, is_final=False):
                     continue
                 is_supplied = True
                 supplied_demands[type_index] += current_demand
+                total_remaining_supplies -= current_demand
+                complete_total_demands -= current_demand
                 if is_final:
                     working_data['fulfillment_matrix'][node, type_index] += current_demand
 
@@ -107,6 +112,8 @@ def solution_to_route(solution, data, is_final=False):
                     continue
                 is_supplied = True
                 supplied_demands[type_index] += current_supply
+                total_remaining_supplies -= current_supply
+                complete_total_demands -= current_supply
                 if is_final:
                     working_data['fulfillment_matrix'][node, type_index] += current_supply
         if is_supplied:
@@ -184,6 +191,9 @@ def is_in_tabu(route, tabu_list):
 
 def tabu_algorithm(data):
     init_sol = initial_solution(data)
+    data['total_demands'] = np.sum(data['demand_matrix'], axis=0)
+    data['complete_total_demands'] = np.sum(data['total_demands'])
+    data['total_supplies'] = np.sum(data['supply_matrix'])
     route, route_len, _ = solution_to_route(init_sol, data)
     best_sol = init_sol.copy()
     best_candidate = best_sol.copy()
