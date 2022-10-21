@@ -139,4 +139,5 @@ dmypy.json
 **/.idea/
 
 # API
+DagasServer/key/
 ./DagasServer/key/*.json
