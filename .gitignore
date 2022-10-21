@@ -137,3 +137,6 @@ dmypy.json
 **/migrations/*
 !**/migrations/0001_initial.py
 **/.idea/
+
+# API
+./DagasServer/key/*.json
