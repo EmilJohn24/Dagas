@@ -33,7 +33,7 @@ import React from "react";
 import { useAxios } from 'axiosConfig';
 import { Navigate } from "react-router-dom";
 
-function OrderInfo({orderID, qrImage, status, received, isExpired, checkRole}) {
+function OrderInfo({orderID, qrImage, status, received, isExpired, checkRole, donorSame}) {
   const [{data: putTransaction, loading: transactionPutLoading, error: transactionPutError}, executeTransactionPut] = useAxios({
     url: `/relief/api/transactions/${orderID}/quick_update_status/`,
     method: "PUT"
@@ -93,7 +93,7 @@ function OrderInfo({orderID, qrImage, status, received, isExpired, checkRole}) {
           </MDTypography>
         </MDBox>
       </Grid>:
-      checkRole == 2 && currentStatus == "Packaging"? 
+      checkRole == 2 && currentStatus == "Packaging" && donorSame? 
       <Grid item xs={12} md={6} sx={{ textAlign: "right" }}>
         <MDButton onClick={handlePackage} variant="gradient" color="light" size="small">
           Packaged
