@@ -9,7 +9,7 @@ import { isLoggedIn, setAuthTokens, clearAuthTokens, getAccessToken, getRefreshT
 import packageJson from '../../package.json';
 import * as Yup from 'yup';
 import axiosConfig from '../axiosConfig';
-
+import { logout } from '../axiosConfig';
 // Formik Tutorial: https://formik.org/docs/tutorial
 // Useful: https://stackoverflow.com/questions/68905266/how-to-use-react-navigation-usenavigation-hook-in-a-class-component <3
 // TODO: Consider using class-based handling using <Formik> (https://stackblitz.com/edit/react-formik-form-validation-gge2u7?file=App%2FRegister.jsx)
@@ -32,6 +32,7 @@ class Login extends React.Component {
                 })}
                 onSubmit={async (values) => {
                     console.log(JSON.stringify(values));
+                    logout();
                     const data = await axiosConfig
                             .post('/api/rest-authlogin/', 
                                 JSON.stringify(values))
@@ -94,10 +95,9 @@ class Login extends React.Component {
                                                 </div>
                                                 <div className="col-lg-6 d-flex align-items-center gradient-custom">
                                                     <div className="text-white px-3 py-4 p-md-5 mx-md-4">
-                                                        <h4 className="mb-4">We are more than just a company</h4>
-                                                        <p className="small mb-0">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                                                        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                                                        exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                                                        <h4 className="mb-4">Welcome to Dagas</h4>
+                                                        <p className="small mb-0">A mobile and web-based disaster relief goods management system to improve 
+                                                        the efficiency of the relief supply chains in the country during disasters.</p>
                                                     </div>
                                                 </div>
                                             </div>

@@ -45,7 +45,7 @@ import * as React from 'react';
 
 function TransactionDetail({details}) {
   const [roleCheck, setRole] = useState();
-
+  const [sameDonor, setSameDonor] = useState(() => false);
   const [{data, loading, error}, refetch] = useAxios("/relief/api/users/current_user/");
   
 
@@ -59,10 +59,19 @@ function TransactionDetail({details}) {
     
   }, [data, roleCheck])
 
+  useEffect(() => {
+    console.log("Triggered effect for handling post");
+    if (details.donor_info.user == data.id){
+      setSameDonor(true);
+    }
+  }, [data, sameDonor])
+
   if (loading) return;
   if (error) return <Navigate to="/login"/>
 
-
+  console.log(details.donor_info.user);
+  console.log(data.id);
+  console.log(sameDonor);
   console.log(details);
   return (
       <MDBox my={6}>
@@ -77,7 +86,7 @@ function TransactionDetail({details}) {
               <MDBox pt={1} pb={3} px={2}>
                 <MDBox mb={3}>
                   <OrderInfo orderID={details.id} qrImage={details.qr_code} status={details.status_string} 
-                          received={details.received} isExpired={details.is_expired} checkRole={roleCheck}/>
+                          received={details.received} isExpired={details.is_expired} checkRole={roleCheck} donorSame={sameDonor}/>
                 </MDBox>
                 <Divider />
                 <MDBox mt={3}>
