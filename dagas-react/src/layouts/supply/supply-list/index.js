@@ -177,7 +177,7 @@ function SupplyList() {
                           <MDBox mt={3}>
                             <Grid container spacing={3}>
                               <Grid item xs={12} sm={6}>
-                                <FormField id="name" type="text" label="Name" {...formik.getFieldProps('name')} />
+                                <FormField id="name" type="text" label="Supply Description" {...formik.getFieldProps('name')} />
                               </Grid>
                               <Grid item xs={12} sm={6}>
                                 <FormField type="number" name="number" label="Quantity/Pax" {...formik.getFieldProps('pax')}/>
@@ -348,7 +348,7 @@ function SupplyList() {
         align: "center", 
         width: "40%",
         Cell: ({row}) => {
-          const percent = (row.values.available_pax / row.values.pax) * 100;
+          const percent = (row.values.available_pax / row.original.pax) * 100;
           return (
           <MDBox width="8rem">
              <MDProgress variant="gradient" value={percent} color="success" />
