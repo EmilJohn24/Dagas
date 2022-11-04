@@ -65,7 +65,7 @@ function OrderInfo({orderID, qrImage, status, received, isExpired, checkRole}) {
       <Grid item xs={12} md={6}>
         <MDBox display="flex" alignItems="center">
           <MDBox mr={2}>
-            <MDAvatar size="xxl" src={qrImage} alt="QR Code" />
+            <MDAvatar size="xxl" variant="square" src={qrImage} alt="QR Code" />
           </MDBox>
           <MDBox lineHeight={1}>
             <MDTypography variant="h6" fontWeight="medium">

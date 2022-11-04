@@ -160,7 +160,7 @@ public class HomeActivity extends AppCompatActivity {
             nameTxt.setText(currentUserThread.getUser().getString("username"));
             emailTxt.setText(currentUserThread.getUser().getString("email"));
             roleTxt.setText("Role: " + roleVerbose);
-            Picasso.with(this).load(baseUrl + currentUserThread
+            Picasso.with(this).load("" + currentUserThread
                     .getUser().getString("profile_picture"))
                     .into(profilePictureImg);
         } catch (JSONException e) {
