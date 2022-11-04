@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { configure, makeUseAxios } from 'axios-hooks';
 import LRU from 'lru-cache';
-import { applyAuthTokenInterceptor, resolve } from 'axios-jwt';
+import { applyAuthTokenInterceptor, resolve, clearAuthTokens } from 'axios-jwt';
 
 const instance = axios.create({
     // baseURL: 'http://192.168.100.2:8000',
@@ -22,6 +22,8 @@ axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 export const useAxios = makeUseAxios({axios: instance});
 // configure({ instance, cache }); 
 
+
+
 //Token Refresh Function
 const requestRefresh = async (refresh) => {
     const response = await instance.post(`/api/token/refresh/`, { refresh })
@@ -30,6 +32,9 @@ const requestRefresh = async (refresh) => {
     return response;
 
 };
+
+//Log out
+export const logout = () => clearAuthTokens();
 
 // Apply interceptor
 applyAuthTokenInterceptor(instance, { requestRefresh });  // Notice that this uses the axiosInstance instance.  <-- important
