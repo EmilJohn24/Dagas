@@ -9,7 +9,7 @@ import { isLoggedIn, setAuthTokens, clearAuthTokens, getAccessToken, getRefreshT
 import packageJson from '../../package.json';
 import * as Yup from 'yup';
 import axiosConfig from '../axiosConfig';
-
+import { logout } from '../axiosConfig';
 // Formik Tutorial: https://formik.org/docs/tutorial
 // Useful: https://stackoverflow.com/questions/68905266/how-to-use-react-navigation-usenavigation-hook-in-a-class-component <3
 // TODO: Consider using class-based handling using <Formik> (https://stackblitz.com/edit/react-formik-form-validation-gge2u7?file=App%2FRegister.jsx)
@@ -32,6 +32,7 @@ class Login extends React.Component {
                 })}
                 onSubmit={async (values) => {
                     console.log(JSON.stringify(values));
+                    logout();
                     const data = await axiosConfig
                             .post('/api/rest-authlogin/', 
                                 JSON.stringify(values))
