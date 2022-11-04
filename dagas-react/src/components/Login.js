@@ -94,10 +94,9 @@ class Login extends React.Component {
                                                 </div>
                                                 <div className="col-lg-6 d-flex align-items-center gradient-custom">
                                                     <div className="text-white px-3 py-4 p-md-5 mx-md-4">
-                                                        <h4 className="mb-4">We are more than just a company</h4>
-                                                        <p className="small mb-0">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                                                        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                                                        exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                                                        <h4 className="mb-4">Welcome to Dagas</h4>
+                                                        <p className="small mb-0">A mobile and web-based disaster relief goods management system to improve 
+                                                        the efficiency of the relief supply chains in the country during disasters.</p>
                                                     </div>
                                                 </div>
                                             </div>
