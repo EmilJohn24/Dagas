@@ -37,7 +37,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-_-rs#!5yr7=4%1z2e89schctuhz4wows3xb-6j3f4xfe$074jd'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+if IS_HEROKU:
+    DEBUG = eval(os.getenv('DEBUG', default='False'))
+else:
+    DEBUG = True
 
 ALLOWED_HOSTS = ['192.168.100.2', '192.168.1.4', '192.168.31.25', '127.0.0.1', '192.168.2.108', '192.168.1.87', '192.168.1.63',]
 
@@ -318,7 +321,7 @@ if IS_HEROKU:
     GS_CREDENTIALS = service_account.Credentials.from_service_account_info(service_acc)
 else:
     GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-        "key/dagas-338907-a5296af43275.json"
+        "key/dagas-338907-87f4744f405e.json"
     )
 
 django_heroku.settings(locals())
