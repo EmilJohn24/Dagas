@@ -211,9 +211,9 @@ public class DonorAddSupply extends Fragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String type = spinnerType.getSelectedItem().toString();
                 try {
-                    if(type.equals("food")) typeDescription.setText("Rice [1-2 kilo/s]\nCup noodles[2 cups]\nCanned Goods (i.e. Sardines, Corned Beef, Meatloaf) [2 cans]");
-                    else if(type.equals("water")) typeDescription.setText("Bottled Water [500mL - 1L]");
-                    else if(type.equals("clothes")) typeDescription.setText("Blanket [Yung kasya tao please]");
+                    if(type.equals("Food")) typeDescription.setText("Rice [1-2 kilo/s]\nCup noodles[2 cups]\nCanned Goods (i.e. Sardines, Corned Beef, Meatloaf) [2 cans]");
+                    else if(type.equals("Water")) typeDescription.setText("Bottled Water [500mL - 1L]");
+                    else if(type.equals("Clothes")) typeDescription.setText("Adult size");
                     else typeDescription.setText(spinnerType.getSelectedItem().toString());
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
@@ -303,10 +303,16 @@ public class DonorAddSupply extends Fragment {
                         JSONObject supplyEdit = new JSONObject();
                         supplyEdit.put("name", supplyName.getText().toString());
                         supplyEdit.put("pax", Integer.parseInt(editNumberPax.getText().toString()));
+                        supplyEdit.put("quantity", Integer.parseInt(editNumberPax.getText().toString()));
                         supplyEdit.put("type", spinnerType.getSelectedItemPosition() + 1);
                         supplyEdit.put("donation", finalEditDonationId);
                         DagasJSONServer.putDetail("/relief/api/supplies/", finalSupplyData.getSupplyId(), supplyEdit);
+                        if (finalPhotoFile[0].exists())
+                            DagasJSONServer.uploadWithPut(DagasJSONServer.createDetailUrl(
+                                    "/relief/api/supplies/",
+                                    finalSupplyData.getSupplyId()) + "upload_picture/", finalPhotoFile[0]);
                         //action_nav_donor_add_supply_to_nav_view_supplies
+                        //TODO: add catch exception
                         Navigation.findNavController(view).navigate(R.id.action_nav_donor_add_supply_to_nav_view_supplies);
 
                     }

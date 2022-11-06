@@ -7,7 +7,7 @@
     <string name="action_sign_in_short">Sign in</string>
     <string name="welcome">"Welcome "</string>
     <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
+    <string name="invalid_password">Password must be at least 8 characters</string>
     <string name="login_username">"Username"</string>
     <string name="login_password">"Password"</string>
     <string name="login_failed">"Login failed"</string>
@@ -40,6 +40,8 @@
     <string name="invalid_text">Invalid</string>
     <string name="accept_text">Accept</string>
     <string name="view_supply_text">View Supplies</string>
-    <string name="manual_request_text">Don\'t like our suggestion? Try manual request search</string>
-    <string name="suggestion_text">View a suitable recipient for your supplies</string>
+    <string name="manual_request_text">Manual donation</string>
+    <string name="suggestion_text">View the transactions</string>
+<!--    View a suitable recipient for your supplies-->
+<!--    Don\'t like our suggestion? Try manual request search-->
 </resources>

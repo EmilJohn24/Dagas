@@ -195,14 +195,6 @@ public class ResidentRegisterActivity extends AppCompatActivity {
                     emailTxt.setError("Email is required!");
                     registerButton.setEnabled(false);
                 }
-                else if(firstNameTxt == null || firstNameTxt.getText().toString().trim().isEmpty()){
-                    firstNameTxt.setError("First name is required!");
-                    registerButton.setEnabled(false);
-                }
-                else if(lastNameTxt == null || lastNameTxt.getText().toString().trim().isEmpty()){
-                    lastNameTxt.setError("Last name is required!");
-                    registerButton.setEnabled(false);
-                }
                 else if(passwordTxt == null || passwordTxt.getText().toString().trim().length() < 5){
                     passwordTxt.setError("Password length must be greater than 5!");
                     registerButton.setEnabled(false);
@@ -213,6 +205,14 @@ public class ResidentRegisterActivity extends AppCompatActivity {
                 }
                 else if(!passwordTxt.getText().toString().trim().equals(confirmPasswordTxt.getText().toString().trim())){
                     confirmPasswordTxt.setError("Password does not match Confirm Password!");
+                    registerButton.setEnabled(false);
+                }
+                else if(firstNameTxt == null || firstNameTxt.getText().toString().trim().isEmpty()){
+                    firstNameTxt.setError("First name is required!");
+                    registerButton.setEnabled(false);
+                }
+                else if(lastNameTxt == null || lastNameTxt.getText().toString().trim().isEmpty()){
+                    lastNameTxt.setError("Last name is required!");
                     registerButton.setEnabled(false);
                 }
                 else  registerButton.setEnabled(true);

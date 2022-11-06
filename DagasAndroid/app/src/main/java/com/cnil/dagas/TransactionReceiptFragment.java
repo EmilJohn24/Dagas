@@ -286,7 +286,7 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
 
             //Execute Directions API request
             GeoApiContext context = new GeoApiContext.Builder()
-                    .apiKey("AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM")
+                    .apiKey("AIzaSyA8e9yuGCTb3GivqWGo9ZTQvD16vkW6eAo")
                     .build();
 
             //Loader: https://stackoverflow.com/questions/10207612/android-execute-code-in-regular-intervals

@@ -25,7 +25,7 @@
         <item
             android:id="@+id/nav_donor_add_supply"
             android:icon="@android:drawable/ic_menu_add"
-            android:title="Add Donation" />
+            android:title="Add Supply" />
 
         <item
             android:id="@+id/nav_view_requests"
@@ -42,7 +42,7 @@
         <item
             android:id="@+id/nav_transactions"
             android:icon="@android:drawable/ic_menu_view"
-            android:title="View Previous Transactions" />
+            android:title="View Transactions" />
         <item
             android:id="@+id/nav_user_profile"
             android:icon="@drawable/ic_loginusername_foreground"

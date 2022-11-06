@@ -96,7 +96,6 @@ public class HomeActivity extends AppCompatActivity {
             if(roleVerbose.equals("1")){
                 roleVerbose = "Resident";
                 topLevelDestinations.add(R.id.nav_home);
-                topLevelDestinations.add(R.id.nav_qr_scanner);
                 topLevelDestinations.add(R.id.nav_transactions);
                 topLevelDestinations.add(R.id.nav_upload_id);
                 topLevelDestinations.add(R.id.nav_user_profile);
@@ -106,11 +105,11 @@ public class HomeActivity extends AppCompatActivity {
                 navigationView.getMenu().findItem(R.id.nav_donor_add_supply).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_suggestions).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_calamity_tip_fragment).setVisible(false);
+                navigationView.getMenu().findItem(R.id.nav_qr_scanner).setVisible(false);
             }
             else if(roleVerbose.equals("2")){
                 roleVerbose = "Donor";
                 topLevelDestinations.add(R.id.nav_home);
-                topLevelDestinations.add(R.id.nav_qr_scanner);
                 topLevelDestinations.add(R.id.nav_user_profile);
                 topLevelDestinations.add(R.id.nav_view_requests);
                 topLevelDestinations.add(R.id.nav_view_supplies);
@@ -119,6 +118,7 @@ public class HomeActivity extends AppCompatActivity {
                 navigationView.getMenu().findItem(R.id.nav_barangay_request).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_upload_id).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_res_qr).setVisible(false);
+                navigationView.getMenu().findItem(R.id.nav_qr_scanner).setVisible(false);
             }
             else if(roleVerbose.equals("3")){
                 roleVerbose = "Barangay";
@@ -142,7 +142,6 @@ public class HomeActivity extends AppCompatActivity {
             else{
                 roleVerbose = "Resident";
                 topLevelDestinations.add(R.id.nav_home);
-                topLevelDestinations.add(R.id.nav_qr_scanner);
                 topLevelDestinations.add(R.id.nav_barangay_request);
                 topLevelDestinations.add(R.id.nav_view_requests);
                 topLevelDestinations.add(R.id.nav_view_supplies);
@@ -151,6 +150,7 @@ public class HomeActivity extends AppCompatActivity {
                 topLevelDestinations.add(R.id.nav_user_profile);
                 navigationView.getMenu().findItem(R.id.nav_donor_add_supply).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_suggestions).setVisible(false);
+                navigationView.getMenu().findItem(R.id.nav_qr_scanner).setVisible(false);
             }
         } catch (JSONException e) {
             e.printStackTrace();

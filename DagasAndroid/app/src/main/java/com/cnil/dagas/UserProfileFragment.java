@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -129,12 +130,15 @@ public class UserProfileFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try {
-                    if (finalPhotoFile[0].exists())
-                        DagasJSONServer.uploadWithPut(
+                    if (finalPhotoFile[0].exists()) //only refreshes the image once
+                        DagasJSONServer.uploadWithPut( //TODO add server response check
                                 "/relief/api/users/upload_profile_picture/", finalPhotoFile[0]);
                         HomeActivity homeActivity = (HomeActivity) getActivity();
+                        profilePictureImageView.setImageURI(photoURI[0]);
                         if (homeActivity != null)
                             homeActivity.updateProfilePicture(photoURI[0]);
+                        Toast.makeText(UserProfileFragment.this.getContext(),"Uploaded successfully!",
+                            Toast.LENGTH_SHORT).show();
 
                 } catch (JSONException | InterruptedException e) {
                     Log.e(TAG, e.getMessage());

@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.cnil.dagas.databinding.FragmentUploadIdBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
@@ -226,6 +227,8 @@ public class UploadIdFragment extends Fragment {
             public void onClick(View view) {
                 UploadId thread = new UploadId(finalPhotoFile[0]);
                 thread.start();
+                Toast.makeText(UploadIdFragment.this.getContext(),"Uploaded successfully!",
+                        Toast.LENGTH_SHORT).show(); //consider migrating the toast message to upload thread
             }
         });
        return root;

@@ -97,7 +97,7 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
         Suggestion.SuggestionNode previousNode = new Suggestion.SuggestionNode(
                 "-1", "Donor", "Donor", donorGeolocation, 1); //1 is just a placeholder in this case
         GeoApiContext context = new GeoApiContext.Builder()
-                .apiKey("AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM")
+                .apiKey("AIzaSyA8e9yuGCTb3GivqWGo9ZTQvD16vkW6eAo")
                 .build();
         for (Suggestion.SuggestionNode node : Suggestion.ITEMS){
             Marker nodeMarker = map.addMarker(new MarkerOptions()
@@ -255,6 +255,7 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
             Response response = client.newCall(request).execute();
             JSONObject createSuggestionResponse = new JSONObject(response.body().string());
             algoID = createSuggestionResponse.getInt("id");
+            Suggestion.ITEMS.clear(); //clears previous nodes
             //TODO: ADD SUCESS CHECK
             Request suggestionRequest = client.builderFromBaseUrl(
                     String.format(SPECIFIC_ALGORITHM_URL, algoID))

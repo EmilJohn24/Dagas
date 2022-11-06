@@ -118,9 +118,9 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         evacuationCenterNameTextView.setText(barangayRequest.getEvacuationCenterName());
         HashMap<String, Integer> itemRequestMap = barangayRequest.getItemRequestMap();
         for (Map.Entry<String, Integer> entry: itemRequestMap.entrySet()){
-            if(entry.getKey().equals("food")){
+            if(entry.getKey().equals("Food")){
                 foodTextView.setText("Food: " + entry.getValue().toString());
-            } else if (entry.getKey().equals("water")){
+            } else if (entry.getKey().equals("Water")){
                 waterTextView.setText("Water: " + entry.getValue().toString());
             } else clothesTextView.setText("Clothes: " + entry.getValue().toString());
         }
