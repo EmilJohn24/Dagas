@@ -24,14 +24,18 @@ import * as Yup from 'yup';
 //     Col,
 //     option
 //   } from "reactstrap";
-
+// Material Dashboard 2 PRO React components
+import MDBox from "components/MDBox";
+import MDTypography from "components/MDTypography";
+import MDInput from "components/MDInput";
 import Form from 'react-bootstrap/Form';
 import { useNavigate } from "react-router-dom";
 import packageJson from '../../package.json';
-
-
-
-
+import { useAxios } from 'axiosConfig';
+import { useEffect } from "react";
+import Autocomplete from "@mui/material/Autocomplete";
+import { Navigate } from "react-router-dom";
+import { TextField } from '@mui/material';
 
 
 
@@ -45,7 +49,8 @@ function Registration(props){
     const [value, setValue] = useState('');
 
     const [isActive, setIsActive] = useState(false);
-
+    const [chosenBarangay, setChosenBarangay] = useState(null);
+    const [{data, loading, error}, refetch] = useAxios("/relief/api/users/barangays/");
 
     function handleTextChange(text) {
         setValue(text);
@@ -56,9 +61,11 @@ function Registration(props){
           setIsActive(false);
         }
       }
-    //Formik Handling
-  
 
+    var barangayDropdown;
+
+    if (loading) return;
+    
     return (
         <>
         <Formik 
@@ -70,6 +77,7 @@ function Registration(props){
                 first_name: '',
                 last_name: '',
                 role: '',
+                barangay: '',
             }}
             onSubmit={async (values) => {
             console.log(JSON.stringify(values));
@@ -100,7 +108,7 @@ function Registration(props){
             role: Yup.number("Something went wrong")
             })}
 
-        render={({ errors, status, touched, getFieldProps, handleSubmit }) => (
+        render={({ errors, status, touched, setFieldValue, getFieldProps, handleSubmit }) => (
         <section className="vh-100 bg-image">
           <div className="color-overlay">
             <div className="container py-5 h-100">
@@ -200,7 +208,7 @@ function Registration(props){
 
 
                                     <div className="row">
-                                      <div className="col-12">
+                                      <div className="col-12 mb-4">
                                         <label class="form-label select-label">Choose Role</label>
                                           <select className="select form-control" id="role"
                                             type="number"
@@ -208,8 +216,33 @@ function Registration(props){
                                             <option value="0" disabled>Choose option</option>
                                             <option value="1">Resident</option>
                                             <option value="2">Donor</option>
-                                            <option value="3">Barangay</option>
                                           </select>
+                                      </div>
+                                    </div>
+
+                                    <div className="row">
+                                      <div className="col-12">
+                                        <label class="form-label select-label">Choose barangay</label>
+                                            <Autocomplete
+                                                name="barangay"
+                                                id="barangay"
+                                                options={data}
+                                                getOptionLabel={option => option.user}
+                                                onChange={(event, value) => {
+                                                    console.log(value);
+                                                    setFieldValue('barangay', value.id);
+                                                    setChosenBarangay(value);
+                                                }}
+                                                renderInput={(params) => {
+                                                    console.log(params);
+                                                    return (
+                                                    <MDBox>
+                                                        <TextField {...params} variant="standard" />
+                                                    </MDBox>
+                                                    );
+                                                }
+                                                }
+                                             />
                                       </div>
                                     </div>
 
