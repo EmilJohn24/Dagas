@@ -139,7 +139,7 @@ class TransactionOrderViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         is_many = isinstance(request.data, list)
         if not is_many:
-            return super(TransactionViewSet, self).create(request, *args, **kwargs)
+            return super(TransactionOrderViewSet, self).create(request, *args, **kwargs)
         else:
             serializer = self.get_serializer(data=request.data, many=True)
             serializer.is_valid(raise_exception=True)
