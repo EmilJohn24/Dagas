@@ -49,7 +49,7 @@ import * as Yup from 'yup';
 
 //AXIOS and navigation
 import { useAxios } from 'axiosConfig';
-
+import axiosConfig from "axiosConfig";
 import logo from 'logo.svg';
 import { Navigate } from "react-router-dom";
 import { Icon } from "@mui/material";
@@ -85,16 +85,18 @@ function SupplyList() {
   
  
   //Deleting effect
-  useEffect(() => {
-    async function deleteSupplyFunc(){
-      if (isDeleting) {
-        await executeSupplyEdit();
-        await refetch();
-      }
-  }
-  deleteSupplyFunc();
+
+  // useEffect(() => {
+  //   async function deleteSupplyFunc(){
+  //     if (isDeleting) {
+  //       await executeSupplyDelete();
+  //       await refetch();
+  //       setDeleting(false);
+  //     }
+  // }
+  // deleteSupplyFunc();
     
-  }, [isDeleting]);
+  // }, [isDeleting]);
 
   // Supply type insertion effect
   useEffect(() =>{
@@ -152,9 +154,15 @@ function SupplyList() {
                         });
                         setEditing(false);
                     } else{
-                        executeSupplyPost({
-                          data: requestValues
-                        });
+                        // executeSupplyPost({
+                        //   data: requestValues
+                        // });
+                        const result = await axiosConfig
+                          .post(`/relief/api/supplies/`, JSON.stringify(requestValues))
+                          .then((res) => {
+                              refetch();
+                          })
+                          .catch((error) => console.log(error));
                     }
 
                     //Refetch supplies
@@ -366,9 +374,16 @@ function SupplyList() {
           return (
             <DefaultCell>
 
-              <MDButton onClick={(event) => {
-                setDeleteSupplyId(row.values.id);
-                setDeleting(true);
+              <MDButton onClick={async (event) => {
+                // setDeleteSupplyId(row.values.id);
+                // setDeleting(true);
+                const result = await axiosConfig
+                  .delete(`/relief/api/supplies/${row.values.id}`)
+                  .then((res) => {
+                      refetch();
+                  })
+                  .catch((error) => console.log(error));    
+
               }}>
                   <Icon fontSize="small">delete</Icon>
               </MDButton>

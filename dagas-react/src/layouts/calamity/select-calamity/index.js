@@ -40,7 +40,7 @@ import { CImage } from '@coreui/react'
 
 //AXIOS and navigation
 import { useAxios } from 'axiosConfig';
-
+import axiosConfig from "axiosConfig";
 import logo from 'logo.svg';
 import { Navigate } from "react-router-dom";
 import { Avatar, darkScrollbar, Icon } from "@mui/material";
@@ -66,7 +66,7 @@ function Calamities({ google, locations = [] }) {
   const [activeMarker, setActiveMarker] = useState({});
   const [selectedPlace, setSelectedPlace] = useState({});
   const [clickMarkerCoord, setClickMarkerCoord] = useState(null);
-
+  const [isEditing, setEditing] = useState(() => false);
   // Loading item types
   const [{data, loading, error}, refetch] = useAxios("/relief/api/evacuation-center/");
   const [chosenDisaster, setChosenDisaster] = useState(null);
@@ -95,8 +95,8 @@ function Calamities({ google, locations = [] }) {
     setShowingInfoWindow(true);
   };
 
-
-
+  const [{data: currUser, loading: currUserLoad, error: currUserError}, refetchCurrUser] = useAxios("/relief/api/users/current_user/");
+  
   const onMapClick = (t, map, coord) => {
       setClickMarkerCoord(coord.latLng);
   }
@@ -143,8 +143,8 @@ function Calamities({ google, locations = [] }) {
 
   // Disaster Name insertion effect
   useEffect(() =>{
-    if (disasterError) setDisasterForm("Something went wrong...");
-    else if (!disasterLoading && disasterArray) {
+    if (disasterError || currUserError) setDisasterForm("Something went wrong...");
+    else if (!disasterLoading && !currUserLoad && disasterArray) {
       console.log(disasterArray);
       const disasterNames = disasterArray.map(type => type.name);
       console.log(disasterNames);
@@ -194,16 +194,22 @@ function Calamities({ google, locations = [] }) {
                                 <Autocomplete
                                   name="type"
                                   id="type"
-                                  options={disasterNames}
-                                  onChange={(event, value) => {
+                                  options={disasterArray}
+                                  defaultValue={currUser.current_disaster}
+                                  getOptionLabel={option => option.name}
+                                  onChange={async (event, value) => {
                                     console.log(`Changing to ${value}...`)
-                                    formik.setFieldValue('type', value);
-                                    setChosenDisaster(value);
+                                    formik.setFieldValue('type', value.name);
+                                    const result = await axiosConfig
+                                      .get(`/relief/api/disasters/${value.id}/change_to_disaster/`)
+                                      .then((res) => {
+                                        console.log(res);
+                                      })
+                                      .catch((error) => console.log(error));   
                                   }}
                                   renderInput={(params) => {
                                       return (
                                         <MDBox>
-                                          <Icon size="xl">{params.value}</Icon>
                                           <MDInput {...params} onChange={formik.handleChange} variant="standard" />
                                         </MDBox>
                                       );
@@ -224,7 +230,7 @@ function Calamities({ google, locations = [] }) {
       setDisasterForm(DisasterTypeWrapped);
       
     }
-}, [disasterLoading, disasterError, disasterArray]);
+}, [disasterLoading, disasterError, disasterArray, currUserError, currUserLoad, currUser]);
 
   const mapRender = (
     <MDBox p={3} >

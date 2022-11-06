@@ -436,7 +436,8 @@ class CustomRegisterSerializer(RegisterSerializer):
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     role = serializers.ChoiceField(choices=User.ROLE_CHOICES, allow_null=True, allow_blank=True)
-
+    barangay = serializers.PrimaryKeyRelatedField(many=False, allow_null=True,
+                                                  required=False, queryset=BarangayProfile.objects.all(),)
     # profile_picture = serializers.ImageField()
     def get_cleaned_data(self):
         super(CustomRegisterSerializer, self).get_cleaned_data()
@@ -448,6 +449,7 @@ class CustomRegisterSerializer(RegisterSerializer):
             'first_name': self.validated_data.get('first_name', ''),
             'last_name': self.validated_data.get('last_name', ''),
             'role': self.validated_data.get('role'),
+            'barangay': self.validated_data.get('barangay'),
             # 'profile picture': self.validated_data.get('profile_picture'),
         }
 
@@ -456,6 +458,10 @@ class CustomRegisterSerializer(RegisterSerializer):
         user = super().save(request)
         user.role = self.validated_data.get('role')
         user.save()
+        if self.validated_data.get('barangay') is not None and user.role == User.RESIDENT:
+            user_resident_profile = ResidentProfile.objects.get(user=user)
+            user_resident_profile.barangay = self.validated_data.get('barangay')
+            user_resident_profile.save()
         return user
 
 

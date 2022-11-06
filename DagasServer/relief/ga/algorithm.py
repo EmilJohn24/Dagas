@@ -103,6 +103,9 @@ class DagasProblemParalellizedWrapper(ElementwiseProblem):
 class DagasSoloProblemParalellizedWrapper(DagasProblemParalellizedWrapper):
     def __init__(self, elementwise=True, algo_data=None, **kwargs):
         chromosome_length = algo_data['num_requests']
+        algo_data['total_demands'] = np.sum(algo_data['demand_matrix'], axis=0)
+        algo_data['complete_total_demands'] = np.sum(algo_data['total_demands'])
+        algo_data['total_supplies'] = np.sum(algo_data['supply_matrix'])
         lower_bound = np.zeros(chromosome_length)
         upper_bound = np.full(chromosome_length, chromosome_length - 1)
         super().__init__(elementwise, algo_data,
@@ -116,12 +119,14 @@ class DagasSoloProblemParalellizedWrapper(DagasProblemParalellizedWrapper):
 
         # working_data = copy.deepcopy(data)
         working_data = self.algo_data
+        total_remaining_supplies = working_data['total_supplies']
+        complete_total_demands = working_data['complete_total_demands']
         total_demands = np.sum(working_data['demand_matrix'], axis=0)
         supplied_demands = np.zeros(len(working_data['item_types']))
         for node in chromosome:
             remaining_supplies = working_data['supply_matrix'] - supplied_demands
-            remaining_demands = total_demands - supplied_demands
-            if np.sum(remaining_supplies) == 0 or np.sum(remaining_demands) == 0:
+            # remaining_demands = total_demands - supplied_demands
+            if total_remaining_supplies == 0 or complete_total_demands == 0:
                 break
 
             # if np.sum(working_data['supply_matrix']) == 0 \
@@ -134,9 +139,13 @@ class DagasSoloProblemParalellizedWrapper(DagasProblemParalellizedWrapper):
 
                 if surplus >= 0:
                     supplied_demands[type_index] += current_demand
+                    total_remaining_supplies -= current_demand
+                    complete_total_demands -= current_demand
 
                 else:
                     supplied_demands[type_index] += current_supply
+                    total_remaining_supplies -= current_supply
+                    complete_total_demands -= current_supply
             route.append(node)
         return route, working_data
 

@@ -100,6 +100,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
     const template = collapse.map(({ name, route, key, href }) =>
       href ? (
         <Link
+          reloadDocument
           key={key}
           href={href}
           target="_blank"
@@ -109,7 +110,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
           <SidenavItem name={name} nested />
         </Link>
       ) : (
-        <NavLink to={route} key={key} sx={{ textDecoration: "none" }}>
+        <NavLink reloadDocument to={route} key={key} sx={{ textDecoration: "none" }}>
           <SidenavItem name={name} active={route === pathname} nested />
         </NavLink>
       )
@@ -142,6 +143,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
       } else {
         returnValue = href ? (
           <Link
+            reloadDocument
             href={href}
             key={key}
             target="_blank"
@@ -151,7 +153,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
             <SidenavItem color={color} name={name} active={key === itemName} />
           </Link>
         ) : (
-          <NavLink to={route} key={key} sx={{ textDecoration: "none" }}>
+          <NavLink reloadDocument to={route} key={key} sx={{ textDecoration: "none" }}>
             <SidenavItem color={color} name={name} active={key === itemName} />
           </NavLink>
         );
