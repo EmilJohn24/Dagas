@@ -110,8 +110,16 @@ function TransactionList() {
         },
         {
           Header: "date",
-          accessor: "date",
-          Cell: ({ value }) => <DefaultCell value={value} />,
+          accessor: "created_on",
+          Cell: ({ value }) => {
+            // console.log(row.values.evacuation_center_serialized.name);
+            const withoutMilliseconds = value.split('.')[0]
+            const [date, time] = withoutMilliseconds.split('T');
+            const dateStr = new Date(date).toLocaleDateString();
+            return (
+              <DefaultCell value={dateStr + " || " + time}></DefaultCell>
+            );
+          } 
         },
         {
           Header: "status",

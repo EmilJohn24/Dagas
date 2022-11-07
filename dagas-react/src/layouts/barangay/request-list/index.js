@@ -94,8 +94,11 @@ function RequestList() {
           accessor: "expected_date",
           Cell: ({value}) => {
             // console.log(row.values.evacuation_center_serialized.name);
+            const withoutMilliseconds = value.split('.')[0]
+            const [date, time] = withoutMilliseconds.split('T');
+            const dateStr = new Date(date).toLocaleDateString();
             return (
-              <DefaultCell value={value}></DefaultCell>
+              <DefaultCell value={dateStr + " || " + time}></DefaultCell>
             );
           } 
         },
