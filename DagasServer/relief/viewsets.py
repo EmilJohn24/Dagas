@@ -158,6 +158,17 @@ class TransactionViewSet(viewsets.ModelViewSet):
                      'barangay_request__evacuation_center__name', ]
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        current_user = self.request.user
+        queryset = Transaction.objects.all()
+        if current_user.role == User.DONOR:
+            donor_profile = DonorProfile.objects.get(user=current_user)
+            queryset = queryset.filter(donor=donor_profile)
+        elif current_user.role == User.BARANGAY:
+            barangay_profile = BarangayProfile.objects.get(user=current_user)
+            queryset = queryset.filter(barangay_request__barangay=barangay_profile)
+        return queryset
+
     @action(detail=True, methods=['patch', 'put'], name='Quick Update status',
             permission_classes=[IsProfileUserOrReadOnly])
     def quick_update_status(self, request, pk=None):
