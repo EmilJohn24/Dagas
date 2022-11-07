@@ -53,6 +53,10 @@ import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocomplet
 import { geocodeByPlaceId } from "react-google-places-autocomplete";
 import icon from "assets/theme/components/icon";
 
+import * as React from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
+
 function Suggestions({ google, locations = [] }) {
   // Loading item types
   const [{data, loading, error}, refetch] = useAxios("/relief/api/evacuation-center/");
@@ -148,6 +152,13 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
       lng: position.coords.longitude
     });
   }
+
+  const loadingSpinner = (
+    <Box sx={{ display: 'flex' }}>
+      <CircularProgress />
+    </Box>
+  )
+
 
   useEffect(() => {
     
@@ -279,6 +290,7 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
         Donations To Make
       </MDTypography>
       <MDBox mt={2}>
+      {(dataReco && dataReco.result != null) ? null : loadingSpinner }
         {renderEvacDetails()}
       </MDBox>
     </>
@@ -340,7 +352,7 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
                 <MDBox mt={3}>
                   <Grid container spacing={3}>
                     <Grid item xs={12} md={6} lg={3}>
-                    {renderSuggestedEvacs}
+                      {renderSuggestedEvacs}
                     </Grid>
                     <Grid item xs={12} md={6} lg={9}>
                       {renderMap}
