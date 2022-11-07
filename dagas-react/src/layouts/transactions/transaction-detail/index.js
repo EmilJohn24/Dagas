@@ -61,8 +61,10 @@ function TransactionDetail({details}) {
 
   useEffect(() => {
     console.log("Triggered effect for handling post");
-    if (details.donor_info.user == data.id){
-      setSameDonor(true);
+    if (data){
+      if (details.donor_info.user == data.id){
+        setSameDonor(true);
+      }
     }
   }, [data, sameDonor])
 
