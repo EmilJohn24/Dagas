@@ -331,7 +331,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ('id', 'donor', 'donor_name', 'donor_info', 'barangay_name', 'evac_center_name',
-                  'transaction_image', 'qr_code', 'transaction_orders',
+                  'transaction_image', 'qr_code', 'transaction_orders', 'created_on',
                   'barangay_request', 'received', 'received_date', 'status_string')
         read_only_fields = ('qr_code', 'received', 'donor', 'donor_info')
 
