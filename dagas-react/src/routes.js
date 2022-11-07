@@ -188,13 +188,21 @@ const routes = [
         route: "/pages/profile/profile-overview",
         component: <ProfileOverview />,
       },
-      {
-        name: "Settings",
-        key: "profile-settings",
-        route: "/pages/account/settings",
-        component: <Settings />,
-      },
+      // {
+      //   name: "Settings",
+      //   key: "profile-settings",
+      //   route: "/pages/account/settings",
+      //   component: <Settings />,
+      // },
     ],
+  },
+  {
+    type: "collapse",
+    name: "Logout",
+    key: "logout",
+    route: "/login",
+    component: <Login/>,
+    noCollapse: true
   },
   { type: "divider", key: "divider-0" },
 ];
