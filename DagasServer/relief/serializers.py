@@ -224,6 +224,18 @@ class BarangayRequestSerializer(serializers.ModelSerializer):
     expected_date = serializers.DateTimeField(required=False)
     item_request_to_add = ItemRequestSerializer(many=True, partial=True, required=False,
                                                 allow_null=True, write_only=True, )
+    not_in_transaction = serializers.SerializerMethodField(method_name='calculate_not_in_transaction')
+    def calculate_not_in_transaction(self, current_request):
+        item_types = ItemType.objects.all()
+        not_in_transaction_response = {}
+        for item_type in item_types:
+            untrans_pax = current_request.calculate_untransacted_pax(item_type)
+            total_pax = current_request.total_pax_of_type(item_type)
+            not_in_transaction_response[item_type.name] = {
+                'not_in_transaction': untrans_pax,
+                'total': total_pax
+            }
+        return not_in_transaction_response
 
     @transaction.atomic
     def create(self, validated_data):
@@ -247,7 +259,7 @@ class BarangayRequestSerializer(serializers.ModelSerializer):
         model = BarangayRequest
         fields = ('id', 'item_request', 'item_requests_serialized',
                   'evacuation_center', 'expected_date', 'barangay',
-                  'barangay_serialized', 'evacuation_center_serialized', 'item_request_to_add',)
+                  'barangay_serialized', 'evacuation_center_serialized', 'item_request_to_add', 'not_in_transaction')
         read_only_fields = ('item_requests_serialized', 'barangay_serialized', 'evacuation_center_serialized')
 
 
