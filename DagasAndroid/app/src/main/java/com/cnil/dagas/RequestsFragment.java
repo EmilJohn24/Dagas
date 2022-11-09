@@ -111,10 +111,14 @@ public class RequestsFragment extends Fragment {
                 JSONObject evacCenterJSON = requestJSONObject.getJSONObject("evacuation_center_serialized");
                 String evacCenterName = evacCenterJSON.getString("name");
                 JSONArray itemRequestJSONArray = requestJSONObject.getJSONArray("item_requests_serialized");
+                JSONObject untransactedItemRequestJSON = requestJSONObject.getJSONObject("not_in_transaction");
                 HashMap<String, Integer> itemRequestMap = new HashMap<String, Integer>();
                 for (int innerIndex = 0; innerIndex < itemRequestJSONArray.length(); innerIndex++) {
                     JSONObject itemRequestJSONObject = itemRequestJSONArray.getJSONObject(innerIndex);
-                    itemRequestMap.put(itemRequestJSONObject.getString("type_str"), itemRequestJSONObject.getInt("pax"));
+                    String itemTypeStr = itemRequestJSONObject.getString("type_str");
+                    itemRequestMap.put(itemTypeStr, untransactedItemRequestJSON
+                                                        .getJSONObject(itemTypeStr)
+                                                        .getInt("not_in_transaction"));
                 }
                 String coord = evacCenterJSON.getString("geolocation");
                 String[] splitCoord = coord.split(",");

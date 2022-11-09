@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -82,12 +83,12 @@ public class CreateTransactionFragment extends Fragment {
             Response response = client.newCall(request).execute();
             //TODO: Add success check
             JSONObject requestJSONArray = new JSONObject(response.body().string());
-            JSONArray notInTransactionArray = requestJSONArray.optJSONArray("not_in_transaction");
-            if (notInTransactionArray != null) {
-                for (int i = 0; i != notInTransactionArray.length(); i++) {
-                    JSONObject notInTransaction = notInTransactionArray.getJSONObject(i);
-                    untransactedAmounts.add(notInTransaction.optInt("not_in_transaction", 0));
-                }
+            JSONObject notInTransactionObject = requestJSONArray.getJSONObject("not_in_transaction");
+            Iterator<String> keyIterator = notInTransactionObject.keys();
+            while (keyIterator.hasNext()) {
+                String itemTypeStr = keyIterator.next();
+                JSONObject notInTransactionItem = notInTransactionObject.getJSONObject(itemTypeStr);
+                untransactedAmounts.add(notInTransactionItem.optInt("not_in_transaction", 0));
             }
         }
     }
