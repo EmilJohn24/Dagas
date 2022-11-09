@@ -74,6 +74,7 @@ public class RequestsFragment extends Fragment {
         }
 
         private void grabRequests() throws IOException, JSONException {
+            adapter.clear();
             OkHttpSingleton client = OkHttpSingleton.getInstance();
 //            RequestBody body = RequestBody.create(createRequestJSON.toString(), JSON);
             Request request;

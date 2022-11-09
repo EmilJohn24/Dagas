@@ -82,14 +82,12 @@ public class CreateTransactionFragment extends Fragment {
             Response response = client.newCall(request).execute();
             //TODO: Add success check
             JSONObject requestJSONArray = new JSONObject(response.body().string());
-
-            for (Integer typeId : itemTypeIds){
-                Request typeRequest = client.builderFromBaseUrl(requestURL + "not_in_transaction/?type=" + typeId)
-                                    .get()
-                                    .build();
-                Response typeResponse = client.newCall(typeRequest).execute();
-                JSONObject typeResponseJson = new JSONObject(typeResponse.body().string());
-                untransactedAmounts.add(typeResponseJson.optInt("not_in_transaction", 0));
+            JSONArray notInTransactionArray = requestJSONArray.optJSONArray("not_in_transaction");
+            if (notInTransactionArray != null) {
+                for (int i = 0; i != notInTransactionArray.length(); i++) {
+                    JSONObject notInTransaction = notInTransactionArray.getJSONObject(i);
+                    untransactedAmounts.add(notInTransaction.optInt("not_in_transaction", 0));
+                }
             }
         }
     }
