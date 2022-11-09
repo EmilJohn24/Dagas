@@ -134,13 +134,7 @@ public class CreateTransactionFragment extends Fragment {
                 int itemTypeID = requestJSONObject.getInt("type");
                 int pax = requestJSONObject.getInt("pax");
                 int available = requestJSONObject.getInt("available_pax");
-                Request itemTypeRequest = client.builderFromBaseUrl(
-                                            String.format(SPECIFIC_ITEM_TYPE_URL, itemTypeID))
-                                        .get()
-                                        .build();
-                Response itemTypeResponse = client.newCall(itemTypeRequest).execute();
-                JSONObject itemTypeJSON = new JSONObject(itemTypeResponse.body().string());
-                String itemTypeName = itemTypeJSON.getString("name");
+                String itemTypeName = requestJSONObject.getString("type_str");
 
 //                Request availablePaxRequest = client.builderFromBaseUrl(
 //                                            String.format(AVAILABLE_PAX, itemID))

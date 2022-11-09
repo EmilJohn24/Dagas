@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cnil.dagas.data.CurrentUserThread;
 import com.cnil.dagas.databinding.FragmentRequestsBinding;
 import com.cnil.dagas.http.OkHttpSingleton;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -87,6 +88,20 @@ public class RequestsFragment extends Fragment {
             }
             Response response = client.newCall(request).execute();
             //TODO: Add success check
+            CurrentUserThread currentUserThread = new CurrentUserThread();
+            currentUserThread.start();
+            String roleVerbose = null;
+            try {
+                currentUserThread.join();
+            } catch (InterruptedException e) {
+                Log.e(TAG, e.getMessage());
+            }
+            try {
+                roleVerbose = currentUserThread.getUser().getString("role_verbose");
+            } catch (JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
+            
             JSONArray requestJSONArray = new JSONArray(response.body().string());
             for (int index = 0; index < requestJSONArray.length(); index++) {
                 JSONObject requestJSONObject = requestJSONArray.getJSONObject(index);
@@ -110,7 +125,7 @@ public class RequestsFragment extends Fragment {
                 double evacuationCenterDistance = userLocation.distanceTo(evacLocation);
                 this.adapter.add(new RequestsAdapter.BarangayRequest(barangayName, evacCenterName,
                                         evacuationCenterDistance, REQUESTS_URL + requestJSONObject.getInt("id") + "/",
-                                        requestJSONObject.getInt("id"), itemRequestMap));
+                                        requestJSONObject.getInt("id"), itemRequestMap, roleVerbose));
 
             }
 

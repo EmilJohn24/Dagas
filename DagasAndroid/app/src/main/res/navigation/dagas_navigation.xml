@@ -106,6 +106,9 @@
         android:name="com.cnil.dagas.UserProfileFragment"
         android:label="User Profile"
         tools:layout="@layout/user_profile" />
+        <action
+            android:id="@+id/action_nav_calamity_tip_fragment_to_nav_home"
+            app:destination="@id/nav_home" />
     <fragment
         android:id="@+id/nav_suggestions"
         android:name="com.cnil.dagas.SuggestionNodeFragment"

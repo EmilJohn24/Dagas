@@ -25,7 +25,7 @@ import java.util.Objects;
 
 public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHolder>{
     private static final String TAG = RequestsAdapter.class.getName();
-    private static String role_verbose;
+//    private static String role_verbose;
     public static class BarangayRequest{
         private final String barangayName;
         private final String evacuationCenterName;
@@ -33,13 +33,15 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         private final String acceptURL;
         private final int id;
         private final HashMap itemRequestMap;
-        public BarangayRequest(String barangayName, String evacuationCenterName, double evacuationCenterDistance, String acceptURL, int id, HashMap itemRequest) {
+        private final String roleVerbose;
+        public BarangayRequest(String barangayName, String evacuationCenterName, double evacuationCenterDistance, String acceptURL, int id, HashMap itemRequest, String roleVerbose) {
             this.barangayName = barangayName;
             this.evacuationCenterName = evacuationCenterName;
             this.acceptURL = acceptURL;
             this.evacuationCenterDistance = evacuationCenterDistance;
             this.id = id;
             this.itemRequestMap = itemRequest;
+            this.roleVerbose = roleVerbose;
         }
 
 
@@ -58,6 +60,10 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
         public int getId() {
             return id;
         }
+
+        public String getRoleVerbose() {
+        return roleVerbose;
+    }
 
         public double getEvacuationCenterDistance() {
             return evacuationCenterDistance;
@@ -87,18 +93,6 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.card_request, parent, false);
-        CurrentUserThread currentUserThread = new CurrentUserThread();
-        currentUserThread.start();
-        try {
-            currentUserThread.join();
-        } catch (InterruptedException e) {
-            Log.e(TAG, e.getMessage());
-        }
-        try {
-            role_verbose = currentUserThread.getUser().getString("role_verbose");
-        } catch (JSONException e) {
-            Log.e(TAG, e.getMessage());
-        }
         return new ViewHolder(view);
     }
 
@@ -125,7 +119,7 @@ public class RequestsAdapter extends RecyclerView.Adapter<RequestsAdapter.ViewHo
             } else clothesTextView.setText("Clothes: " + entry.getValue().toString());
         }
 //        requestListTextView.setText()
-        if(role_verbose.equals("Barangay")) acceptButton.setVisibility(View.INVISIBLE);
+        if(barangayRequest.getRoleVerbose().equals("Barangay")) acceptButton.setVisibility(View.INVISIBLE);
         distanceTextView.setText(String.valueOf(Math.round(barangayRequest.getEvacuationCenterDistance() / 1000)) + " km away");
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override

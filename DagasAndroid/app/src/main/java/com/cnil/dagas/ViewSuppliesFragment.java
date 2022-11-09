@@ -73,13 +73,8 @@ public class ViewSuppliesFragment extends Fragment {
                 int itemTypeID = requestJSONObject.getInt("type");
                 int pax = requestJSONObject.getInt("pax");
                 int available = requestJSONObject.getInt("available_pax");
-                Request itemTypeRequest = client.builderFromBaseUrl(
-                        String.format(SPECIFIC_ITEM_TYPE_URL, itemTypeID))
-                        .get()
-                        .build();
-                Response itemTypeResponse = client.newCall(itemTypeRequest).execute();
-                JSONObject itemTypeJSON = new JSONObject(itemTypeResponse.body().string());
-                String itemTypeName = itemTypeJSON.getString("name");
+
+                String itemTypeName = requestJSONObject.getString("type_str");
                 //CHANGE: Removing unnecessary request for available pax
                 /*
                     Request availablePaxRequest = client.builderFromBaseUrl(
