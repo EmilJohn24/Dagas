@@ -55,35 +55,6 @@ function BarangayRequest(props) {
     method: "POST"
   }, {  manual: true  });
   
-  const [{data: postFoodRequest, loading: postFoodLoading, error: postFoodError}, executeFoodRequestPost] = useAxios({
-    url: "/relief/api/item-request/",
-    method: "POST"
-  }, {  manual: true  });
-
-  const [{data: postWaterRequest, loading: postWaterLoading, error: postWaterError}, executeWaterRequestPost] = useAxios({
-    url: "/relief/api/item-request/",
-    method: "POST"
-  }, {  manual: true  });
-
-  const [{data: postClothesRequest, loading: postClothesLoading, error: postClothesError}, executeClothesRequestPost] = useAxios({
-    url: "/relief/api/item-request/",
-    method: "POST"
-  }, {  manual: true  });
-
-  // const handleFoodChange = (event) => {
-  //   console.log(event.target.value);
-  //   setFoodAmount(event.target.value);
-  // };
-
-  // const handleWaterChange = (event) => {
-  //   console.log(event.target.value);
-  //   setWaterAmount(event.target.value);
-  // };
-
-  // const handleClothesChange = (event) => {
-  //   console.log(event.target.value);
-  //   setClothesAmount(event.target.value);
-  // };
 
   const handleChange = (event) => {
     console.log(event.target.value);
@@ -91,46 +62,9 @@ function BarangayRequest(props) {
   };    
   
   useEffect(() => {
-    console.log("Triggered effect for handling post");
-    console.log(postLoading);
-    if (!postRequest || postLoading) return;
-    console.log("Accepted post loaded condition...");
-      var requestValues = {};
-      requestValues["type"] = 1;
-      requestValues["pax"] = foodAmount;
-      requestValues["barangay_request"] = postRequest.id;
-      console.log(requestValues);
-
-      executeFoodRequestPost({
-          data: requestValues
-    });
-
-      requestValues["type"] = 2;
-      requestValues["pax"] = waterAmount;
-      console.log(JSON.stringify(requestValues));
+      if (postRequest && !postLoading) navigation('/requests');
       
-      executeWaterRequestPost({
-          data: requestValues
-      });
-    
-      requestValues["type"] = 3;
-      requestValues["pax"] = ClothesAmount;
-      console.log(JSON.stringify(requestValues));
-
-      executeClothesRequestPost({
-          data: requestValues
-      });
-      //if (isSubmitted) navigation('/requests');
-  }, [postLoading, postRequest, isSubmitted])
-//   const handleSubmit = (event) => {
-
-    
-// };
-  useEffect(() => {
-      if (postFoodRequest && postWaterRequest && postClothesRequest && !postFoodLoading && !postWaterLoading && !postClothesLoading){
-        navigation('/requests');
-      }
-  }, [postFoodRequest, postWaterRequest, postClothesRequest, postClothesLoading, postWaterLoading, postFoodLoading])
+  }, [postRequest, postLoading])
   if (loading) return;
   if (error) return <Navigate to="/login"/>;
   const listEvacuationCenters = data.map((data) =>
@@ -162,6 +96,10 @@ function BarangayRequest(props) {
               (values, {setSubmitting}) => {
                 var evacValues ={};
                 evacValues["evacuation_center"] = evacCenter;
+                evacValues["item_request_to_add"] = [
+                  {'type': 1, 'pax': values.food},
+                  {'type': 2, 'pax': values.water},
+                  {'type': 3, 'pax': values.clothes}];
                 executeRequestPost({
                   data: evacValues
                 });

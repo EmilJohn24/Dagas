@@ -25,6 +25,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Autocomplete from "@mui/material/Autocomplete";
 import InputLabel from '@mui/material/InputLabel';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { Paper, Typography, Button } from '@mui/material';
 
 // @mui icons
 import FacebookIcon from "@mui/icons-material/Facebook";
@@ -47,6 +48,17 @@ import DefaultProjectCard from "examples/Cards/ProjectCards/DefaultProjectCard";
 // Overview page components
 import Header from "layouts/pages/profile/components/Header";
 import PlatformSettings from "layouts/pages/profile/profile-overview/components/PlatformSettings";
+
+//Carousel
+import Carousel from 'react-material-ui-carousel'
+import { CImage } from '@coreui/react'
+
+//Image imports
+import tip1 from "assets/images/tip1.png";
+import tip2 from "assets/images/tip2.png";
+import tip3 from "assets/images/tip3.png";
+import tip4 from "assets/images/tip4.png";
+import tip5 from "assets/images/tip5.png";
 
 // Data
 import profilesListData from "layouts/pages/profile/profile-overview/data/profilesListData";
@@ -134,6 +146,30 @@ function Overview() {
             </Grid>
   )
 
+  const carouselRender = (
+    <Grid direction="column" item xs={12} md={5} xl={5} sx={{ display: "flex" }}>
+        <MDBox>
+          <Carousel>
+            <Paper>
+              <CImage className="d-block w-100" src={tip3} alt="Tip 3" />
+            </Paper>
+            <Paper>
+              <CImage className="d-block w-100" src={tip2} alt="Tip 2" />
+            </Paper>
+            <Paper>
+              <CImage className="d-block w-100" src={tip1} alt="Tip 1" />
+            </Paper>
+            <Paper>
+              <CImage className="d-block w-100" src={tip4} alt="Tip 4" />
+            </Paper>
+            <Paper>
+              <CImage className="d-block w-100" src={tip5} alt="Tip 5" />
+            </Paper>
+          </Carousel>
+        </MDBox>
+      </Grid>
+  )
+
   console.log(data);
   return (
     <DashboardLayout>
@@ -148,8 +184,8 @@ function Overview() {
             <Grid item xs={12} md={7} xl={7} sx={{ display: "flex" }}>
               <Divider orientation="vertical" sx={{ ml: -2, mr: 1 }} />
               <ProfileInfoCard
-                title="profile information"
-                description="Hi, I’m Alec Thompson, Decisions: If you can’t decide, the answer is no. If two equally difficult paths, choose the one more painful in the short term (pain avoidance is creating an illusion of equality)."
+                title="Welcome to Dagas"
+                description="A mobile and web-based disaster relief goods management system to improve the efficiency of the relief supply chains in the country during disasters."
                 info={{
                   username: data.username,
                   firstName: data.first_name, 
@@ -179,7 +215,7 @@ function Overview() {
               />
               <Divider orientation="vertical" sx={{ mx: 0 }} />
             </Grid>
-            {(data.role_verbose=="Resident")? residentQRRender: ""}
+            {(data.role_verbose=="Resident")? residentQRRender: (data.role_verbose=="Donor")? carouselRender: ""}
             {/* <Grid item xs={12} xl={6}>
               <ProfilesList title="conversations" profiles={profilesListData} shadow={false} />
             </Grid> */}

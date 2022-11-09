@@ -213,7 +213,7 @@ function Registration(props){
                                           <select className="select form-control" id="role"
                                             type="number"
                                             {...getFieldProps('role')} >
-                                            <option value="0" disabled>Choose option</option>
+                                            <option value="" selected disabled hidden>Choose option</option>
                                             <option value="1">Resident</option>
                                             <option value="2">Donor</option>
                                           </select>

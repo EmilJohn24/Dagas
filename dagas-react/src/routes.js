@@ -75,29 +75,53 @@ var currentUser = {
 }
 // const currentUser = null;
 const routes = [
-  {
-    type: "collapse",
-    name: "Login",
-    key: "login",
-    route: "/login",
-    component: <Login/>,
-    noCollapse: true
+  // {
+  //   type: "collapse",
+  //   name: "Login",
+  //   key: "login",
+  //   route: "/login",
+  //   component: <Login/>,
+  //   noCollapse: true
 
-  },
+  // },
+  // {
+  //   type: "collapse",
+  //   name: "Registration",
+  //   key: "register",
+  //   route: "/register",
+  //   component: <Registration/>,
+  //   noCollapse: true
+  // },
   {
     type: "collapse",
-    name: "Registration",
-    key: "register",
-    route: "/register",
-    component: <Registration/>,
-    noCollapse: true
-  },
-  {
-    type: "collapse",
-    name: "Calamity",
+    name: "Select Calamity",
     key: "calamity",
     route: "/calamity",
     component: <Calamities/>,
+    noCollapse: true
+  },
+  {
+    type: "collapse",
+    name: "View/Add Supply",
+    key: "supply-list",
+    route: "/supplies",
+    component: <SupplyList />,
+    noCollapse: true
+  },
+  {
+    type: "collapse",
+    name: "View Barangay Requests",
+    key: "request-list",
+    route: "/requests",
+    component: <RequestList />,
+    noCollapse: true
+  },
+  {
+    type: "collapse",
+    name: "Suggestions",
+    key: "suggestions",
+    route: "/suggestions",
+    component: <Suggestions/>,
     noCollapse: true
   },
   {
@@ -116,85 +140,38 @@ const routes = [
     component: <EvacuationMap/>,
     noCollapse: true
   },
+  // {
+  //   type: "collapse",
+  //   name: "Accept Request",
+  //   key: "accept-request",
+  //   route: "/AcceptRequest",
+  //   component: <AcceptRequest/>,
+  //   noCollapse: true
+  // },
   {
     type: "collapse",
-    name: "Request",
-    key: "request",
-    collapse:[
-      {
-        name: "Accept Request",
-        key: "accept-request",
-        route: "/AcceptRequest",
-        component: <AcceptRequest/>,
-      }
-    ],
-  },
-  {
-    type: "collapse",
-    name: "Transactions",
-    key: "transactions",
-    collapse: [
-      {
-        name: "Transaction List",
-        key: "transaction-list",
-        route: "/transactions",
-        component: <TransactionList />,
-      }
-    ],
-  },
-  {
-    type: "collapse",
-    name: "Supplies",
-    key: "supplies",
-    collapse: [
-      {
-        name: "Supply List",
-        key: "supply-list",
-        route: "/supplies",
-        component: <SupplyList />,
-      }
-    ],
-  },
-  {
-    type: "collapse",
-    name: "Barangay",
-    key: "barangay",
-    collapse: [
-      {
-        name: "Request List",
-        key: "request-list",
-        route: "/requests",
-        component: <RequestList />,
-      }
-    ],
-  },
-  {
-    type: "collapse",
-    name: "Suggestions",
-    key: "suggestions",
-    route: "/suggestions",
-    component: <Suggestions/>,
+    name: "Transaction List",
+    key: "transaction-list",
+    route: "/transactions",
+    component: <TransactionList />,
     noCollapse: true
   },
   {
     type: "collapse",
-    name: "Profile",
-    key: "brooklyn-alice",
-    icon: <MDAvatar src={currentUser.profile_picture} alt="Brooklyn Alice" size="sm" />,
-    collapse: [
-      {
-        name: "My Profile",
-        key: "my-profile",
-        route: "/pages/profile/profile-overview",
-        component: <ProfileOverview />,
-      },
-      {
-        name: "Settings",
-        key: "profile-settings",
-        route: "/pages/account/settings",
-        component: <Settings />,
-      },
-    ],
+    name: "My Profile",
+    key: "my-profile",
+    route: "/pages/profile/profile-overview",
+    component: <ProfileOverview />,
+    icon: <MDAvatar src={currentUser.profile_picture} alt="my-profile" size="sm" />,
+    noCollapse: true
+  },
+  {
+    type: "collapse",
+    name: "Logout",
+    key: "logout",
+    route: "/login",
+    component: <Login/>,
+    noCollapse: true
   },
   { type: "divider", key: "divider-0" },
 ];

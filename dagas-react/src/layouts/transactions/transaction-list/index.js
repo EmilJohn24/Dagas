@@ -110,8 +110,16 @@ function TransactionList() {
         },
         {
           Header: "date",
-          accessor: "date",
-          Cell: ({ value }) => <DefaultCell value={value} />,
+          accessor: "created_on",
+          Cell: ({ value }) => {
+            // console.log(row.values.evacuation_center_serialized.name);
+            const withoutMilliseconds = value.split('.')[0]
+            const [date, time] = withoutMilliseconds.split('T');
+            const dateStr = new Date(date).toLocaleDateString();
+            return (
+              <DefaultCell value={dateStr + " || " + time}></DefaultCell>
+            );
+          } 
         },
         {
           Header: "status",
@@ -199,20 +207,20 @@ function TransactionList() {
       <DashboardNavbar />
       <MDBox my={3}>
         <MDBox display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-          <MDButton variant="gradient" color="info">
+          {/* <MDButton variant="gradient" color="info">
             new order
-          </MDButton>
+          </MDButton> */}
           <MDBox display="flex">
-            <MDButton variant={menu ? "contained" : "outlined"} color="dark" onClick={openMenu}>
+            {/* <MDButton variant={menu ? "contained" : "outlined"} color="dark" onClick={openMenu}>
               filters&nbsp;
               <Icon>keyboard_arrow_down</Icon>
-            </MDButton>
+            </MDButton> */}
             {renderMenu}
             <MDBox ml={1}>
-              <MDButton variant="outlined" color="dark">
+              {/* <MDButton variant="outlined" color="dark">
                 <Icon>description</Icon>
                 &nbsp;export csv
-              </MDButton>
+              </MDButton> */}
             </MDBox>
           </MDBox>
         </MDBox>

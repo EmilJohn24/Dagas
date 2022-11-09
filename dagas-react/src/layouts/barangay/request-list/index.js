@@ -94,8 +94,11 @@ function RequestList() {
           accessor: "expected_date",
           Cell: ({value}) => {
             // console.log(row.values.evacuation_center_serialized.name);
+            const withoutMilliseconds = value.split('.')[0]
+            const [date, time] = withoutMilliseconds.split('T');
+            const dateStr = new Date(date).toLocaleDateString();
             return (
-              <DefaultCell value={value}></DefaultCell>
+              <DefaultCell value={dateStr + " || " + time}></DefaultCell>
             );
           } 
         },
@@ -156,10 +159,10 @@ function RequestList() {
         <MDBox display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
           <MDBox display="flex">
             <MDBox ml={1}>
-              <MDButton variant="outlined" color="dark">
+              {/* <MDButton variant="outlined" color="dark">
                 <Icon>description</Icon>
                 &nbsp;export csv
-              </MDButton>
+              </MDButton> */}
             </MDBox>
           </MDBox>
         </MDBox>

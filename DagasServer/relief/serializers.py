@@ -193,6 +193,7 @@ class EvacuationDetailsSerializer(serializers.ModelSerializer):
 class ItemRequestSerializer(serializers.ModelSerializer):
     date_added = serializers.DateTimeField(required=False, default=datetime.now(timezone.utc))
     type_str = serializers.StringRelatedField(source='type')
+    barangay_request = serializers.PrimaryKeyRelatedField(required=False, queryset=BarangayRequest.objects.all())
 
     class Meta:
         model = ItemRequest
@@ -221,6 +222,21 @@ class BarangayRequestSerializer(serializers.ModelSerializer):
     evacuation_center_serialized = EvacuationCenterSerializer(source='evacuation_center',
                                                               read_only=True, many=False, )
     expected_date = serializers.DateTimeField(required=False)
+    item_request_to_add = ItemRequestSerializer(many=True, partial=True, required=False,
+                                                allow_null=True, write_only=True, )
+
+    @transaction.atomic
+    def create(self, validated_data):
+        if 'item_request_to_add' in validated_data:
+            new_item_requests = validated_data.pop('item_request_to_add', [])
+            barangay_requests = BarangayRequest.objects.create(**validated_data)
+            for new_item_request in new_item_requests:
+                new_item_request_dict = dict(new_item_request)
+                new_item_request_dict['barangay_request'] = barangay_requests
+                ItemRequest.objects.create(**new_item_request_dict)
+        else:
+            barangay_requests = BarangayRequest.objects.create(**validated_data)
+        return barangay_requests
 
     # def create(self, validated_data):
     #     barangay_request: BarangayRequest = BarangayRequest.objects.create()
@@ -231,7 +247,7 @@ class BarangayRequestSerializer(serializers.ModelSerializer):
         model = BarangayRequest
         fields = ('id', 'item_request', 'item_requests_serialized',
                   'evacuation_center', 'expected_date', 'barangay',
-                  'barangay_serialized', 'evacuation_center_serialized')
+                  'barangay_serialized', 'evacuation_center_serialized', 'item_request_to_add',)
         read_only_fields = ('item_requests_serialized', 'barangay_serialized', 'evacuation_center_serialized')
 
 
@@ -315,7 +331,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = ('id', 'donor', 'donor_name', 'donor_info', 'barangay_name', 'evac_center_name',
-                  'transaction_image', 'qr_code', 'transaction_orders',
+                  'transaction_image', 'qr_code', 'transaction_orders', 'created_on',
                   'barangay_request', 'received', 'received_date', 'status_string')
         read_only_fields = ('qr_code', 'received', 'donor', 'donor_info')
 
@@ -437,7 +453,8 @@ class CustomRegisterSerializer(RegisterSerializer):
     last_name = serializers.CharField()
     role = serializers.ChoiceField(choices=User.ROLE_CHOICES, allow_null=True, allow_blank=True)
     barangay = serializers.PrimaryKeyRelatedField(many=False, allow_null=True,
-                                                  required=False, queryset=BarangayProfile.objects.all(),)
+                                                  required=False, queryset=BarangayProfile.objects.all(), )
+
     # profile_picture = serializers.ImageField()
     def get_cleaned_data(self):
         super(CustomRegisterSerializer, self).get_cleaned_data()
