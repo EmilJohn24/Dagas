@@ -76,10 +76,11 @@ function RequestList() {
         },
         {
           Header: "requested_supplies",
-          accessor: "item_requests_serialized",
           Cell: ({row}) => {
-            const reqType = row.values.item_requests_serialized.map(type => type.type_str);
-            const reqQty = row.values.item_requests_serialized.map(qty => qty.pax);
+            console.log(row);
+            console.log(row.original.item_requests_serialized);
+            const reqType = row.original.item_requests_serialized.map(req => req.type_str);
+            const reqQty = reqType.map(type => row.original.not_in_transaction[type].not_in_transaction);
             var str = "";
             for (let i = 0; i < reqType.length; i++) {
               str += `${reqType[i]}: ${reqQty[i]} | `

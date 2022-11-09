@@ -230,12 +230,16 @@ function AcceptRequest({requestId}) {
       },
       {
           Header: "Pax",
-          accessor: "pax",
           Cell: ({row}) => {
+            const item_type_str = row.values.type_str;
+            console.log(item_type_str);
+            console.log(data.not_in_transaction);
+            const untransacted = data.not_in_transaction[item_type_str].not_in_transaction;
+            const total_pax = data.not_in_transaction[item_type_str].total;
             return(
               <DefaultCell>
               <MDTypography variant="h5" fontWeight="medium">
-                {row.values.pax}
+                {untransacted} / {total_pax}
                 </MDTypography>
               </DefaultCell>
             )
