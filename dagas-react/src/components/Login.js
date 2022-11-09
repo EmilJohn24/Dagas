@@ -119,6 +119,7 @@ class Login extends React.Component {
 
 // Wrap and export
 export default function(props) {
+    logout();
     const navigation = useNavigate();
   
     return <Login {...props} navigation={navigation} />;

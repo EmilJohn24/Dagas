@@ -96,6 +96,7 @@ const routes = [
     type: "collapse",
     name: "Select Calamity",
     key: "calamity",
+    roles: ["Donor"],
     route: "/calamity",
     component: <Calamities/>,
     noCollapse: true
@@ -104,6 +105,7 @@ const routes = [
     type: "collapse",
     name: "View/Add Supply",
     key: "supply-list",
+    roles: ["Donor"],
     route: "/supplies",
     component: <SupplyList />,
     noCollapse: true
@@ -120,6 +122,7 @@ const routes = [
     type: "collapse",
     name: "Suggestions",
     key: "suggestions",
+    roles: ["Donor"],
     route: "/suggestions",
     component: <Suggestions/>,
     noCollapse: true
@@ -128,6 +131,7 @@ const routes = [
     type: "collapse",
     name: "Barangay Request",
     key: "barangay-request",
+    roles: ["Barangay"],
     route: "/request",
     component: <BarangayRequest/>,
     noCollapse: true

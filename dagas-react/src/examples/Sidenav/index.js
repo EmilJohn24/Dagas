@@ -47,6 +47,7 @@ import {
   setTransparentSidenav,
   setWhiteSidenav,
 } from "context";
+import { useAxios } from 'axiosConfig';
 
 function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const [openCollapse, setOpenCollapse] = useState(false);
@@ -59,7 +60,9 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const items = pathname.split("/").slice(1);
   const itemParentName = items[1];
   const itemName = items[items.length - 1];
-
+  
+  const [{data: userData, loading: userLoading, error: userError}, refetchUserData] = useAxios("/relief/api/users/current_user/");    
+  console.log(userData);
   let textColor = "white";
 
   if (transparentSidenav || (whiteSidenav && !darkMode)) {
@@ -94,7 +97,11 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
     // Remove event listener on cleanup
     return () => window.removeEventListener("resize", handleMiniSidenav);
   }, [dispatch, location]);
-
+  if (userLoading) return;
+  if (userError) {
+    console.log(userError);
+    return;
+  }
   // Render all the nested collapse items from the routes.js
   const renderNestedCollapse = (collapse) => {
     const template = collapse.map(({ name, route, key, href }) =>
@@ -122,7 +129,6 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const renderCollapse = (collapses) =>
     collapses.map(({ name, collapse, route, href, key }) => {
       let returnValue;
-
       if (collapse) {
         returnValue = (
           <SidenavItem
@@ -162,7 +168,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
     });
 
   // Render all the routes from the routes.js (All the visible items on the Sidenav)
-  const renderRoutes = routes.map(
+  const renderRoutes = routes.filter(({roles}) => (!roles || roles.includes(userData.role_verbose))).map(
     ({ type, name, icon, title, collapse, noCollapse, key, href, route }) => {
       let returnValue;
 
