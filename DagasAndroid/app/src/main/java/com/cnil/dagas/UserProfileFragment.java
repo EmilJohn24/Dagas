@@ -118,9 +118,9 @@ public class UserProfileFragment extends Fragment {
             fullNameTxt.setText(String.format("%s, %s", currentUserThread.getUser().optString("last_name"), currentUserThread.getUser().optString("first_name")));
             emailTxt.setText(currentUserThread.getUser().getString("email"));
             roleTxt.setText(roleVerbose);
-            Picasso.with(this.getContext()).load("" + currentUserThread
-                    .getUser().getString("profile_picture"))
-                    .into(profilePictureImageView);
+//            Picasso.with(this.getContext()).load("" + currentUserThread
+//                    .getUser().getString("profile_picture"))
+//                    .into(profilePictureImageView);
         } catch (JSONException e) {
             Log.e(TAG, e.getMessage());
         }
@@ -162,7 +162,7 @@ public class UserProfileFragment extends Fragment {
                         DagasJSONServer.uploadWithPut( //TODO add server response check
                                 "/relief/api/users/upload_profile_picture/", finalPhotoFile[0]);
                         HomeActivity homeActivity = (HomeActivity) getActivity();
-                        profilePictureImageView.setImageURI(photoURI[0]);
+//                        profilePictureImageView.setImageURI(photoURI[0]);
                         if (homeActivity != null)
                             homeActivity.updateProfilePicture(photoURI[0]);
                         Toast.makeText(UserProfileFragment.this.getContext(),"Uploaded successfully!",
