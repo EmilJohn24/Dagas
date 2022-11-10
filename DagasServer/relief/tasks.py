@@ -431,9 +431,9 @@ def generate_data(donor_count=10, evacuation_center_count=10,
             test_barangay = get_user_model().objects.create_user(
                 username=barangay_name,
                 password="barangay123",
-                email=f'{barangay_names}@gmail.com',
+                email=f'{barangay_name}@gmail.com',
                 first_name="Barangay",
-                last_name=barangay_names,
+                last_name=barangay_name,
                 role=User.BARANGAY,
             )
             test_barangay.save()
