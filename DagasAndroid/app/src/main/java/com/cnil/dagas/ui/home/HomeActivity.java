@@ -78,7 +78,7 @@ public class HomeActivity extends AppCompatActivity {
 //            }
 //        });
         startService(new Intent(this, LocationService.class));
-        startService(new Intent(this, DagasNotificationService.class));
+//        startService(new Intent(this, DagasNotificationService.class));
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         TextView nameTxt = (TextView) navigationView.getHeaderView(0).findViewById(R.id.nameTxt);

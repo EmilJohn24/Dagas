@@ -376,7 +376,7 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     } finally{
-                        handler.postDelayed(this, 5000);
+                        handler.postDelayed(this, 60000);
                     }
                 }
             };
