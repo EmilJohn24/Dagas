@@ -223,13 +223,16 @@ class TransactionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         current_donor = DonorProfile.objects.get(user=self.request.user)
         # TODO: Possible re-run algorithm here
-        algo_exec = AlgorithmExecution.objects.filter(
+        algo_execs = AlgorithmExecution.objects.filter(
             donor=current_donor)
-        if algo_exec:
-            algo_exec = algo_exec.filter(result__isnull=True) | algo_exec.filter(result__accepted=False,
-                                                                                 result__expiration_time__gt=
-                                                                                 datetime.now(timezone.utc))
-            algo_exec.delete()
+        if algo_execs:
+            algo_execs = algo_execs.filter(result__isnull=True) | algo_execs.filter(result__accepted=False,
+                                                                                    result__expiration_time__gt=
+                                                                                    datetime.now(timezone.utc))
+            for algo_exec in algo_execs:
+                if algo_exec.result is not None:
+                    algo_exec.result.delete()
+            algo_execs.delete()
         serializer.save(donor=current_donor, received=Transaction.PACKAGING, )
     # Note: Based on total pool of donations
     # TODO: Consider checking for oversupply
