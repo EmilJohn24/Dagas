@@ -261,7 +261,8 @@ function Calamities({ google, locations = [] }) {
                           visible={showingInfoWindow}
                           onClose={onClose}>
                           <div>
-                              <h4>{selectedPlace.name}</h4>
+                              <h4>{selectedPlace.barangay_name}</h4>
+                              <h5>{selectedPlace.name}</h5>
                           </div>
                       </InfoWindow>
                   </Map>
