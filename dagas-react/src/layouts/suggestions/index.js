@@ -273,9 +273,10 @@ const [{data: dataAccept, loading: loadAccept, error: errorAccept}, AcceptPost] 
           <TimelineItem
           color="info"
           icon="local_shipping"
-          title={`Evacuation Center: ${evac_data.evacuation_center_name}`}
+          title={<>{`Barangay Name: ${evac_data.barangay_name} `} <br/>
+                  {`Evacuation Center: ${evac_data.evacuation_center_name}`}</>}
           description={str}
-          dateTime="22 DEC 7:20 PM" // Deadline of delivery?
+          // dateTime="22 DEC 7:20 PM" // Deadline of delivery?
         />
         )
       });
