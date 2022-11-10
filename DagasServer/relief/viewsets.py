@@ -337,13 +337,22 @@ class DisasterViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class EvacuationCenterViewSet(viewsets.ModelViewSet):
-    queryset = EvacuationCenter.objects.all()
     serializer_class = EvacuationCenterSerializer
 
     def perform_create(self, serializer):
         serializer.save(barangays=BarangayProfile.objects.get(
             user=self.request.user)
         )
+
+    def get_queryset(self):
+        queryset = EvacuationCenter.objects.all()
+        user = self.request.user
+        if not user.is_anonymous:
+            if user.role == User.DONOR:
+                user_donor = DonorProfile.objects.get(user=user)
+                if user_donor.current_disaster:
+                    queryset = queryset.filter(barangays__current_disaster=user_donor.current_disaster)
+        return queryset
 
     @action(detail=False, methods=['get'], name='Get Current Evac',
             permission_classes=[IsProfileUserOrReadOnly])
@@ -366,7 +375,7 @@ class SupplyViewSet(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
     queryset = Supply.objects.all()
     serializer_class = SupplySerializer
     pagination_class = SmallResultsSetPagination
-    
+
     def perform_create(self, serializer):
         serializer.save(datetime_added=datetime.now(timezone.utc),
                         donor=DonorProfile.objects.get(user=self.request.user),

@@ -177,10 +177,11 @@ class GovAdminSerializer(serializers.ModelSerializer):
 
 class EvacuationCenterSerializer(serializers.ModelSerializer):
     disaster = serializers.StringRelatedField(source='barangays.current_disaster')
+    barangay_name = serializers.StringRelatedField(source='barangays.user.username')
 
     class Meta:
         model = EvacuationCenter
-        fields = ('id', 'name', 'barangays', 'address', 'geolocation', 'disaster')
+        fields = ('id', 'name', 'barangays', 'barangay_name', 'address', 'geolocation', 'disaster')
 
 
 class EvacuationDetailsSerializer(serializers.ModelSerializer):
@@ -225,6 +226,7 @@ class BarangayRequestSerializer(serializers.ModelSerializer):
     item_request_to_add = ItemRequestSerializer(many=True, partial=True, required=False,
                                                 allow_null=True, write_only=True, )
     not_in_transaction = serializers.SerializerMethodField(method_name='calculate_not_in_transaction')
+
     def calculate_not_in_transaction(self, current_request):
         item_types = ItemType.objects.all()
         not_in_transaction_response = {}
