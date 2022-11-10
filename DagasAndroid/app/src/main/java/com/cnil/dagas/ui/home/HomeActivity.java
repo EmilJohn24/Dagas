@@ -56,6 +56,12 @@ public class HomeActivity extends AppCompatActivity {
         profilePictureImageView.setImageURI(imagePath);
         //        profilePictureImageView.setImage
     }
+    public void updateDisaster(int pos){
+        NavigationView navigationView = binding.navView;
+        Spinner disasterSpinnerView = (Spinner) navigationView.getHeaderView(0).findViewById(R.id.disasterSpinner);
+        disasterSpinnerView.setSelection(pos);
+        //        profilePictureImageView.setImage
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +85,6 @@ public class HomeActivity extends AppCompatActivity {
         TextView emailTxt = (TextView) navigationView.getHeaderView(0).findViewById(R.id.emailTxt);
         TextView roleTxt = (TextView) navigationView.getHeaderView(0).findViewById(R.id.roleTxt);
         ImageView profilePictureImg = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.profilePictureImageView);
-
         //Load current user data
         CurrentUserThread currentUserThread = new CurrentUserThread();
         currentUserThread.start();
@@ -119,7 +124,7 @@ public class HomeActivity extends AppCompatActivity {
                 navigationView.getMenu().findItem(R.id.nav_upload_id).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_res_qr).setVisible(false);
                 navigationView.getMenu().findItem(R.id.nav_qr_scanner).setVisible(false);
-                navigationView.getMenu().findItem(R.id.nav_calamity_tip_fragment).setVisible(false);
+//                navigationView.getMenu().findItem(R.id.nav_calamity_tip_fragment).setVisible(false);
             }
             else if(roleVerbose.equals("3")){
                 roleVerbose = "Barangay";
@@ -189,9 +194,13 @@ public class HomeActivity extends AppCompatActivity {
                 }
             }
             Spinner disasterSpinner = (Spinner) navigationView.getHeaderView(0).findViewById(R.id.disasterSpinner);
+//            disasterSpinner.setVisibility(View.VISIBLE);
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, new ArrayList<>(disasterIDs.keySet()));
             disasterSpinner.setAdapter(adapter);
             //TODO: Set initial selection to currently set disaster
+            JSONObject currentUserDisaster = currentUserThread.getUser().optJSONObject("current_disaster");
+            int spinnerPosition = adapter.getPosition(currentUserDisaster.optString("name"));
+            disasterSpinner.setSelection(spinnerPosition);
             disasterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {

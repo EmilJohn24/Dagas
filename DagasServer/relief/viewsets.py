@@ -223,6 +223,16 @@ class TransactionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         current_donor = DonorProfile.objects.get(user=self.request.user)
         # TODO: Possible re-run algorithm here
+        algo_execs = AlgorithmExecution.objects.filter(
+            donor=current_donor)
+        if algo_execs:
+            algo_execs = algo_execs.filter(result__isnull=True) | algo_execs.filter(result__accepted=False,
+                                                                                    result__expiration_time__gt=
+                                                                                    datetime.now(timezone.utc))
+            for algo_exec in algo_execs:
+                if algo_exec.result is not None:
+                    algo_exec.result.delete()
+            algo_execs.delete()
         serializer.save(donor=current_donor, received=Transaction.PACKAGING, )
     # Note: Based on total pool of donations
     # TODO: Consider checking for oversupply
@@ -352,6 +362,15 @@ class EvacuationCenterViewSet(viewsets.ModelViewSet):
                 user_donor = DonorProfile.objects.get(user=user)
                 if user_donor.current_disaster:
                     queryset = queryset.filter(barangays__current_disaster=user_donor.current_disaster)
+            elif user.role == User.RESIDENT:
+                user_resident = ResidentProfile.objects.get(user=user)
+                user_barangay = user_resident.barangay
+                if user_barangay is not None:
+                    queryset = queryset.filter(barangays=user_barangay)
+            elif user.role == User.BARANGAY:
+                user_barangay = BarangayProfile.objects.get(user=user)
+                if user_barangay is not None:
+                    queryset = queryset.filter(barangays=user_barangay)
         return queryset
 
     @action(detail=False, methods=['get'], name='Get Current Evac',

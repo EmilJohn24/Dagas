@@ -236,7 +236,7 @@ public class EvacuationVisualMapFragment extends Fragment implements OnMapReadyC
             String name = null;
             try {
                 coord = center.getString("geolocation");
-                name = center.getString("name") + " (Barangay " + center.getString("barangays") + ")";
+                name = center.getString("name") + " (Barangay " + center.getString("barangay_name") + ")";
 
             } catch (JSONException e) {
                 Log.e(TAG, e.getMessage());
