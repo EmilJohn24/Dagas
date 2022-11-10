@@ -507,7 +507,7 @@ def generate_data(donor_count=10, evacuation_center_count=10,
 
 
 def generate_data_from_file(filename, **kwargs):
-    barangay_names = open(filename).readlines()
+    barangay_names = open(filename).read().splitlines()
     kwargs['barangay_names'] = barangay_names
     return generate_data(**kwargs)
 
