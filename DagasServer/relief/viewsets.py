@@ -352,6 +352,15 @@ class EvacuationCenterViewSet(viewsets.ModelViewSet):
                 user_donor = DonorProfile.objects.get(user=user)
                 if user_donor.current_disaster:
                     queryset = queryset.filter(barangays__current_disaster=user_donor.current_disaster)
+            elif user.role == User.RESIDENT:
+                user_resident = ResidentProfile.objects.get(user=user)
+                user_barangay = user_resident.barangay
+                if user_barangay is not None:
+                    queryset = queryset.filter(barangays=user_barangay)
+            elif user.role == User.BARANGAY:
+                user_barangay = BarangayProfile.objects.get(user=user)
+                if user_barangay is not None:
+                    queryset = queryset.filter(barangays=user_barangay)
         return queryset
 
     @action(detail=False, methods=['get'], name='Get Current Evac',
