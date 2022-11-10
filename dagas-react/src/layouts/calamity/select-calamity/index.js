@@ -69,7 +69,6 @@ function Calamities({ google, locations = [] }) {
   const [isEditing, setEditing] = useState(() => false);
   // Loading item types
   const [{data, loading, error}, refetch] = useAxios("/relief/api/evacuation-center/");
-  const [chosenDisaster, setChosenDisaster] = useState(null);
   const {
       placesService,
       placePredictions,
@@ -89,6 +88,7 @@ function Calamities({ google, locations = [] }) {
   console.log(placePredictions);
   console.log(data);
   const [{data: disasterArray, loading: disasterLoading, error: disasterError}, refetchTypes] = useAxios("/relief/api/disasters/");
+  const [chosenDisaster, setChosenDisaster] = useState(null);
   const onMarkerClick = (props, marker, e) =>{
     setSelectedPlace(props);
     setActiveMarker(marker);
@@ -124,7 +124,10 @@ function Calamities({ google, locations = [] }) {
           const geoloc = {lat: lat, lng, lng};
           return <Marker
                       onClick={onMarkerClick}
-                      name={evac_data.name}
+                      name={<>
+                      <h4>{evac_data.barangay_name}</h4>
+                      <h5>{evac_data.name}</h5>
+                      </>}
                       position={geoloc}
                       />
         }
@@ -135,12 +138,14 @@ function Calamities({ google, locations = [] }) {
         const geoloc = {lat: lat, lng, lng};
         return <Marker
                     onClick={onMarkerClick}
-                    name={evac_data.name}
+                    name={<>
+                      <h4>{evac_data.barangay_name}</h4>
+                      <h5>{evac_data.name}</h5>
+                      </>}
                     position={geoloc}
                     />
     });
   }
-
   // Disaster Name insertion effect
   useEffect(() =>{
     if (disasterError || currUserError) setDisasterForm("Something went wrong...");
@@ -195,16 +200,19 @@ function Calamities({ google, locations = [] }) {
                                   name="type"
                                   id="type"
                                   options={disasterArray}
-                                  defaultValue={currUser.current_disaster}
+                                  value={currUser.current_disaster}
                                   getOptionLabel={option => option.name}
                                   onChange={async (event, value) => {
-                                    console.log(`Changing to ${value}...`)
+                                    console.log(`Changing to ${value.name}...`)
                                     formik.setFieldValue('type', value.name);
+                                    setChosenDisaster(value.name);
+
                                     const result = await axiosConfig
                                       .get(`/relief/api/disasters/${value.id}/change_to_disaster/`)
                                       .then((res) => {
                                         console.log(res);
                                         refetch();
+                                        refetchCurrUser();
                                       })
                                       .catch((error) => console.log(error));   
                                   }}
@@ -262,7 +270,6 @@ function Calamities({ google, locations = [] }) {
                           visible={showingInfoWindow}
                           onClose={onClose}>
                           <div>
-                              <h4>{selectedPlace.barangay_name}</h4>
                               <h5>{selectedPlace.name}</h5>
                           </div>
                       </InfoWindow>
@@ -312,7 +319,7 @@ function Calamities({ google, locations = [] }) {
     </DashboardLayout>
   );
 }
-
+//AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM
 export default GoogleApiWrapper({
   apiKey: 'AIzaSyBqxOriSUSwlm8HEZ0W6gkQj3fazIbegDM'
 })(Calamities);

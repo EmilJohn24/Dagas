@@ -97,7 +97,10 @@ function EvacuationMap({ google, locations = [] }){
             const geoloc = {lat: lat, lng, lng};
             return <Marker
                         onClick={onMarkerClick}
-                        name={evac_data.name}
+                        name={<>
+                            <h4>{evac_data.barangay_name}</h4>
+                            <h5>{evac_data.name}</h5>
+                            </>}
                         position={geoloc}
                         />
         });
@@ -222,7 +225,6 @@ function EvacuationMap({ google, locations = [] }){
                                             visible={showingInfoWindow}
                                             onClose={onClose}>
                                             <div>
-                                                <h4>{selectedPlace.barangay_name}</h4>
                                                 <h5>{selectedPlace.name}</h5>
                                             </div>
                                         </InfoWindow>
