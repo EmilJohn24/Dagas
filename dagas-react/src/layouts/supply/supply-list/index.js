@@ -342,14 +342,14 @@ function SupplyList() {
           else return <ProductCell image={row.values.picture} name={row.original.name} />;
         }
       },
-      /* { 
-        Header: "pax", 
-        accessor: "pax", 
+      { 
+        Header: "type", 
+        accessor: "type_str", 
         width: "10%", 
         Cell: ({value}) => {
           return <DefaultCell>{value}</DefaultCell>
         }
-      }, */
+      }, 
       // { Header: "review", accessor: "review", align: "center" },
       { Header: "availability", 
         accessor: "available_pax", 
