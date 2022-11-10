@@ -16,7 +16,7 @@ from django.contrib.auth import get_user_model
 # See management/commands/create_groups.py for list of groups
 # TODO: Finish models
 from django.db.models import Sum
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django_google_maps import fields as map_fields
@@ -348,10 +348,10 @@ class BarangayRequest(models.Model):
     def is_handled(self):
         for item_type in ItemType.objects.all():
             if self.calculate_untransacted_pax(item_type) - \
-                self.calculate_suggested_pax(item_type) > 0:
+                    self.calculate_suggested_pax(item_type) > 0:
                 return False
         return True
-        
+
     def calculate_suggested_pax(self, item_type: ItemType):
         """Returns the number of pax for item_type that has been suggested to others"""
         # Unaccepted route nodes: Filters out accepted suggestions to
@@ -467,6 +467,18 @@ def generate_transaction_stubs(sender, instance, created, **kwargs):
             notify.send(sender=barangay.user, recipient=resident_profile.user, target=instance,
                         verb=notif_verb, description=notif_message)
 
+
+@receiver(pre_save, sender=ResidentProfile)
+def resident_brgy_change_transaction_stub_handler(sender, instance, **kwargs):
+    if instance.id is not None:
+        previous_resident_state = ResidentProfile.objects.get(id=instance.id)
+        if previous_resident_state.barangay != instance.barangay and instance.barangay is not None:
+            for request in BarangayRequest.objects.filter(barangay=instance.barangay):
+                TransactionStub.objects.create(request=request, resident=instance)
+                notif_verb = "New Request Created"
+                notif_message = "Your barangay has filed a new request"
+                notify.send(sender=instance.barangay.user, recipient=instance.user, target=request,
+                            verb=notif_verb, description=notif_message)
 
 class Rating(models.Model):
     resident = models.ForeignKey(to=ResidentProfile, on_delete=models.CASCADE,
