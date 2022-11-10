@@ -114,6 +114,7 @@ const routes = [
     type: "collapse",
     name: "View Barangay Requests",
     key: "request-list",
+    roles: ["Donor","Barangay"],
     route: "/requests",
     component: <RequestList />,
     noCollapse: true
