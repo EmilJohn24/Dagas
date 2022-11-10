@@ -294,22 +294,6 @@ class TransactionOrderSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     "pax": item_supply.name + " has insufficient pax. Deleting transaction..."},
                     code=status.HTTP_400_BAD_REQUEST)
-
-        type_supplies = supplies.filter(type=item_type)
-        all_orders = TransactionOrder.objects.filter(transaction__in=donor_transactions)
-        all_order_type_pax = all_orders.filter(supply__type=item_type).aggregate(Sum('pax'))
-        transaction_pax = all_order_type_pax.get('pax__sum')
-        if transaction_pax is None:
-            transaction_pax = 0
-
-        if type_supplies:
-            type_supply_pax_sum = type_supplies.aggregate(Sum('pax'))
-            type_supply_pax = type_supply_pax_sum.get('pax__sum')
-
-            # Note: Use https://stackoverflow.com/questions/51665260/django-rest-framework-custom-error-message
-            if type_supply_pax - transaction_pax < item_pax:
-                raise serializers.ValidationError({
-                    "pax": item_type.name + " not enough."}, )
         return data
 
     supply_info = SupplySerializer(source='supply', many=False, read_only=True, )
