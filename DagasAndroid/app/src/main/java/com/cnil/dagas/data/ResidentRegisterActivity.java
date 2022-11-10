@@ -195,12 +195,12 @@ public class ResidentRegisterActivity extends AppCompatActivity {
                     emailTxt.setError("Email is required!");
                     registerButton.setEnabled(false);
                 }
-                else if(passwordTxt == null || passwordTxt.getText().toString().trim().length() < 5){
-                    passwordTxt.setError("Password length must be greater than 5!");
+                else if(passwordTxt == null || passwordTxt.getText().toString().trim().length() < 8){
+                    passwordTxt.setError("Password length must be at least 8!");
                     registerButton.setEnabled(false);
                 }
-                else if(confirmPasswordTxt == null || confirmPasswordTxt.getText().toString().trim().length() < 5){
-                    confirmPasswordTxt.setError("Confirm Password length must be greater than 5!");
+                else if(confirmPasswordTxt == null || confirmPasswordTxt.getText().toString().trim().length() < 8){
+                    confirmPasswordTxt.setError("Confirm Password length must be at least 8!");
                     registerButton.setEnabled(false);
                 }
                 else if(!passwordTxt.getText().toString().trim().equals(confirmPasswordTxt.getText().toString().trim())){

@@ -54,7 +54,7 @@ public class UserProfileFragment extends Fragment {
         binding = UserProfileBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        ImageView profilePictureImageView = root.findViewById(R.id.profile_picture);
+//        ImageView profilePictureImageView = root.findViewById(R.id.profile_picture);
         TextView fullNameTxt = root.findViewById(R.id.full_name);
         TextView emailTxt = root.findViewById(R.id.email);
         //TextView barangayTxt = root.findViewById(R.id.barangay);

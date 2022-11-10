@@ -21,6 +21,7 @@ import com.cnil.dagas.data.CurrentUserThread;
 import com.cnil.dagas.data.DisasterListThread;
 import com.cnil.dagas.data.DisasterUpdateThread;
 import com.cnil.dagas.databinding.FragmentCalamityTipBinding;
+import com.cnil.dagas.ui.home.HomeActivity;
 import com.squareup.picasso.Picasso;
 import com.synnapps.carouselview.CarouselView;
 import com.synnapps.carouselview.ImageClickListener;
@@ -36,6 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CalamityTipFragment extends Fragment {
+    private static final String TAG = "";
     CarouselView carouselView;
     FragmentCalamityTipBinding binding;
     int[] sampleImages = {R.drawable.tip1, R.drawable.tip2, R.drawable.tip3, R.drawable.tip4, R.drawable.tip5,};
@@ -69,12 +71,26 @@ public class CalamityTipFragment extends Fragment {
         Spinner calamitySpinner = root.findViewById(R.id.calamitySpinner);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_spinner_item, new ArrayList<>(disasterIDs.keySet()));
         calamitySpinner.setAdapter(adapter);
+        //Load current user data
+        CurrentUserThread currentUserThread = new CurrentUserThread();
+        currentUserThread.start();
+        try {
+            currentUserThread.join();
+        } catch (InterruptedException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        JSONObject currentUserDisaster = currentUserThread.getUser().optJSONObject("current_disaster");
+        int spinnerPosition = adapter.getPosition(currentUserDisaster.optString("name"));
+        calamitySpinner.setSelection(spinnerPosition);
         //TODO: Set initial selection to currently set disaster
         calamitySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String disasterName = adapter.getItem(i);
                 Integer disasterId = disasterIDs.get(disasterName);
+                HomeActivity homeActivity = (HomeActivity) getActivity();
+                if (homeActivity != null)
+                    homeActivity.updateDisaster(i);
                 DisasterUpdateThread updateThread = new DisasterUpdateThread(disasterId);
                 updateThread.start();
             }

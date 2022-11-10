@@ -41,7 +41,7 @@
     <string name="accept_text">Accept</string>
     <string name="view_supply_text">View Supplies</string>
     <string name="manual_request_text">Manual donation</string>
-    <string name="suggestion_text">View the transactions</string>
+    <string name="suggestion_text">View suggestion</string>
 <!--    View a suitable recipient for your supplies-->
 <!--    Don\'t like our suggestion? Try manual request search-->
 </resources>
