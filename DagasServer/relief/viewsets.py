@@ -223,6 +223,13 @@ class TransactionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         current_donor = DonorProfile.objects.get(user=self.request.user)
         # TODO: Possible re-run algorithm here
+        algo_exec = AlgorithmExecution.objects.filter(
+            donor=current_donor)
+        if algo_exec:
+            algo_exec = algo_exec.filter(result__isnull=True) | algo_exec.filter(result__accepted=False,
+                                                                                 result__expiration_time__gt=
+                                                                                 datetime.now(timezone.utc))
+            algo_exec.delete()
         serializer.save(donor=current_donor, received=Transaction.PACKAGING, )
     # Note: Based on total pool of donations
     # TODO: Consider checking for oversupply
@@ -337,13 +344,31 @@ class DisasterViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class EvacuationCenterViewSet(viewsets.ModelViewSet):
-    queryset = EvacuationCenter.objects.all()
     serializer_class = EvacuationCenterSerializer
 
     def perform_create(self, serializer):
         serializer.save(barangays=BarangayProfile.objects.get(
             user=self.request.user)
         )
+
+    def get_queryset(self):
+        queryset = EvacuationCenter.objects.all()
+        user = self.request.user
+        if not user.is_anonymous:
+            if user.role == User.DONOR:
+                user_donor = DonorProfile.objects.get(user=user)
+                if user_donor.current_disaster:
+                    queryset = queryset.filter(barangays__current_disaster=user_donor.current_disaster)
+            elif user.role == User.RESIDENT:
+                user_resident = ResidentProfile.objects.get(user=user)
+                user_barangay = user_resident.barangay
+                if user_barangay is not None:
+                    queryset = queryset.filter(barangays=user_barangay)
+            elif user.role == User.BARANGAY:
+                user_barangay = BarangayProfile.objects.get(user=user)
+                if user_barangay is not None:
+                    queryset = queryset.filter(barangays=user_barangay)
+        return queryset
 
     @action(detail=False, methods=['get'], name='Get Current Evac',
             permission_classes=[IsProfileUserOrReadOnly])
@@ -366,7 +391,7 @@ class SupplyViewSet(AutoPrefetchViewSetMixin, viewsets.ModelViewSet):
     queryset = Supply.objects.all()
     serializer_class = SupplySerializer
     pagination_class = SmallResultsSetPagination
-    
+
     def perform_create(self, serializer):
         serializer.save(datetime_added=datetime.now(timezone.utc),
                         donor=DonorProfile.objects.get(user=self.request.user),

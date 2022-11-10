@@ -192,6 +192,7 @@ export default function App() {
         <Routes>
           {getRoutes(routes)}
           <Route path="*" element={<Navigate to="/login" />} />
+          <Route path="/register" element={<Registration/>} />
         </Routes>
       </ThemeProvider>
     </CacheProvider>
@@ -216,6 +217,7 @@ export default function App() {
       <Routes>
         {getRoutes(routes)}
         <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="/register" element={<Registration/>} />
       </Routes>
     </ThemeProvider>
   );

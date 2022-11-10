@@ -268,7 +268,8 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     data = {}
     # Distance Matrix (Heaviside in meters)
     #   Phase 1: Get Evacuation Latitudes and Longitudes
-    barangay_request_ids = [barangay_request.id for barangay_request in BarangayRequest.objects.all() if not barangay_request.is_handled()]
+    barangay_request_ids = [barangay_request.id for barangay_request in BarangayRequest.objects.all() if
+                            not barangay_request.is_handled()]
     barangay_requests = BarangayRequest.objects.filter(id__in=barangay_request_ids)
     evacuation_geolocations = list(barangay_requests.values_list('evacuation_center__geolocation', flat=True))
     evacuation_lats = list(map(lambda request_tuple: request_tuple.lat, evacuation_geolocations))
@@ -342,7 +343,7 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
     data['ends'] = data['starts']
 
     # Demand and supply load
-   
+
     data['item_types'] = []
     data['demand_types'] = []
     data['supply_types'] = []
@@ -388,7 +389,7 @@ def generate_data_model_from_db(solo_mode=False, solo_donor=None):
 
 @shared_task
 def generate_data(donor_count=10, evacuation_center_count=10,
-                  min_demand=100, max_demand=1000,
+                  min_demand=100, max_demand=1000, barangay_names=None,
                   min_supply=1000, max_supply=10000):
     # Clear dataset
     random.seed(1)
@@ -404,9 +405,11 @@ def generate_data(donor_count=10, evacuation_center_count=10,
         return points
 
     # A random polygon around Luzon that dictates the range of generated evacuation centers
-    generation_polygon = Polygon([(14.798263, 120.921852), (14.873512, 121.074507),
-                                  (14.553057, 121.164575), (14.516944, 121.004209)])
-
+    # generation_polygon = Polygon([(14.798263, 120.921852), (14.873512, 121.074507),
+    #                               (14.553057, 121.164575), (14.516944, 121.004209)])
+    # Pateros Bounding Box
+    generation_polygon = Polygon([(14.552783, 121.064408), (14.550782, 121.078887),
+                                  (14.535703, 121.070605), (14.545624, 121.059724)])
     # Step 1: Generate users
     #   Step 1a: Clear all donors, supplies, and donations
     User.objects.filter(role=User.DONOR).delete()
@@ -421,61 +424,65 @@ def generate_data(donor_count=10, evacuation_center_count=10,
     Transaction.objects.all().delete()
     TransactionOrder.objects.all().delete()
     #   Step 1b: Create pseudo-barangay and evacuation centers
-    if not User.objects.filter(role=User.BARANGAY, username="FakeBarangay"):
-        test_barangay = get_user_model().objects.create_user(
-            username="FakeBarangay",
-            password="barangay123",
-            email="fake_barangay@gmail.com",
-            first_name="Fake",
-            last_name="Barangay",
-            role=User.BARANGAY,
-        )
-        test_barangay.save()
-    # Step 1b-2: Generate evacuation centers
-    barangay_user = User.objects.filter(role=User.BARANGAY, username="FakeBarangay")[0]
-    barangay = BarangayProfile.objects.filter(user=barangay_user)[0]
-    generated_points = polygon_random_points(generation_polygon, evacuation_center_count)
-    for i, point in enumerate(generated_points):
-        # Generate evacuation center
-        point_str = str(point.x) + "," + str(point.y)
-        random_evacuation = EvacuationCenter.objects.create(
-            name="Evacuation" + str(i),
-            barangays=barangay,
-            address="N/A",
-            geolocation=point_str,
-        )
-        if random_evacuation:
-            # Step 2: Generate requests
-
-            request = BarangayRequest.objects.create(
-                evacuation_center=random_evacuation,
-                expected_date=datetime.now(timezone.utc) + timedelta(days=1),
-                barangay=barangay,
+    if barangay_names is None:
+        barangay_names = [f'Barangay_1']
+    for barangay_name in barangay_names:
+        if not User.objects.filter(role=User.BARANGAY, username=barangay_name):
+            test_barangay = get_user_model().objects.create_user(
+                username=barangay_name,
+                password="barangay123",
+                email=f'{barangay_name}@gmail.com',
+                first_name="Barangay",
+                last_name=barangay_name,
+                role=User.BARANGAY,
             )
-            # Generate item request for each type
-            for item_type in ItemType.objects.all():
-                random_pax = random.randrange(min_demand, max_demand)
-                ItemRequest.objects.create(
-                    barangay_request=request,
-                    date_added=datetime.now(timezone.utc),
-                    pax=random_pax,
-                    type=item_type,
+            test_barangay.save()
+        # Step 1b-2: Generate evacuation centers
+        barangay_user = User.objects.filter(role=User.BARANGAY, username=barangay_name)[0]
+        barangay = BarangayProfile.objects.filter(user=barangay_user)[0]
+        generated_points = polygon_random_points(generation_polygon, evacuation_center_count)
+        for i, point in enumerate(generated_points):
+            # Generate evacuation center
+            point_str = str(point.x) + "," + str(point.y)
+            random_evacuation = EvacuationCenter.objects.create(
+                name="Evacuation" + str(i),
+                barangays=barangay,
+                address="N/A",
+                geolocation=point_str,
+            )
+            if random_evacuation:
+                # Step 2: Generate requests
+
+                request = BarangayRequest.objects.create(
+                    evacuation_center=random_evacuation,
+                    expected_date=datetime.now(timezone.utc) + timedelta(days=1),
+                    barangay=barangay,
                 )
+                # Generate item request for each type
+                for item_type in ItemType.objects.all():
+                    random_pax = random.randrange(min_demand, max_demand)
+                    ItemRequest.objects.create(
+                        barangay_request=request,
+                        date_added=datetime.now(timezone.utc),
+                        pax=random_pax,
+                        type=item_type,
+                    )
 
     #   Step 1c: Generate donors (with locations and donations)
     generated_donor_points = polygon_random_points(generation_polygon, donor_count)
     for i, point in enumerate(generated_donor_points):
         donor_point_str = str(point.x) + "," + str(point.y)
-        if not User.objects.filter(role=User.DONOR, username="FakeDonor" + str(i)):
+        donor_name = "Donor" + str(i)
+        if not User.objects.filter(role=User.DONOR, username=donor_name):
             new_donor = get_user_model().objects.create_user(
-                username="FakeDonor" + str(i),
+                username=donor_name,
                 password="donor123",
-                email="fake_donor" + str(i) + "@gmail.com",
-                first_name="Fake",
+                email="donor" + str(i) + "@gmail.com",
+                first_name="Generic",
                 last_name="Donor",
                 role=User.DONOR,
             )
-        donor_user = User.objects.filter(role=User.DONOR, username=str("FakeDonor" + str(i)))[0]
+        donor_user = User.objects.filter(role=User.DONOR, username=donor_name)[0]
         donor = DonorProfile.objects.filter(user=donor_user)[0]
         UserLocation.objects.create(
             user=donor_user,
@@ -497,6 +504,12 @@ def generate_data(donor_count=10, evacuation_center_count=10,
                 quantity=random_quantity,
                 donation=pseudo_donation,
             )
+
+
+def generate_data_from_file(filename, **kwargs):
+    barangay_names = open(filename).read().splitlines()
+    kwargs['barangay_names'] = barangay_names
+    return generate_data(**kwargs)
 
 
 # https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.BallTree.html
