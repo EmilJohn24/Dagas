@@ -204,6 +204,7 @@ function Calamities({ google, locations = [] }) {
                                       .get(`/relief/api/disasters/${value.id}/change_to_disaster/`)
                                       .then((res) => {
                                         console.log(res);
+                                        refetch();
                                       })
                                       .catch((error) => console.log(error));   
                                   }}
