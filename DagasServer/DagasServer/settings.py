@@ -85,7 +85,7 @@ INSTALLED_APPS = [
     # For pygraphviz:
     # https://stackoverflow.com/questions/59707234/issues-installing-pygrahviz-fatal-error-c1083-cannot-open-include-file-graph
     'django_extensions',
-    'djangobower',
+
 ]
 
 # Daphne and Channels
@@ -332,20 +332,5 @@ else:
 #         'LOCATION': '127.0.0.1:11211',
 #     }
 # }
-
-
-PROJECT_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), ".."),
-)
-BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_ROOT, 'components')
-
-BOWER_INSTALLED_APPS = (
-    'd3#3.3.13',
-    'nvd3#1.7.1',
-)
-
-STATICFILES_FINDERS = (
-    'djangobower.finders.BowerFinder',
-)
 
 django_heroku.settings(locals())
