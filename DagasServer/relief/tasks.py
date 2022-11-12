@@ -33,7 +33,6 @@ from relief.models import DonorProfile, BarangayRequest, User, ItemType, Supply,
 
 # Algorithm section
 # Algorithm-related imports
-from sklearn.neighbors import BallTree
 import numpy as np
 import pandas as pd
 from haversine import haversine_vector, Unit
@@ -510,31 +509,6 @@ def generate_data_from_file(filename, **kwargs):
     barangay_names = open(filename).read().splitlines()
     kwargs['barangay_names'] = barangay_names
     return generate_data(**kwargs)
-
-
-# https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.BallTree.html
-def nearest_neighbor_query(lats, lons, tree, requests, k=5, ):
-    distances, indices = tree.query(np.deg2rad(np.c_[lats, lons]), k=k)
-    # nearest_evacs = requests['name'].iloc[indices[:, 0]]
-
-    return distances, indices
-
-
-def generate_tree(evacuation_centers, geolocations):
-    barangay_requests = BarangayRequest.objects.all()
-
-    geolocation_lats = list(map(lambda request_tuple: request_tuple.lat, geolocations))
-    geolocation_lons = list(map(lambda request_tuple: request_tuple.lon, geolocations))
-
-    requests = pd.DataFrame(data={
-        'name': evacuation_centers,
-        'lat': geolocation_lats,
-        'lon': geolocation_lons,
-    })
-    return BallTree(np.deg2rad(requests[['lat', 'lon']].values), metric='haversine'), requests
-    # lng = []
-    # for barangay_request in barangay_requests:
-    #     lat.append(barangay_request.evacuation_center.)
 
 
 # Output
