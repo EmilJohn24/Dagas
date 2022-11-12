@@ -416,6 +416,7 @@ class ItemRequest(models.Model):
         """
         return self.victim_request is None
 
+    @property
     def untransacted_pax(self):
         transaction_orders = TransactionOrder.objects.filter(transaction__barangay_request=self)
         transaction_orders = transaction_orders.filter(supply__type=self.type)
