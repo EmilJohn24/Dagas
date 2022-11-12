@@ -379,7 +379,6 @@ public class SuggestionNodeFragment extends Fragment implements OnMapReadyCallba
                 try {
                     DagasJSONServer.post(String.format(ACCEPT_SUGGESTION_URL,algoID), new JSONObject());
                     //action_nav_suggestions_to_nav_transactions
-                    TimeUnit.SECONDS.sleep(1);
                     Navigation.findNavController(view)
                             .navigate(R.id.action_nav_suggestions_to_nav_transactions);
                 } catch (Exception e) {
