@@ -24,7 +24,6 @@ import django_heroku
 # Run the following to deploy to Heroku specifically: git subtree push --prefix DagasServer heroku master
 # To run python manage.py commands on Heroku deployment: heroku run python manage.py
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-from demoproject.demoproject.settings import PROJECT_ROOT
 from google.oauth2 import service_account
 
 IS_HEROKU = "DYNO" in os.environ
@@ -86,7 +85,6 @@ INSTALLED_APPS = [
     # For pygraphviz:
     # https://stackoverflow.com/questions/59707234/issues-installing-pygrahviz-fatal-error-c1083-cannot-open-include-file-graph
     'django_extensions',
-    'djangobower',
 
 ]
 
@@ -334,22 +332,5 @@ CACHES = {
         'LOCATION': '127.0.0.1:11211',
     }
 }
-
-
-# Bower Stuff
-STATICFILES_FINDERS = (
-    'djangobower.finders.BowerFinder',
-)
-
-PROJECT_ROOT = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), ".."),
-)
-
-BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_ROOT, 'components')
-
-BOWER_INSTALLED_APPS = (
-    'd3#3.3.13',
-    'nvd3#1.7.1',
-)
 
 django_heroku.settings(locals())
