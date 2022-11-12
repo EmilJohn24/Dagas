@@ -416,6 +416,17 @@ class ItemRequest(models.Model):
         """
         return self.victim_request is None
 
+    def untransacted_pax(self):
+        transaction_orders = TransactionOrder.objects.filter(transaction__barangay_request=self)
+        transaction_orders = transaction_orders.filter(supply__type=self.type)
+        if not len(transaction_orders) == 0:
+            pax_in_transaction = transaction_orders.aggregate(Sum('pax')).get('pax__sum')
+            if pax_in_transaction is None:
+                return self.pax
+            return self.pax - pax_in_transaction
+        else:
+            return self.pax
+
 
 class VictimRequest(models.Model):
     # Nullable because this can be requested through the barangay
@@ -479,6 +490,7 @@ def resident_brgy_change_transaction_stub_handler(sender, instance, **kwargs):
                 notif_message = "Your barangay has filed a new request"
                 notify.send(sender=instance.barangay.user, recipient=instance.user, target=request,
                             verb=notif_verb, description=notif_message)
+
 
 class Rating(models.Model):
     resident = models.ForeignKey(to=ResidentProfile, on_delete=models.CASCADE,
