@@ -51,3 +51,5 @@ django-storages
 # ASGI libraries:
 # uvicorn
 # channels
+pymemcache
+django-admin-charts

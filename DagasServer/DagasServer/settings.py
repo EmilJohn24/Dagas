@@ -48,6 +48,8 @@ ALLOWED_HOSTS = ['192.168.100.2', '192.168.1.4', '192.168.31.25', '127.0.0.1', '
 
 INSTALLED_APPS = [
     # 'channels',
+    'admin_tools_stats',
+    'django_nvd3',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -323,5 +325,12 @@ else:
     GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
         "key/dagas-338907-87f4744f405e.json"
     )
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
 
 django_heroku.settings(locals())
