@@ -55,3 +55,4 @@ pymemcache
 django-admin-charts
 django-nvd3
 django-bower
+django-jsonfield
