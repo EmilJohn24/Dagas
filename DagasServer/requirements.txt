@@ -53,3 +53,5 @@ django-storages
 # channels
 pymemcache
 django-admin-charts
+django-nvd3
+django-bower
