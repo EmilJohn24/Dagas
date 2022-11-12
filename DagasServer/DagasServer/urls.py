@@ -26,7 +26,7 @@ from DagasServer import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('mis/', include('admin_tools_stats.urls')),
+    path('admin_tools_stats/', include('admin_tools_stats.urls')),
     path('relief/', include('relief.urls')),
     path('api-auth/', include('rest_framework.urls')),
     # path('api/rest-auth', include('rest_auth.urls')),
