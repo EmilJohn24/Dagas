@@ -22,7 +22,7 @@ class SupplySummary(SlickReportView):
     report_title = "Supply Summary"
     time_series_pattern = 'daily'
     time_series_columns = [
-        SlickReportField.create(name='pax__sum', field='quantity', method=Sum, verbose_name='Pax per day')
+        SlickReportField.create(name='pax_series', field='quantity', method=Sum, verbose_name='Pax per day')
     ]
     columns = ['name',
                SlickReportField.create(method=Sum, field='pax', name='pax__sum', verbose_name='Pax'),
@@ -36,8 +36,9 @@ class SupplySummary(SlickReportView):
             'plot_total': False,
         },
         {
-            'type': 'column',
-            'data_source': ['pax__sum'],
-            'title_source': 'title',
+            'type': 'area',
+            'data_source': ['pax_series'],
+            'title_source': 'name',
             'title': 'Supplies',
+            'plot_total': True,
         }, ]
