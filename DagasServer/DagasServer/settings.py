@@ -88,7 +88,6 @@ INSTALLED_APPS = [
     'django_extensions',
     'slick_reporting',
     'crispy_forms',
-    'djangobower',
 ]
 
 # Daphne and Channels
