@@ -27,6 +27,7 @@ from DagasServer.mis_views import SupplySummary
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('admin_tools_stats/', include('admin_tools_stats.urls')),
     path('supply-report', SupplySummary.as_view()),
     path('relief/', include('relief.urls')),
     path('api-auth/', include('rest_framework.urls')),

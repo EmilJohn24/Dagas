@@ -54,3 +54,7 @@ django-storages
 pymemcache
 django-slick-reporting
 django-queryable-properties
+django-admin-charts
+django-nvd3
+django-bower
+django-jsonfield

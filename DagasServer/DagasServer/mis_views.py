@@ -8,11 +8,11 @@ from relief.models import Supply
 
 @report_field_register
 class AvailablePaxField(SlickReportField):
-    name = 'available_pax'
-    calculation_field = 'calculate_available_pax'
+    name = 'pax'
+    calculation_field = 'pax'
     type = 'number'
     method = Sum
-    verbose_name = 'Available Pax'
+    verbose_name = 'Total Pax'
 
 
 class SupplySummary(SlickReportView):
@@ -20,13 +20,24 @@ class SupplySummary(SlickReportView):
     date_field = 'datetime_added'
     group_by = 'type'
     report_title = "Supply Summary"
+    time_series_pattern = 'daily'
+    time_series_columns = [
+        SlickReportField.create(name='pax__sum', field='quantity', method=Sum, verbose_name='Pax per day')
+    ]
     columns = ['name',
-               'available_pax', ]
-    chart_settings = [{
-        'type': 'column',
-        'data_source': ['available_pax'],
-        'plot_total': False,
-        'title_source': 'title',
-        'title': 'Supplies',
+               SlickReportField.create(method=Sum, field='pax', name='pax__sum', verbose_name='Pax'),
+               '__time_series__', ]
 
-    }, ]
+    chart_settings = [
+        {
+            'type': 'pie',
+            'data_source': ['pax__sum'],
+            'title': 'Supply Distribution',
+            'plot_total': False,
+        },
+        {
+            'type': 'column',
+            'data_source': ['pax__sum'],
+            'title_source': 'title',
+            'title': 'Supplies',
+        }, ]
