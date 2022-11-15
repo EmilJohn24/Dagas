@@ -52,7 +52,5 @@ django-storages
 # uvicorn
 # channels
 pymemcache
-django-admin-charts
-django-nvd3
-django-bower
-django-jsonfield
+django-slick-reporting
+django-queryable-properties

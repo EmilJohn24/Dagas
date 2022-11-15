@@ -23,10 +23,11 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from DagasServer import settings
+from DagasServer.mis_views import SupplySummary
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('admin_tools_stats/', include('admin_tools_stats.urls')),
+    path('supply-report', SupplySummary.as_view()),
     path('relief/', include('relief.urls')),
     path('api-auth/', include('rest_framework.urls')),
     # path('api/rest-auth', include('rest_auth.urls')),
@@ -34,7 +35,7 @@ urlpatterns = [
     path('api/rest-auth', include('dj_rest_auth.urls')),
     url('^inbox/notifications/', include(notifications.urls, namespace='notifications')),
 
-    #API tokens
+    # API tokens
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]

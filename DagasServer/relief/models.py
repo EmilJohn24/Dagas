@@ -21,6 +21,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from django_google_maps import fields as map_fields
 from notifications.signals import notify
+from queryable_properties.properties import queryable_property
 
 from DagasServer import settings
 
@@ -211,6 +212,7 @@ class Supply(models.Model):
     datetime_added = models.DateTimeField('Date added', null=True, default=datetime.now, )
 
     # Not in transaction
+    @queryable_property
     def calculate_available_pax(self):
         supply_transactions = TransactionOrder.objects.filter(supply=self)
         if supply_transactions is not None:

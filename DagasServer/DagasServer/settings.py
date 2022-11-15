@@ -48,8 +48,6 @@ ALLOWED_HOSTS = ['192.168.100.2', '192.168.1.4', '192.168.31.25', '127.0.0.1', '
 
 INSTALLED_APPS = [
     # 'channels',
-    'admin_tools_stats',
-    'django_nvd3',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -85,6 +83,8 @@ INSTALLED_APPS = [
     # For pygraphviz:
     # https://stackoverflow.com/questions/59707234/issues-installing-pygrahviz-fatal-error-c1083-cannot-open-include-file-graph
     'django_extensions',
+    'slick_reporting',
+    'crispy_forms',
 
 ]
 
@@ -326,6 +326,7 @@ else:
         "key/dagas-338907-87f4744f405e.json"
     )
 
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 # CACHES = {
 #     'default': {
 #         'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
