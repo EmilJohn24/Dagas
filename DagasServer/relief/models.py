@@ -212,7 +212,6 @@ class Supply(models.Model):
     datetime_added = models.DateTimeField('Date added', null=True, default=datetime.now, )
 
     # Not in transaction
-    @queryable_property
     def calculate_available_pax(self):
         supply_transactions = TransactionOrder.objects.filter(supply=self)
         if supply_transactions is not None:
