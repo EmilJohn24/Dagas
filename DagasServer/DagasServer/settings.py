@@ -49,9 +49,10 @@ ALLOWED_HOSTS = ['192.168.100.2', '192.168.1.4', '192.168.31.25', '127.0.0.1', '
 
 INSTALLED_APPS = [
     # 'channels',
-    'admin_tools_stats',
-    'django_nvd3',
-    'django.contrib.admin',
+    # 'admin_tools_stats',
+    # 'django_nvd3',
+    # 'django.contrib.admin',
+    'django.contrib.admin.apps.SimpleAdminConfig',  # instead of 'django.contrib.admin'
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -88,6 +89,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'slick_reporting',
     'crispy_forms',
+    'adminplus',
 ]
 
 # Daphne and Channels

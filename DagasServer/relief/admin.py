@@ -4,8 +4,13 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django_google_maps import widgets as map_widgets
 from django_google_maps import fields as map_fields
-from relief.models import AlgorithmExecution, TransactionOrder, User, Transaction, EvacuationCenter, BarangayProfile, DonorProfile, Donation, Supply, \
-    BarangayRequest, ItemRequest, RouteNode, RouteSuggestion, Fulfillment, Disaster, ResidentProfile, TransactionStub, AlgorithmExecution
+
+from DagasServer.mis_views import SupplySeries, SupplySummary, RequestSeries, RequestSummary, TransactionOrderSeries, \
+    TransactionOrderSummary
+from relief.models import AlgorithmExecution, TransactionOrder, User, Transaction, EvacuationCenter, BarangayProfile, \
+    DonorProfile, Donation, Supply, \
+    BarangayRequest, ItemRequest, RouteNode, RouteSuggestion, Fulfillment, Disaster, ResidentProfile, TransactionStub, \
+    AlgorithmExecution
 
 # Guide: https://docs.djangoproject.com/en/4.0/ref/contrib/admin/
 # 3.2 Guide: https://docs.djangoproject.com/en/3.2/ref/contrib/admin/
@@ -19,8 +24,10 @@ class EvacuationCenterAdmin(admin.ModelAdmin):
     }
     list_display = ('name', 'barangays', 'address')
 
+
 class BarangayRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'barangay', 'evacuation_center',)
+
 
 class ProfileAdmin(UserAdmin):
     list_filter = ('role', 'is_staff',)
@@ -33,6 +40,14 @@ class DonorAdmin(admin.ModelAdmin):
 class SupplyAdmin(admin.ModelAdmin):
     list_display = ('name', 'type', 'quantity', 'pax', 'calculate_available_pax', 'donation',)
     list_filter = ('type',)
+
+
+admin.site.register_view('supply-series', 'Supply Trend', visible=True, view=SupplySeries.as_view())
+admin.site.register_view('supply-summary', 'Supply Summary', visible=True, view=SupplySummary.as_view())
+admin.site.register_view('request-series', 'Request Trend', visible=True, view=RequestSeries.as_view())
+admin.site.register_view('supply-series', 'Request Summary', visible=True, view=RequestSummary.as_view())
+admin.site.register_view('order-summary', 'Order Trend', visible=True, view=TransactionOrderSeries.as_view())
+admin.site.register_view('order-series', 'Order Summary', visible=True, view=TransactionOrderSummary.as_view())
 
 admin.site.register(AlgorithmExecution)
 admin.site.register(TransactionStub)

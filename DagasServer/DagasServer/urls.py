@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from adminplus.sites import AdminSitePlus
 from django.conf.urls import url
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -26,9 +27,12 @@ from DagasServer import settings
 from DagasServer.mis_views import SupplySummary, SupplySeries, RequestSummary, RequestSeries, TransactionOrderSeries, \
     TransactionOrderSummary
 
+admin.site = AdminSitePlus()
+admin.autodiscover()
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('admin_tools_stats/', include('admin_tools_stats.urls')),
+    # path('admin_tools_stats/', include('admin_tools_stats.urls')),
     # Graphs
     path('supply-series', SupplySeries.as_view()),
     path('supply-summary', SupplySummary.as_view()),
