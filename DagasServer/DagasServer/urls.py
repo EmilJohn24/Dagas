@@ -23,12 +23,20 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from DagasServer import settings
-from DagasServer.mis_views import SupplySummary
+from DagasServer.mis_views import SupplySummary, SupplySeries, RequestSummary, RequestSeries, TransactionOrderSeries, \
+    TransactionOrderSummary
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('admin_tools_stats/', include('admin_tools_stats.urls')),
-    path('supply-report', SupplySummary.as_view()),
+    # Graphs
+    path('supply-series', SupplySeries.as_view()),
+    path('supply-summary', SupplySummary.as_view()),
+    path('request-series', RequestSeries.as_view()),
+    path('request-summary', RequestSummary.as_view()),
+    path('order-series', TransactionOrderSeries.as_view()),
+    path('order-summary', TransactionOrderSummary.as_view()),
+    # End Graphs
     path('relief/', include('relief.urls')),
     path('api-auth/', include('rest_framework.urls')),
     # path('api/rest-auth', include('rest_auth.urls')),
