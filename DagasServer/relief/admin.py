@@ -45,7 +45,7 @@ class SupplyAdmin(admin.ModelAdmin):
 admin.site.register_view('supply-series', 'Supply Trend', visible=True, view=SupplySeries.as_view())
 admin.site.register_view('supply-summary', 'Supply Summary', visible=True, view=SupplySummary.as_view())
 admin.site.register_view('request-series', 'Request Trend', visible=True, view=RequestSeries.as_view())
-admin.site.register_view('request-series', 'Request Summary', visible=True, view=RequestSummary.as_view())
+admin.site.register_view('request-summary', 'Request Summary', visible=True, view=RequestSummary.as_view())
 admin.site.register_view('order-summary', 'Order Trend', visible=True, view=TransactionOrderSeries.as_view())
 admin.site.register_view('order-series', 'Order Summary', visible=True, view=TransactionOrderSummary.as_view())
 admin.site.register_view('transaction-summary', 'Transactions', visible=True, view=TransactionSummary.as_view())
