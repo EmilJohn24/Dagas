@@ -508,15 +508,15 @@ def generate_data(donor_count=10, evacuation_center_count=10,
 def randomize_dates(days_covered=10):
     def randomizer():
         return datetime.now(timezone.utc) - timedelta(days=random.randint(0, days_covered))
+
     for supply in Supply.objects.all():
         supply.datetime_added = randomizer()
         supply.save()
     for item_request in ItemRequest.objects.all():
         item_request.date_added = randomizer()
         item_request.save()
-    for transaction in Transact.objects.all():
+    for transaction in Transaction.objects.all():
         transaction.created_on = randomizer()
-
 
 
 def generate_data_from_file(filename, **kwargs):
