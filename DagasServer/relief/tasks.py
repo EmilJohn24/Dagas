@@ -513,8 +513,10 @@ def randomize_dates(days_covered=10):
         supply.save()
     for item_request in ItemRequest.objects.all():
         item_request.date_added = randomizer()
-    for transaction in Transaction.objects.all():
+        item_request.save()
+    for transaction in Transact.objects.all():
         transaction.created_on = randomizer()
+
 
 
 def generate_data_from_file(filename, **kwargs):
