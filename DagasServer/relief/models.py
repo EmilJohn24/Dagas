@@ -232,6 +232,9 @@ class Supply(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    class Meta:
+        verbose_name_plural = 'supplies'
+
 
 # TODO: Check if good models
 
@@ -324,6 +327,7 @@ class BarangayRequest(models.Model):
     evacuation_center = models.ForeignKey(null=True, to=EvacuationCenter, on_delete=models.CASCADE)
     details = models.ForeignKey(null=True, to=EvacuationDetails,
                                 on_delete=models.CASCADE)  # contains both the barangay and the evac center
+    # TODO: Add own disaster field (since BarangayProfile's disaster can change)
     # TODO: Add check
     expected_date = models.DateTimeField(null=True, default=datetime.now)
 
