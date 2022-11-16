@@ -1,12 +1,24 @@
 from django.db.models import Sum, Count
 from slick_reporting.decorators import report_field_register
 from slick_reporting.fields import SlickReportField
+from slick_reporting.form_factory import report_form_factory
 from slick_reporting.views import SlickReportView
 
+import relief.models
 from relief.models import Supply, ItemRequest, Transaction, TransactionOrder
 
 
 class SupplySummary(SlickReportView):
+    def get_form_class(self):
+        def f_filter_func(fkey_maps):
+            disaster_model = relief.models.BarangayProfile._meta.get_field('current_disaster')
+            fkey_maps['donor__current_disaster_id'] = disaster_model
+            return fkey_maps
+        return self.form_class or report_form_factory(self.get_report_model(), crosstab_model=self.crosstab_model,
+                                                      display_compute_reminder=self.crosstab_compute_reminder,
+                                                      excluded_fields=self.excluded_fields,
+                                                      fkeys_filter_func=f_filter_func)
+
     report_model = Supply
     date_field = 'datetime_added'
     group_by = 'type'
