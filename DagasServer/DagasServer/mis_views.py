@@ -11,7 +11,7 @@ from relief.models import Supply, ItemRequest, Transaction, TransactionOrder
 class SupplySummary(SlickReportView):
     def get_form_class(self):
         def f_filter_func(fkey_maps):
-            disaster_model = relief.models.BarangayProfile._meta.get_field('current_disaster')
+            disaster_model = relief.models.DonorProfile._meta.get_field('current_disaster')
             fkey_maps['donor__current_disaster_id'] = disaster_model
             return fkey_maps
         return self.form_class or report_form_factory(self.get_report_model(), crosstab_model=self.crosstab_model,
@@ -38,6 +38,15 @@ class SupplySummary(SlickReportView):
 
 
 class SupplySeries(SlickReportView):
+    def get_form_class(self):
+        def f_filter_func(fkey_maps):
+            disaster_model = relief.models.DonorProfile._meta.get_field('current_disaster')
+            fkey_maps['donor__current_disaster_id'] = disaster_model
+            return fkey_maps
+        return self.form_class or report_form_factory(self.get_report_model(), crosstab_model=self.crosstab_model,
+                                                      display_compute_reminder=self.crosstab_compute_reminder,
+                                                      excluded_fields=self.excluded_fields,
+                                                      fkeys_filter_func=f_filter_func)
     report_model = Supply
     date_field = 'datetime_added'
     group_by = 'type'
@@ -60,6 +69,15 @@ class SupplySeries(SlickReportView):
 
 
 class RequestSummary(SlickReportView):
+    def get_form_class(self):
+        def f_filter_func(fkey_maps):
+            disaster_model = relief.models.BarangayProfile._meta.get_field('current_disaster')
+            fkey_maps['barangay_request__barangay__current_disaster_id'] = disaster_model
+            return fkey_maps
+        return self.form_class or report_form_factory(self.get_report_model(), crosstab_model=self.crosstab_model,
+                                                      display_compute_reminder=self.crosstab_compute_reminder,
+                                                      excluded_fields=self.excluded_fields,
+                                                      fkeys_filter_func=f_filter_func)
     report_model = ItemRequest
     date_field = 'date_added'
     group_by = 'type'
@@ -79,6 +97,15 @@ class RequestSummary(SlickReportView):
 
 
 class RequestSeries(SlickReportView):
+    def get_form_class(self):
+        def f_filter_func(fkey_maps):
+            disaster_model = relief.models.BarangayProfile._meta.get_field('current_disaster')
+            fkey_maps['barangay_request__barangay__current_disaster_id'] = disaster_model
+            return fkey_maps
+        return self.form_class or report_form_factory(self.get_report_model(), crosstab_model=self.crosstab_model,
+                                                      display_compute_reminder=self.crosstab_compute_reminder,
+                                                      excluded_fields=self.excluded_fields,
+                                                      fkeys_filter_func=f_filter_func)
     report_model = ItemRequest
     date_field = 'date_added'
     group_by = 'type'
@@ -101,6 +128,15 @@ class RequestSeries(SlickReportView):
 
 
 class TransactionOrderSummary(SlickReportView):
+    def get_form_class(self):
+        def f_filter_func(fkey_maps):
+            disaster_model = relief.models.BarangayProfile._meta.get_field('current_disaster')
+            fkey_maps['transaction__barangay_request__barangay__current_disaster_id'] = disaster_model
+            return fkey_maps
+        return self.form_class or report_form_factory(self.get_report_model(), crosstab_model=self.crosstab_model,
+                                                      display_compute_reminder=self.crosstab_compute_reminder,
+                                                      excluded_fields=self.excluded_fields,
+                                                      fkeys_filter_func=f_filter_func)
     report_model = TransactionOrder
     date_field = 'transaction__created_on'
     group_by = 'supply__type'
@@ -119,6 +155,15 @@ class TransactionOrderSummary(SlickReportView):
 
 
 class TransactionOrderSeries(SlickReportView):
+    def get_form_class(self):
+        def f_filter_func(fkey_maps):
+            disaster_model = relief.models.BarangayProfile._meta.get_field('current_disaster')
+            fkey_maps['transaction__barangay_request__barangay__current_disaster_id'] = disaster_model
+            return fkey_maps
+        return self.form_class or report_form_factory(self.get_report_model(), crosstab_model=self.crosstab_model,
+                                                      display_compute_reminder=self.crosstab_compute_reminder,
+                                                      excluded_fields=self.excluded_fields,
+                                                      fkeys_filter_func=f_filter_func)
     report_model = TransactionOrder
     date_field = 'transaction__created_on'
     group_by = 'supply__type'
@@ -141,6 +186,15 @@ class TransactionOrderSeries(SlickReportView):
 
 
 class TransactionSummary(SlickReportView):
+    def get_form_class(self):
+        def f_filter_func(fkey_maps):
+            disaster_model = relief.models.BarangayProfile._meta.get_field('current_disaster')
+            fkey_maps['barangay_request__barangay__current_disaster_id'] = disaster_model
+            return fkey_maps
+        return self.form_class or report_form_factory(self.get_report_model(), crosstab_model=self.crosstab_model,
+                                                      display_compute_reminder=self.crosstab_compute_reminder,
+                                                      excluded_fields=self.excluded_fields,
+                                                      fkeys_filter_func=f_filter_func)
     report_model = Transaction
     date_field = 'created_on'
     group_by = 'received'
