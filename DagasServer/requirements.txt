@@ -51,3 +51,11 @@ django-storages
 # ASGI libraries:
 # uvicorn
 # channels
+pymemcache
+django-slick-reporting
+django-queryable-properties
+django-admin-charts
+django-nvd3
+django-bower
+django-jsonfield
+django-adminplus
