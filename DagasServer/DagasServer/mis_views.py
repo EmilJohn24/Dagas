@@ -126,3 +126,21 @@ class TransactionOrderSeries(SlickReportView):
             'title': 'Transaction Orders Fulfilled',
         }
     ]
+
+
+class TransactionSummary(SlickReportView):
+    report_model = Transaction
+    date_field = 'created_on'
+    group_by = 'received'
+    report_title = "Transaction Status"
+    columns = [SlickReportField.create(method=Count, field='received', name='count', verbose_name='Pax'),
+               '__time_series__', ]
+
+    chart_settings = [
+        {
+            'type': 'pie',
+            'data_source': ['count'],
+            'title_source': 'name',
+            'title': 'Transaction Distribution',
+            'plot_total': False,
+        }, ]
