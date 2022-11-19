@@ -28,6 +28,7 @@ from DagasServer.mis_views import SupplySummary, SupplySeries, RequestSummary, R
     TransactionOrderSummary
 
 admin.site = AdminSitePlus()
+admin.site.index_template = 'index.html'
 admin.autodiscover()
 
 urlpatterns = [
