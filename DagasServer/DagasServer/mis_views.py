@@ -5,7 +5,7 @@ from slick_reporting.form_factory import report_form_factory
 from slick_reporting.views import SlickReportView
 
 import relief.models
-from relief.models import Supply, ItemRequest, Transaction, TransactionOrder
+from relief.models import Supply, ItemRequest, Transaction, TransactionOrder, ItemType
 
 
 class SupplySummary(SlickReportView):
@@ -142,6 +142,17 @@ class RequestSeries(SlickReportView):
         }, ]
 
 
+@report_field_register
+class ItemTypeName(SlickReportField):
+    name = 'item_type_name'
+    calculation_field = 'supply__type'
+    verbose_name = 'Item Type'
+
+    def resolve(self, current_obj, current_row=None):
+        current_obj = int(current_obj)
+        return ItemType.objects.get(id=current_obj).name
+
+
 class TransactionOrderSummary(SlickReportView):
     def get_form_class(self):
         def f_filter_func(fkey_maps):
@@ -165,14 +176,14 @@ class TransactionOrderSummary(SlickReportView):
     group_by = 'supply__type'
     excluded_fields = ['supply_id', 'transaction_id']
     report_title = "Transaction Order Summary"
-    columns = ['supply__type__name',
+    columns = ['item_type_name',
                SlickReportField.create(method=Sum, field='pax', name='pax__sum', verbose_name='Pax')]
 
     chart_settings = [
         {
             'type': 'pie',
             'data_source': ['pax__sum'],
-            'title_source': 'supply__type__name',
+            'title_source': 'item_type_name',
             'title': 'Transacted Order Distribution',
             'plot_total': False,
         }, ]
@@ -205,14 +216,14 @@ class TransactionOrderSeries(SlickReportView):
     time_series_columns = [
         SlickReportField.create(name='series_pax', field='pax', method=Sum, verbose_name='Pax per day')
     ]
-    columns = ['supply__type__name',
+    columns = ['item_type_name',
                SlickReportField.create(method=Sum, field='pax', name='pax__sum', verbose_name='Pax'), ]
 
     chart_settings = [
         {
             'type': 'area',
             'data_source': ['series_pax'],
-            'title_source': 'supply__type__name',
+            'title_source': 'item_type_name',
             'title': 'Transaction Orders Fulfilled',
         }
     ]
