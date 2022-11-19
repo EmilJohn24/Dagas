@@ -2,8 +2,10 @@ package com.cnil.dagas;
 
 import static androidx.core.content.FileProvider.getUriForFile;
 
+import android.app.DatePickerDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -40,6 +43,7 @@ import org.w3c.dom.Text;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -48,6 +52,13 @@ import okhttp3.Response;
 
 public class DonorAddSupply extends Fragment {
     private final String TAG = DonorAddSupply.class.getName();
+    private final Calendar calendar = Calendar.getInstance();
+    private int year = calendar.get(Calendar.YEAR);
+    private int month = calendar.get(Calendar.MONTH);
+    private int day = calendar.get(Calendar.DAY_OF_MONTH);
+//    public String expiration = year+"-"+month+"-"+day;
+    private String expiration;
+
     public DonorAddSupply() {
         // Required empty public constructor
     }
@@ -88,6 +99,7 @@ public class DonorAddSupply extends Fragment {
                 createRequestJSON.put("quantity", pax);
                 createRequestJSON.put("pax", pax);
                 createRequestJSON.put("donation", donationID);
+                if (type != 2) createRequestJSON.put("expiration_date", expiration);
             } catch (JSONException e) {
                 Log.e(TAG, e.getMessage());
             }
@@ -197,6 +209,7 @@ public class DonorAddSupply extends Fragment {
         //Load spinner content
         Spinner spinnerType = root.findViewById(R.id.spinnerType);
         TextView typeDescription = root.findViewById(R.id.typeDescription);
+        TextView expirationDate = root.findViewById(R.id.expirationDate);
         DonorAddThread thread = new DonorAddThread();
         thread.start();
         try {
@@ -211,9 +224,18 @@ public class DonorAddSupply extends Fragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 String type = spinnerType.getSelectedItem().toString();
                 try {
-                    if(type.equals("Food")) typeDescription.setText("Rice [1-2 kilo/s]\nCup noodles[2 cups]\nCanned Goods (i.e. Sardines, Corned Beef, Meatloaf) [2 cans]");
-                    else if(type.equals("Water")) typeDescription.setText("Bottled Water [500mL - 1L]");
-                    else if(type.equals("Clothes")) typeDescription.setText("Adult size");
+                    if(type.equals("Food")) {
+                        typeDescription.setText("Rice [1-2 kilo/s]\nCup noodles[2 cups]\nCanned Goods (i.e. Sardines, Corned Beef, Meatloaf) [2 cans]");
+                        expirationDate.setVisibility(View.VISIBLE);
+                    }
+                    else if(type.equals("Water")) {
+                        typeDescription.setText("Bottled Water [500mL - 1L]");
+                        expirationDate.setVisibility(View.VISIBLE);
+                    }
+                    else if(type.equals("Clothes")) {
+                        typeDescription.setText("Adult size");
+                        expirationDate.setVisibility(View.GONE);
+                    }
                     else typeDescription.setText(spinnerType.getSelectedItem().toString());
                 } catch (Exception e) {
                     Log.e(TAG, e.getMessage());
@@ -223,6 +245,26 @@ public class DonorAddSupply extends Fragment {
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
 
+            }
+        });
+
+        expirationDate.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                DatePickerDialog dialog = new DatePickerDialog(DonorAddSupply.this.getContext(), new DatePickerDialog.OnDateSetListener() {
+
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        month = month + 1;
+                        String date = "Exp. Date:"+dayOfMonth+"/"+month+"/"+year;
+                        expirationDate.setText(date);
+                        calendar.set(year, month - 1, dayOfMonth);
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+                        expiration = format.format(calendar.getTime());
+                    }
+                },year, month, day);
+                dialog.show();
+                dialog.getDatePicker().setMinDate(calendar.getTimeInMillis() + 100000000);
             }
         });
 
