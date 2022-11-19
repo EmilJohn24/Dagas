@@ -6,6 +6,7 @@ from io import StringIO
 import django.contrib.auth
 import qrcode
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -197,6 +198,17 @@ def supply_image_path(instance, filename):
     return 'supply/id_{0}/{1}'.format(instance.id, filename)
 
 
+def future_date_validation(value):
+    if datetime.now(timezone.utc) >= value:
+        raise ValidationError("Invalid date.", params={
+            "value": value,
+        })
+
+
+def default_expiration_date():
+    return datetime.now(timezone.utc) + timedelta(days=365)
+
+
 # TODO: Add some kind of type to Supply (e.g. Food, Water)
 class Supply(models.Model):
     name = models.CharField(max_length=250)
@@ -210,6 +222,8 @@ class Supply(models.Model):
     donor = models.ForeignKey(to="DonorProfile", on_delete=models.CASCADE,
                               related_name='donor_supplies', null=True, blank=True, )
     datetime_added = models.DateTimeField('Date added', null=True, default=datetime.now, )
+    expiration_date = models.DateTimeField('Expiration Date', null=True,
+                                           default=default_expiration_date, validators=[future_date_validation, ])
 
     # Not in transaction
     def calculate_available_pax(self):
