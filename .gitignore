@@ -136,6 +136,7 @@ dmypy.json
 # Migrations
 **/migrations/*
 !**/migrations/0001_initial.py
+!**/migrations/0002_expiration_date_patch.py
 **/.idea/
 
 # API
