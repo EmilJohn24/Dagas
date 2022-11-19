@@ -25,6 +25,9 @@ class SupplySerializer(serializers.ModelSerializer):
     datetime_added = serializers.DateTimeField(
         required=False,
     )
+    expiration_date = serializers.DateTimeField(
+        required=False,
+    )
     donor = serializers.HyperlinkedRelatedField(
         required=False,
         view_name='relief:donor_details',
@@ -34,10 +37,19 @@ class SupplySerializer(serializers.ModelSerializer):
     donation = serializers.PrimaryKeyRelatedField(many=False, required=False,
                                                   queryset=Donation.objects.all())
 
+    def validate(self, attrs):
+        if 'expiration_date' in attrs:
+            if attrs['expiration_date'] < datetime.now(timezone.utc):
+                raise serializers.ValidationError({
+                    'expiration_date': 'Invalid expiration date'
+                }, code=status.HTTP_400_BAD_REQUEST, )
+        return attrs
+
     class Meta:
         model = Supply
         fields = ('id', 'name', 'type', 'type_str', 'quantity', 'pax',
-                  'donation', 'available_pax', 'picture', 'donor', 'datetime_added')
+                  'donation', 'available_pax', 'picture',
+                  'donor', 'datetime_added', 'expiration_date',)
         read_only = ('available_pax', 'type_str')
 
 
