@@ -7,7 +7,10 @@
 .bg-image{
     position: relative;
     background-image: url("images/PDI-file3.jpg");
-    min-height: 100vh;
+    max-height: 100vh;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
 }
 
 .color-overlay{

@@ -85,6 +85,7 @@
             android:id="@+id/button"
             android:layout_width="100dp"
             android:layout_height="49dp"
+            android:visibility="invisible"
             android:layout_marginBottom="30dp"
             android:text="Submit"
             app:layout_constraintBottom_toBottomOf="parent"
