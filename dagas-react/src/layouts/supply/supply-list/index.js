@@ -53,6 +53,8 @@ import axiosConfig from "axiosConfig";
 import logo from 'logo.svg';
 import { Navigate } from "react-router-dom";
 import { Icon } from "@mui/material";
+
+
 function SupplyList() {
 
   const [supplyForm, setSupplyForm] = useState(() => {
@@ -82,8 +84,8 @@ function SupplyList() {
 
 
   const [typeDescriptionRender, setTypeDescriptionRender] = useState(null);
+  const [typeSelected, setTypeSelected] = useState(null);
   
- 
   //Deleting effect
 
   // useEffect(() => {
@@ -109,7 +111,8 @@ function SupplyList() {
       var initVals = {
         name: '',
         type: typeNames[0],
-        pax: ''
+        pax: '',
+        expiration_date: ''
 
     };
     let formHeader = (
@@ -120,6 +123,7 @@ function SupplyList() {
         initVals.name = supplyData.name;
         initVals.type = supplyData.type_str;
         initVals.pax = supplyData.pax;
+        initVals.expiration_date = supplyData.expiration_date;
         
         console.log(initVals);
         formHeader = (
@@ -137,7 +141,10 @@ function SupplyList() {
                         .required('This value is required'),
                     pax: Yup
                         .number()
-                        .min(1, 'Should have a pax of one or more')
+                        .min(1, 'Should have a pax of one or more'),
+                    expiration_date: Yup
+                        .date()
+                        .min(new Date())
                 })}
                 onSubmit={async (values, {setSubmitting}) => {
                     // var requestValues = {...values}; //copy the data to preprocess
@@ -147,6 +154,9 @@ function SupplyList() {
                     requestValues["pax"] = values.pax;
                     requestValues["quantity"] = values.pax;
                     requestValues["type"] = typeArray.filter(item => item.name == values.type)[0].id;
+                    if (values.type != "Clothes"){
+                      requestValues["expiration_date"] = values.expiration_date;
+                    }
                     console.log(JSON.stringify(requestValues));
                     if (isEditing){
                         await executeSupplyEdit({
@@ -215,6 +225,7 @@ function SupplyList() {
                                   onChange={(event, value) => {
                                     console.log(`Changing to ${value}...`)
                                     formik.setFieldValue('type', value);
+                                    setTypeSelected(value);
                                     // <TextField 
                                     // type='text' 
                                     // defaultValue='lord help me'
@@ -259,6 +270,7 @@ function SupplyList() {
                                         <ListItemText primary={primary} secondary={secondary}/>
                                       </ListItem>
                                     ));
+                                    console.log(typeSelected);
                                     setTypeDescriptionRender((
                                       // <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
                                         <List dense={true}>
@@ -276,12 +288,9 @@ function SupplyList() {
                                     }
                                   }
                                 />
-                                  <MDButton variant="gradient" color="light" type="submit" onClick={formik.handleSubmit}>
-                                  Submit
-                                </MDButton>
                               </MDBox>
-                            </Grid>
-                            <Grid item xs={6} sm={6}>
+                            {/* </Grid>
+                            <Grid item xs={6} sm={6}> */}
                               <MDBox mb={3}>
                                 <MDBox mb={2}>
                                   <MDTypography
@@ -309,6 +318,27 @@ function SupplyList() {
                                   </TextField> */}
                                 </MDBox>
                               </MDBox> 
+                            </Grid>
+                            <Grid item xs={6} sm={6}>
+                              {typeSelected!="Clothes"?<MDBox mb={3}>
+                                <MDBox mb={2}>
+                                <MDTypography
+                                    component="label"
+                                    variant="button"
+                                    fontWeight="regular"
+                                    color="text"
+                                    textTransform="capitalize"
+                                  >
+                                    Expiration Date 
+                                  </MDTypography>
+                                    <br/><input type="datetime-local" id="expiration_date" name="expiration_date" {...formik.getFieldProps('expiration_date')}></input>
+                                </MDBox>
+                              </MDBox> : null}
+                                <MDBox mt={2}>
+                                  <MDButton  variant="gradient" color="light" type="submit" onClick={formik.handleSubmit}>
+                                      Submit
+                                  </MDButton>
+                                </MDBox>
                             </Grid>
                           </Grid>
                         </MDBox>

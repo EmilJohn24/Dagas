@@ -47,6 +47,24 @@ function OrderSummary({orders}) {
             <DefaultCell value={value} />
           ),
         },
+        {
+          Header: "expiration date",
+          accessor: "supply_info",
+          Cell: ({ value }) => {
+            // console.log(row.values.evacuation_center_serialized.name);
+            const withoutMilliseconds = value.expiration_date.split('.')[0]
+            const [date, time] = withoutMilliseconds.split('T');
+            const dateStr = new Date(date).toLocaleDateString();
+            if (value.type_str == "Clothes"){
+              return (
+                <DefaultCell value={"N/A"}></DefaultCell>
+              );
+            } 
+            return (
+              <DefaultCell value={dateStr}></DefaultCell>
+            );
+          } 
+        },
     
     ],
     rows: orders
