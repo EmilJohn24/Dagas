@@ -5,7 +5,22 @@ from slick_reporting.form_factory import report_form_factory
 from slick_reporting.views import SlickReportView
 
 import relief.models
-from relief.models import Supply, ItemRequest, Transaction, TransactionOrder, ItemType
+from relief.models import Supply, ItemRequest, Transaction, TransactionOrder, ItemType, BarangayRequest
+
+
+@report_field_register
+class AvailableAmountField(SlickReportField):
+    name = 'available_pax'
+    calculation_field = 'pax'
+    verbose_name = 'Available Pax'
+
+    def resolve(self, current_obj, current_row=None):
+        current_obj = int(current_obj)
+        supplies = Supply.objects.filter(type_id=current_obj)
+        total = 0
+        for supply in supplies:
+            total += supply.calculate_available_pax()
+        return total
 
 
 class SupplySummary(SlickReportView):
@@ -27,7 +42,8 @@ class SupplySummary(SlickReportView):
     report_title = "Supply Summary"
     columns = ['name',
                SlickReportField.create(method=Sum, field='pax', name='pax__sum', verbose_name='Pax'),
-               '__time_series__', ]
+               'available_pax',
+               ]
 
     chart_settings = [
         {
@@ -35,6 +51,13 @@ class SupplySummary(SlickReportView):
             'data_source': ['pax__sum'],
             'title_source': 'name',
             'title': 'Supply Distribution',
+            'plot_total': False,
+        },
+        {
+            'type': 'pie',
+            'data_source': ['available_pax'],
+            'title_source': 'name',
+            'title': 'Undelivered Supply Distribution',
             'plot_total': False,
         }, ]
 
@@ -73,6 +96,21 @@ class SupplySeries(SlickReportView):
         }, ]
 
 
+@report_field_register
+class UntransactedAmountField(SlickReportField):
+    name = 'untransacted_pax'
+    calculation_field = 'pax'
+    verbose_name = 'Untransacted Pax'
+
+    def resolve(self, current_obj, current_row=None):
+        current_obj = int(current_obj)
+        barangay_requests = BarangayRequest.objects.all()
+        total = 0
+        for barangay_request in barangay_requests:
+            total += barangay_request.calculate_untransacted_pax(current_obj)
+        return total
+
+
 class RequestSummary(SlickReportView):
     def get_form_class(self):
         def f_filter_func(fkey_maps):
@@ -94,7 +132,7 @@ class RequestSummary(SlickReportView):
     excluded_fields = ['barangay_request_id', 'victim_request_id', ]
     columns = ['name',
                SlickReportField.create(method=Sum, field='pax', name='pax__sum', verbose_name='Pax'),
-               '__time_series__', ]
+               'untransacted_pax', ]
 
     chart_settings = [
         {
@@ -103,7 +141,15 @@ class RequestSummary(SlickReportView):
             'title_source': 'name',
             'title': 'Request Distribution',
             'plot_total': False,
-        }, ]
+        },
+        {
+            'type': 'pie',
+            'data_source': ['untransacted_pax'],
+            'title_source': 'name',
+            'title': 'Unfulfilled Demand Distribution',
+            'plot_total': False,
+        },
+    ]
 
 
 class RequestSeries(SlickReportView):
