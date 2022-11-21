@@ -19,7 +19,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="161dp"
             android:background="@drawable/createtransactionsearch">
 
 
@@ -48,9 +48,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="5dp"
                 android:text="X left"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/expiration"
                 app:layout_constraintStart_toStartOf="@+id/typeTextView"
                 app:layout_constraintTop_toBottomOf="@+id/typeTextView" />
 
@@ -89,6 +89,16 @@
                 app:layout_constraintEnd_toEndOf="@+id/viewPictureButton"
                 app:layout_constraintStart_toStartOf="@+id/viewPictureButton"
                 app:layout_constraintTop_toBottomOf="@+id/viewPictureButton" />
+
+            <TextView
+                android:id="@+id/expiration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:text="Exp. Date:"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/availableAmount"
+                app:layout_constraintTop_toBottomOf="@+id/availableAmount" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

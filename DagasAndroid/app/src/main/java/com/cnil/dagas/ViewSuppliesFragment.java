@@ -86,9 +86,15 @@ public class ViewSuppliesFragment extends Fragment {
                     int available = availablePaxJSON.getInt("available");
                 */
                 String supplyPictureUrl = requestJSONObject.optString("picture");
+                String expiration;
+                if (itemTypeName.equals("Clothes")) expiration= "";
+                else{
+                    String[] originalFormExpiration = requestJSONObject.getString("expiration_date").split("T");
+                    expiration = originalFormExpiration[0];
+                }
                 ViewSupplyAdapter.ViewSupply supply = new ViewSupplyAdapter.ViewSupply(
                         itemName, itemTypeName,
-                        available, String.format(SUPPLY_URL, itemID), itemID);
+                        available, String.format(SUPPLY_URL, itemID), itemID, expiration);
                 if (supplyPictureUrl != ""){
                     supply.setPictureUrl(supplyPictureUrl);
                 }
