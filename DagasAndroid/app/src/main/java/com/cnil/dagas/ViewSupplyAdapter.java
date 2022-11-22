@@ -35,15 +35,16 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
         private int paxTransacted;
         private boolean isTransacted;
         private String pictureUrl;
+        private String expirationDate;
 
 
-
-        public ViewSupply(String name, String type, int available, String supplyURL, int supplyID) {
+        public ViewSupply(String name, String type, int available, String supplyURL, int supplyID, String expirationDate) {
             this.isTransacted = false;
             this.name = name;
             this.type = type;
             this.available = available;
             this.supplyId = supplyID;
+            this.expirationDate = expirationDate;
         }
 
         protected ViewSupply(Parcel in) {
@@ -54,6 +55,7 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
             paxTransacted = in.readInt();
             isTransacted = in.readByte() != 0;
             pictureUrl = in.readString();
+            expirationDate = in.readString();
         }
 
         public static final Creator<ViewSupply> CREATOR = new Creator<ViewSupply>() {
@@ -89,6 +91,8 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
             return paxTransacted;
         }
 
+        public String getExpirationDate(){ return expirationDate; }
+
         public void setPaxTransacted(int paxTransacted) {
             this.isTransacted = true;
             this.paxTransacted = paxTransacted;
@@ -122,6 +126,7 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
             parcel.writeInt(paxTransacted);
             parcel.writeByte((byte) (isTransacted?1:0));
             parcel.writeString(pictureUrl);
+            parcel.writeString(expirationDate);
         }
     }
     public static class TransactionOrder{
@@ -169,9 +174,12 @@ public class ViewSupplyAdapter extends RecyclerView.Adapter<ViewSupplyAdapter.Vi
         TextView transactionSupplyName = supplyCard.findViewById(R.id.supplyName);
         TextView typeTextView = supplyCard.findViewById(R.id.typeTextView);
         TextView availableAmountTextView = supplyCard.findViewById(R.id.availableAmount);
+        TextView expirationDate = supplyCard.findViewById(R.id.expiration);
         ViewSupply supply = supplies.get(position);
         transactionSupplyName.setText(supply.getName());
         typeTextView.setText(supply.getType());
+        if (supply.getType().equals("Clothes")) expirationDate.setText(supply.getExpirationDate());
+            else expirationDate.setText("Exp. Date: "+ supply.getExpirationDate());
 
 
 

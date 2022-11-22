@@ -74,12 +74,12 @@
                 android:id="@+id/takeSupplyPictureButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:text="Take Picture"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.502"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/typeDescription" />
+                app:layout_constraintTop_toBottomOf="@+id/expirationDate" />
 
             <TextView
                 android:id="@+id/typeDescription"
@@ -92,7 +92,21 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/spinnerType"
-                app:layout_constraintVertical_bias="0.092" />
+                app:layout_constraintVertical_bias="0.054" />
+
+            <TextView
+                android:id="@+id/expirationDate"
+                style="?android:spinnerStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Exp. Date: 1911/6/16"
+                android:textSize="20sp"
+                app:layout_constraintBottom_toTopOf="@+id/takeSupplyPictureButton"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/typeDescription"
+                app:layout_constraintVertical_bias="1.0" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -250,7 +250,13 @@ public class TransactionReceiptFragment extends Fragment  implements OnMapReadyC
                     String supplyUrl = DagasJSONServer.createDetailUrl("/relief/api/supplies/", id);
                     String supplyPictureUrl = supplyInfo.optString("picture");
                     int availablePax = supplyInfo.getInt("available_pax");
-                    ViewSupplyAdapter.ViewSupply supply = new ViewSupplyAdapter.ViewSupply(name, type, availablePax, supplyUrl, id);
+                    String expiration;
+                    if (type.equals("Clothes")) expiration= "";
+                    else{
+                        String[] originalFormExpiration = supplyInfo.getString("expiration_date").split("T");
+                        expiration = originalFormExpiration[0];
+                    }
+                    ViewSupplyAdapter.ViewSupply supply = new ViewSupplyAdapter.ViewSupply(name, type, availablePax, supplyUrl, id, expiration);
                     if (!supplyPictureUrl.equals("")){
                         supply.setPictureUrl(supplyPictureUrl);
                     }
