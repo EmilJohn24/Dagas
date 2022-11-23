@@ -44,6 +44,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import okhttp3.MediaType;
 import okhttp3.Request;
@@ -247,6 +249,17 @@ public class DonorAddSupply extends Fragment {
 
             }
         });
+//        Date currentDate = Calendar.getInstance().getTime().addDays;
+        Date currentDate = new Date();
+        Calendar c = Calendar.getInstance();
+        c.setTime(currentDate);
+        c.add(Calendar.DATE, 1);
+        currentDate = c.getTime();
+        SimpleDateFormat dateDisplayFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = dateDisplayFormat.format(currentDate);
+        expirationDate.setText("Exp. Date: " + formattedDate);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        expiration = format.format(currentDate);
 
         expirationDate.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -256,7 +269,7 @@ public class DonorAddSupply extends Fragment {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                         month = month + 1;
-                        String date = "Exp. Date:"+dayOfMonth+"/"+month+"/"+year;
+                        String date = "Exp. Date: " + year + "/"+month + "/" + dayOfMonth;
                         expirationDate.setText(date);
                         calendar.set(year, month - 1, dayOfMonth);
                         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
